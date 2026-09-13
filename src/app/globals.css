@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+  --color-cop-blue: var(--cop-blue);
+  --color-cop-navy: var(--cop-navy);
+  --color-cop-gold: var(--cop-gold);
+  --color-cop-red: var(--cop-red);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  /* Church of Pentecost emblem: royal blue, bright gold, white, red accent */
+  --cop-blue: #0050c8;
+  --cop-navy: #0a2266;
+  --cop-gold: #ffd100;
+  --cop-red: #e30613;
+  --background: #f4f7fd;
+  --foreground: #0a2266;
+  --card: #ffffff;
+  --card-foreground: #0a2266;
+  --popover: #ffffff;
+  --popover-foreground: #0a2266;
+  --primary: #0050c8;
+  --primary-foreground: #ffffff;
+  --secondary: #ffd100;
+  --secondary-foreground: #0a2266;
+  --muted: #e8eefb;
+  --muted-foreground: #3d4f7c;
+  --accent: #ffe14a;
+  --accent-foreground: #0a2266;
+  --destructive: #e30613;
+  --border: #c9d4f0;
+  --input: #c9d4f0;
+  --ring: #0050c8;
+  --chart-1: #0050c8;
+  --chart-2: #ffd100;
+  --chart-3: #e30613;
+  --chart-4: #3b6fe0;
+  --chart-5: #0a2266;
+  --radius: 0.625rem;
+  --sidebar: #0a2266;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffd100;
+  --sidebar-primary-foreground: #0a2266;
+  --sidebar-accent: #12308a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1a3a8c;
+  --sidebar-ring: #ffd100;
+}
+
+.dark {
+  --background: #07153f;
+  --foreground: #f7f4e8;
+  --card: #0c1f5c;
+  --card-foreground: #f7f4e8;
+  --popover: #0c1f5c;
+  --popover-foreground: #f7f4e8;
+  --primary: #4d84ff;
+  --primary-foreground: #07153f;
+  --secondary: #ffd100;
+  --secondary-foreground: #07153f;
+  --muted: #122868;
+  --muted-foreground: #c5cde8;
+  --accent: #ffd100;
+  --accent-foreground: #07153f;
+  --destructive: #ff6b6b;
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 16%);
+  --ring: #ffd100;
+  --chart-1: #4d84ff;
+  --chart-2: #ffd100;
+  --chart-3: #ff6b6b;
+  --chart-4: #8eb0ff;
+  --chart-5: #ffffff;
+  --sidebar: #07153f;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffd100;
+  --sidebar-primary-foreground: #07153f;
+  --sidebar-accent: #12308a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: #ffd100;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

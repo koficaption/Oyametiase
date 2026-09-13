@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { navForPortal } from "@/lib/navigation";
-import { resolvePortal, type LedDepartment } from "@/types/portals";
+import { PORTAL_CHROME, resolvePortal, type LedDepartment } from "@/types/portals";
 
 const pwm: LedDepartment = { id: "1", name: "PWM", slug: "pwm", ministry_kind: "pwm", logo_url: null };
 const pmm: LedDepartment = { id: "2", name: "PMM", slug: "pmm", ministry_kind: "pmm", logo_url: null };
@@ -34,6 +34,15 @@ describe("portal resolution", () => {
     expect(navForPortal("presiding_elder").map((item) => item.href)).toContain("/app/notifications");
     expect(navForPortal("secretary").map((item) => item.href)).toContain("/app/notifications");
     expect(navForPortal("womens").map((item) => item.href)).toContain("/app/notifications");
+  });
+
+  it("gives each officer desk a different name and colour", () => {
+    expect(PORTAL_CHROME.presiding_elder.desk).toContain("Assembly");
+    expect(PORTAL_CHROME.secretary.desk).toContain("Records");
+    expect(PORTAL_CHROME.treasurer.desk).toContain("treasury");
+    expect(PORTAL_CHROME.womens.desk).toContain("Women");
+    expect(PORTAL_CHROME.treasurer.sidebar).not.toBe(PORTAL_CHROME.secretary.sidebar);
+    expect(PORTAL_CHROME.womens.sidebar).not.toBe(PORTAL_CHROME.mens.sidebar);
   });
 
   it("keeps the Treasurer on finance navigation only", () => {

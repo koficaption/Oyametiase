@@ -7,6 +7,7 @@ import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FieldSelect } from "@/components/ui/field-select";
 import { CHURCH_POSITIONS, CHURCH_RESPONSIBILITIES } from "@/lib/church-directory";
 import type { ActionResult } from "@/lib/validations/common";
 
@@ -62,25 +63,25 @@ export function RegisterForm() {
         </p>
         <div className="space-y-2">
           <Label htmlFor="church_position" className="text-base font-semibold text-cop-navy">Position at church</Label>
-          <select id="church_position" name="church_position" required className="h-11 w-full rounded-lg border border-cop-navy/25 bg-white px-2 text-base text-cop-navy">
+          <FieldSelect id="church_position" name="church_position" required>
             <option value="">Select position</option>
             {CHURCH_POSITIONS.map((position) => (
               <option key={position} value={position}>
                 {position}
               </option>
             ))}
-          </select>
+          </FieldSelect>
           <FieldError errors={state.fieldErrors?.church_position} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="church_responsibility" className="text-base font-semibold text-cop-navy">Role / responsibility</Label>
-          <select id="church_responsibility" name="church_responsibility" required className="h-11 w-full rounded-lg border border-cop-navy/25 bg-white px-2 text-base text-cop-navy">
+          <FieldSelect id="church_responsibility" name="church_responsibility" required>
             {CHURCH_RESPONSIBILITIES.map((role) => (
               <option key={role} value={role}>
                 {role}
               </option>
             ))}
-          </select>
+          </FieldSelect>
           <FieldError errors={state.fieldErrors?.church_responsibility} />
         </div>
       </fieldset>

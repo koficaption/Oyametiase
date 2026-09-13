@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --font-sans: var(--font-source-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-source-code), ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-cop-blue: var(--cop-blue);
   --color-cop-navy: var(--cop-navy);
@@ -130,10 +130,27 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
   body {
-    @apply bg-background font-sans text-foreground tracking-normal antialiased;
+    font-family: var(--font-source-sans), Arial, Helvetica, sans-serif;
+    letter-spacing: 0;
+    word-spacing: 0.08em;
+    font-variant-ligatures: none;
+    font-kerning: normal;
   }
-  html {
-    @apply font-sans tracking-normal;
+  body {
+    @apply bg-background text-foreground;
+  }
+  input,
+  select,
+  textarea,
+  button,
+  option,
+  label,
+  legend {
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 0;
+    word-spacing: 0.1em;
+    font-variant-ligatures: none;
   }
 }

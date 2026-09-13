@@ -22,7 +22,7 @@ export function ThemeBanner({
     <Card className="overflow-hidden border-cop-gold/50 bg-cop-navy text-white">
       <div className="h-1 bg-cop-gold" />
       <CardContent className={compact ? "p-4" : "p-5"}>
-        <p className="text-xs font-semibold tracking-[0.18em] text-cop-gold">{theme.year} CHURCH THEME</p>
+        <p className="text-xs font-semibold tracking-normal text-cop-gold">{theme.year} CHURCH THEME</p>
         <p className={`mt-2 font-medium leading-relaxed ${compact ? "text-base" : "text-lg"}`}>
           “{theme.title}”
         </p>

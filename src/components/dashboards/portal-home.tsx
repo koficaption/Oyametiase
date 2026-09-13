@@ -16,7 +16,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ChurchThemeRecord } from "@/lib/reports/types";
-import { PORTAL_LABELS, type PortalKind } from "@/types/portals";
+import { PORTAL_CHROME, type PortalKind } from "@/types/portals";
 
 export type PortalStats = {
   totalMembers: number;
@@ -74,8 +74,8 @@ export function PortalHome({
   departmentStats: ChartPoint[];
   churchTheme?: Pick<ChurchThemeRecord, "year" | "title" | "scripture" | "description"> | null;
 }) {
-  const title = ministryName ? `${ministryName} portal` : `${PORTAL_LABELS[portal]} portal`;
-  const greeting = `Peace be with you, ${name}.`;
+  const chrome = PORTAL_CHROME[portal];
+  const greeting = `Peace be with you, ${name}. ${ministryName ? `${ministryName}. ` : ""}${chrome.hint}`;
 
   if (portal === "member") {
     return (
@@ -91,7 +91,7 @@ export function PortalHome({
   if (portal === "treasurer") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Treasurer portal" description={`${greeting} Finance records for Oyame Tiase Assembly.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Tithes" value={money(stats.tithes)} />
           <StatCard label="Offerings" value={money(stats.offerings)} />
@@ -132,7 +132,7 @@ export function PortalHome({
   if (portal === "secretary") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Secretary portal" description={`${greeting} Records and administration — not finance or user management.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total members" value={stats.totalMembers} />
           <StatCard label="New members" value={stats.newMembers} hint="This month" />
@@ -151,7 +151,7 @@ export function PortalHome({
   if (portal === "presiding_elder") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Presiding Elder portal" description={`${greeting} Assembly overview for Oyame Tiase.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <ThemeBanner theme={churchTheme ?? null} />
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Assembly Overview</h2>
@@ -203,7 +203,7 @@ export function PortalHome({
   if (portal === "ministry_finance") {
     return (
       <div className="space-y-6">
-        <PageHeader title={title} description={`${greeting} These books belong to your ministry, not the assembly treasury.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Ministry income" value={money(stats.income)} />
           <StatCard label="Ministry expenses" value={money(stats.expense)} />
@@ -216,7 +216,7 @@ export function PortalHome({
   if (portal === "children_teacher") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Children's class portal" description={`${greeting} You can see the children's records needed for your class.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total children" value={stats.childrenCount} />
           <StatCard label="Attendance this week" value={stats.attendanceWeek} />
@@ -230,7 +230,7 @@ export function PortalHome({
   if (portal === "children") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Children's Ministry portal" description={`${greeting} Children's records stay inside this ministry.`} />
+        <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total children" value={stats.childrenCount} />
           <StatCard label="Classes" value={stats.childrenClasses ?? 0} />
@@ -252,7 +252,7 @@ export function PortalHome({
 
   return (
     <div className="space-y-6">
-      <PageHeader title={title} description={`${greeting} This portal is limited to your ministry.`} />
+      <PageHeader title={chrome.desk} description={greeting} />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={`Number of ${peopleLabel.toLowerCase()}`} value={stats.totalMembers} />
         <StatCard label={`Active ${peopleLabel.toLowerCase()}`} value={stats.activeMembers} />

@@ -6,10 +6,12 @@ import { UserMenu } from "@/components/layout/user-menu";
 import { requireUser, userPortal } from "@/lib/auth/session";
 import { getAssembly } from "@/lib/data/queries";
 import { createClient } from "@/lib/supabase/server";
+import { PORTAL_CHROME } from "@/types/portals";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const portal = userPortal(user);
+  const chrome = PORTAL_CHROME[portal];
   const supabase = await createClient();
   const assembly = await getAssembly(supabase);
   const { data: notifications } = await supabase
@@ -29,14 +31,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         assignments={user.workerAssignments}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b bg-cop-navy text-white">
+        <header className="sticky top-0 z-20 border-b text-white" style={{ backgroundColor: chrome.header }}>
           <div className="h-1 bg-cop-gold" />
           <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <MobileNav role={user.profile.role_slug} portal={portal} assignments={user.workerAssignments} />
             <div className="lg:hidden">
               <div className="text-sm font-semibold">Oyame Tiase Assembly</div>
-              <div className="text-xs text-cop-gold">The Church of Pentecost</div>
+              <div className="text-xs text-cop-gold">{chrome.desk}</div>
             </div>
           </div>
           <div className="flex items-center gap-1">

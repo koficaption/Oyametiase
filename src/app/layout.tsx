@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   },
   description:
     "Local assembly management system for The Church of Pentecost, Oyame Tiase Assembly.",
+  icons: {
+    icon: "/cop-emblem.png",
+    apple: "/cop-emblem.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

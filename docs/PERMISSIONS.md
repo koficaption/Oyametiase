@@ -42,7 +42,7 @@ Hiding a button is never the only control.
 | Prayer: Presiding Elder only | Y | — | — | — | — | — |
 | Prayer: authorized leaders | Y | Y | — | prayer dept | — | — |
 | Prayer: prayer team | Y | — | — | prayer dept | prayer team | — |
-| Welfare cases | Y | S | — | welfare dept | — | — |
+| Welfare cases | Y | — | — | welfare dept | — | — |
 | Finance transactions (write) | — | — | Y | — | — | — |
 | Finance reports | Y | — | Y | — | — | — |
 | Documents (by category ACL) | Y | S | S | S | S | S |

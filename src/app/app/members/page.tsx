@@ -15,7 +15,7 @@ export default async function MembersPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requirePermission("members.view");
+  const user = await requirePermission("members.view");
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : "";
   const department = typeof params.department === "string" ? params.department : undefined;
@@ -23,8 +23,16 @@ export default async function MembersPage({
   const status = typeof params.status === "string" ? params.status : undefined;
   const page = Number(params.page ?? 1);
   const supabase = await createClient();
+  let memberIds: string[] | undefined;
+  if (user.profile.role_slug === "department_leader") {
+    const { data: links } = await supabase
+      .from("department_members")
+      .select("member_id")
+      .in("department_id", user.ledDepartmentIds.length ? user.ledDepartmentIds : ["00000000-0000-0000-0000-000000000000"]);
+    memberIds = (links ?? []).map((row) => row.member_id);
+  }
   const { data: departments } = await supabase.from("departments").select("id, name").eq("is_active", true);
-  const { data, count } = await searchMembers(supabase, { q, department, gender, status, page });
+  const { data, count } = await searchMembers(supabase, { q, department, gender, status, page, memberIds });
 
   return (
     <div className="space-y-6">

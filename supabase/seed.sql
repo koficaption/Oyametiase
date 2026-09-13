@@ -211,8 +211,8 @@ BEGIN
     notes = 'DEVELOPMENT DATA — Treasurer sample record'
   WHERE member_id = m_treasurer;
 
-  UPDATE public.departments SET leader_id = m_elder WHERE id = dept_men;
-  UPDATE public.departments SET leader_id = m_secretary WHERE id = dept_women;
+  UPDATE public.departments SET leader_id = (SELECT id FROM public.members WHERE first_name = 'Nana' AND last_name = 'Yeboah' AND assembly_id = aid) WHERE id = dept_men;
+  UPDATE public.departments SET leader_id = (SELECT id FROM public.members WHERE first_name = 'Ama' AND last_name = 'Sarpong' AND assembly_id = aid) WHERE id = dept_children;
   UPDATE public.departments SET leader_id = m_youth WHERE id = dept_youth;
   UPDATE public.departments SET leader_id = m_welfare WHERE id = dept_welfare;
   UPDATE public.departments SET leader_id = m_member WHERE id = dept_choir;

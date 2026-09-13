@@ -21,10 +21,15 @@ describe("authorization matrix", () => {
     expect(hasPermission("secretary", "finance.view")).toBe(false);
     expect(hasPermission("secretary", "finance.manage")).toBe(false);
     expect(hasPermission("secretary", "users.manage")).toBe(false);
+    expect(hasPermission("secretary", "welfare.view")).toBe(false);
+    expect(hasPermission("secretary", "prayer.moderate")).toBe(false);
+    expect(hasPermission("secretary", "settings.manage")).toBe(false);
+    expect(hasPermission("secretary", "audit.view")).toBe(false);
   });
 
   it("limits the Treasurer to finance work", () => {
     expect(hasPermission("treasurer", "finance.manage")).toBe(true);
+    expect(hasPermission("treasurer", "members.view")).toBe(false);
     expect(hasPermission("treasurer", "members.sensitive")).toBe(false);
     expect(hasPermission("treasurer", "prayer.moderate")).toBe(false);
     expect(hasPermission("treasurer", "settings.manage")).toBe(false);
@@ -36,6 +41,8 @@ describe("authorization matrix", () => {
     expect(hasPermission("department_leader", "members.manage")).toBe(false);
     expect(hasPermission("department_leader", "finance.view")).toBe(false);
     expect(hasPermission("department_leader", "welfare.view")).toBe(false);
+    expect(hasPermission("department_leader", "reports.department")).toBe(true);
+    expect(hasPermission("department_leader", "users.manage")).toBe(false);
   });
 
   it("keeps members in the portal", () => {

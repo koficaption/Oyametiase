@@ -256,15 +256,24 @@ export async function uploadDocumentAction(formData: FormData): Promise<ActionRe
 
 export async function submitDepartmentReportAction(formData: FormData): Promise<ActionResult> {
   const user = await requirePermission("departments.view");
+  const departmentId = str(formData, "department_id");
+  if (
+    user.profile.role_slug === "department_leader" &&
+    departmentId &&
+    !user.ledDepartmentIds.includes(departmentId)
+  ) {
+    return fail("You can only submit a report for your own ministry.");
+  }
   const supabase = await createClient();
   const { error } = await supabase.from("department_reports").insert({
     assembly_id: user.profile.assembly_id,
-    department_id: str(formData, "department_id"),
+    department_id: departmentId,
     title: str(formData, "title"),
     content: str(formData, "content"),
     period_start: emptyToNull(str(formData, "period_start")),
     period_end: emptyToNull(str(formData, "period_end")),
     submitted_by: user.id,
+    status: "submitted",
   });
   if (error) return fail("Unable to submit the department report.");
   revalidatePath("/app/departments");

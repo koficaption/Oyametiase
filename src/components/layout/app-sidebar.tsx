@@ -2,36 +2,40 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Church } from "lucide-react";
-import { NAV_ITEMS, SECTION_LABELS } from "@/lib/navigation";
+import { AssemblyMark } from "@/components/brand/assembly-mark";
+import { navForPortal, SECTION_LABELS } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import { hasPermission, type Permission, type RoleSlug } from "@/types/roles";
+import { PORTAL_LABELS, type PortalKind, type WorkerAssignment } from "@/types/portals";
+import { hasPermission, type Permission } from "@/types/roles";
 
 export function AppSidebar({
   role,
+  portal,
   churchName,
   assemblyName,
+  assignments = [],
 }: {
-  role: RoleSlug;
+  role: Parameters<typeof hasPermission>[0];
+  portal: PortalKind;
   churchName: string;
   assemblyName: string;
+  assignments?: WorkerAssignment[];
 }) {
   const pathname = usePathname();
-  const visible = NAV_ITEMS.filter(
+  const visible = navForPortal(portal, assignments).filter(
     (item) => !item.permission || hasPermission(role, item.permission as Permission),
   );
   const sections = ["overview", "people", "life", "stewardship", "admin"] as const;
 
   return (
     <aside className="hidden w-72 shrink-0 border-r bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
-      <div className="border-b px-5 py-5">
+      <div className="border-b border-sidebar-border px-5 py-5">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Church className="h-5 w-5" aria-hidden />
-          </div>
+          <AssemblyMark size={44} />
           <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">{churchName}</div>
+            <div className="text-[10px] uppercase tracking-[0.16em] text-sidebar-primary">{churchName}</div>
             <div className="font-semibold leading-tight">{assemblyName}</div>
+            <div className="mt-1 text-xs text-sidebar-primary">{PORTAL_LABELS[portal]}</div>
           </div>
         </div>
       </div>
@@ -41,12 +45,13 @@ export function AppSidebar({
           if (!items.length) return null;
           return (
             <div key={section}>
-              <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-sidebar-primary/80">
                 {SECTION_LABELS[section]}
               </p>
               <div className="space-y-1">
                 {items.map((item) => {
-                  const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const path = item.href.split("?")[0];
+                  const active = pathname === path || (path !== "/app" && pathname.startsWith(`${path}/`));
                   return (
                     <Link
                       key={item.href}

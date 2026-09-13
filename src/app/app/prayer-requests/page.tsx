@@ -3,14 +3,14 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { requireUser } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formAction } from "@/lib/forms";
 
 export const metadata = { title: "Prayer requests" };
 
 export default async function PrayerPage() {
-  await requireUser();
+  await requirePermission("prayer.submit");
   const supabase = await createClient();
   const { data: requests } = await supabase
     .from("prayer_requests")

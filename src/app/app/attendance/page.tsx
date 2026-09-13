@@ -3,11 +3,12 @@ import { PageHeader } from "@/components/shared/page-header";
 import { requirePermission } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { memberFullName } from "@/types/database";
+import { hasPermission } from "@/types/roles";
 
 export const metadata = { title: "Attendance" };
 
 export default async function AttendancePage() {
-  await requirePermission("attendance.manage");
+  const user = await requirePermission("attendance.view");
   const supabase = await createClient();
   const [{ data: members }, { data: visitors }, { data: services }, { data: departments }, { data: recent }] =
     await Promise.all([
@@ -33,7 +34,11 @@ export default async function AttendancePage() {
         title="Attendance"
         description="Record Sunday, midweek, department, and special program attendance. Duplicates for the same person, date, and service are blocked."
       />
-      <AttendanceForm people={people} services={services ?? []} departments={departments ?? []} />
+      {hasPermission(user.profile.role_slug, "attendance.manage") ? (
+        <AttendanceForm people={people} services={services ?? []} departments={departments ?? []} />
+      ) : (
+        <p className="text-sm text-muted-foreground">You can review attendance. Recording is limited to authorized officers.</p>
+      )}
       <section className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 text-sm font-semibold">Recent records</h2>
         <div className="space-y-2 text-sm">

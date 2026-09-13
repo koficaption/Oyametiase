@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { CurrentUser, Member, Profile } from "@/types/database";
+import type { LedDepartment, PortalKind, WorkerAssignment } from "@/types/portals";
+import { resolvePortal } from "@/types/portals";
 import type { Permission, RoleSlug } from "@/types/roles";
 import { hasPermission } from "@/types/roles";
 
@@ -31,14 +33,36 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     member = (data as Member | null) ?? null;
   }
 
-  const ledDepartmentIds: string[] = [];
+  const ledDepartments: LedDepartment[] = [];
+  const workerAssignments: WorkerAssignment[] = [];
   if (member) {
     const { data: led } = await supabase
       .from("departments")
-      .select("id")
+      .select("id, name, slug, ministry_kind, logo_url")
       .or(`leader_id.eq.${member.id},assistant_leader_id.eq.${member.id}`)
       .is("archived_at", null);
-    led?.forEach((row) => ledDepartmentIds.push(row.id));
+    led?.forEach((row) =>
+      ledDepartments.push({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        ministry_kind: row.ministry_kind ?? row.slug,
+        logo_url: row.logo_url ?? null,
+      }),
+    );
+
+    const { data: workers } = await supabase
+      .from("workers")
+      .select("department_id, positions(slug)")
+      .eq("member_id", member.id)
+      .eq("status", "active");
+    workers?.forEach((row) => {
+      const position = Array.isArray(row.positions) ? row.positions[0] : row.positions;
+      workerAssignments.push({
+        positionSlug: position?.slug ?? null,
+        departmentId: row.department_id,
+      });
+    });
   }
 
   return {
@@ -46,8 +70,14 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     email: profile.email,
     profile: profile as Profile,
     member,
-    ledDepartmentIds,
+    ledDepartmentIds: ledDepartments.map((dept) => dept.id),
+    ledDepartments,
+    workerAssignments,
   };
+}
+
+export function userPortal(user: CurrentUser): PortalKind {
+  return resolvePortal(user.profile.role_slug, user.ledDepartments);
 }
 
 export async function requireUser() {
@@ -74,4 +104,14 @@ export async function requireRole(roles: RoleSlug[]) {
 
 export function can(user: CurrentUser | null, permission: Permission) {
   return hasPermission(user?.profile.role_slug, permission);
+}
+
+export function scopedDepartmentIds(user: CurrentUser): string[] | null {
+  if (user.profile.role_slug === "presiding_elder" || user.profile.role_slug === "secretary") {
+    return null;
+  }
+  if (user.profile.role_slug === "department_leader") {
+    return user.ledDepartmentIds;
+  }
+  return [];
 }

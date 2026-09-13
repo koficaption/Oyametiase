@@ -10,19 +10,34 @@ import { hasPermission } from "@/types/roles";
 
 export const metadata = { title: "Finance" };
 
-export default async function FinancePage() {
+export default async function FinancePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await requirePermission("finance.view");
+  const params = await searchParams;
+  const kind = typeof params.kind === "string" ? params.kind : "all";
   const supabase = await createClient();
-  const [{ data: transactions }, { data: categories }] = await Promise.all([
-    supabase.from("financial_transactions").select("*, financial_categories(name)").is("archived_at", null).order("occurred_on", { ascending: false }).limit(50),
+  const [{ data: allTransactions }, { data: categories }] = await Promise.all([
+    supabase.from("financial_transactions").select("*, financial_categories(name, slug)").is("archived_at", null).order("occurred_on", { ascending: false }).limit(80),
     supabase.from("financial_categories").select("id, name, type"),
   ]);
-  const income = transactions?.filter((row) => row.type === "income").reduce((sum, row) => sum + Number(row.amount), 0) ?? 0;
-  const expense = transactions?.filter((row) => row.type === "expense").reduce((sum, row) => sum + Number(row.amount), 0) ?? 0;
-  const tithes = transactions?.filter((row) => {
+  const categoryOf = (row: { financial_categories?: { name?: string; slug?: string } | { name?: string; slug?: string }[] | null }) => {
     const category = Array.isArray(row.financial_categories) ? row.financial_categories[0] : row.financial_categories;
-    return category?.name === "Tithes";
-  }).reduce((sum, row) => sum + Number(row.amount), 0) ?? 0;
+    return `${category?.slug ?? ""} ${category?.name ?? ""}`.toLowerCase();
+  };
+  const transactions = (allTransactions ?? []).filter((row) => {
+    if (kind === "tithes") return categoryOf(row).includes("tithe");
+    if (kind === "offerings") return categoryOf(row).includes("offering");
+    if (kind === "donations") return categoryOf(row).includes("donation");
+    if (kind === "income") return row.type === "income";
+    if (kind === "expenses") return row.type === "expense";
+    return true;
+  });
+  const income = (allTransactions ?? []).filter((row) => row.type === "income").reduce((sum, row) => sum + Number(row.amount), 0);
+  const expense = (allTransactions ?? []).filter((row) => row.type === "expense").reduce((sum, row) => sum + Number(row.amount), 0);
+  const tithes = (allTransactions ?? []).filter((row) => categoryOf(row).includes("tithe")).reduce((sum, row) => sum + Number(row.amount), 0);
   const canWrite = hasPermission(user.profile.role_slug, "finance.manage");
 
   return (

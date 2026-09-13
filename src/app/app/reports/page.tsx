@@ -17,11 +17,18 @@ const REPORTS = [
 
 export default async function ReportsPage() {
   const user = await requireUser();
+  const canDepartment = hasPermission(user.profile.role_slug, "reports.department") || hasPermission(user.profile.role_slug, "reports.admin");
   const available = REPORTS.filter((report) => hasPermission(user.profile.role_slug, report.permission));
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Assembly reports" description="Exports are generated on the server from live database records." />
+      <PageHeader title="Reports" description="The Presiding Elder reviews assembly and ministry reports. Department leaders submit from Departments." />
+      {canDepartment ? (
+        <p className="rounded-xl border bg-card p-4 text-sm">
+          Ministry reports are submitted from <a className="underline" href="/app/departments">Departments</a> and reviewed under{" "}
+          {hasPermission(user.profile.role_slug, "approvals.view") ? <a className="underline" href="/app/approvals">Approvals</a> : "Approvals (Presiding Elder)."}.
+        </p>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         {available.map((report) => (
           <div key={report.key} className="rounded-xl border bg-card p-4">

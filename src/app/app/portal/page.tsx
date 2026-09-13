@@ -42,12 +42,18 @@ export default async function PortalPage() {
       ) : (
         <p className="rounded-xl border bg-card p-4 text-sm">This login is not linked to a member record yet.</p>
       )}
-      <section className="rounded-xl border bg-card p-4">
+      <section id="attendance" className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 font-semibold">My attendance</h2>
         {attendance?.map((row, index) => {
           const service = Array.isArray(row.services) ? row.services[0] : row.services;
           return <div key={`${row.attendance_date}-${index}`} className="flex justify-between border-b py-2 text-sm last:border-0"><span>{row.attendance_date}</span><span>{service?.name} · {row.status}</span></div>;
         })}
+      </section>
+      <section id="department" className="rounded-xl border bg-card p-4">
+        <h2 className="mb-3 font-semibold">My department</h2>
+        <p className="text-sm text-muted-foreground">
+          {user.member ? "Your ministry assignment is kept on your member record. Ask the Secretary if it needs updating." : "No member record is linked yet."}
+        </p>
       </section>
       <section className="rounded-xl border bg-card p-4">
         <h2 className="mb-3 font-semibold">Announcements</h2>

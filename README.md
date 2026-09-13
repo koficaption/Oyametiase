@@ -128,9 +128,14 @@ After auth users exist, the Presiding Elder invites officers from **Users**. Rec
 
 Development login emails (only after you create matching Auth users yourself):
 
-- `elder@oyametiase.local`
-- `secretary@oyametiase.local`
-- `treasurer@oyametiase.local`
+- `elder@oyametiase.local` — Presiding Elder portal
+- `secretary@oyametiase.local` — Secretary portal
+- `treasurer@oyametiase.local` — Treasurer portal
+- `womens.leader@oyametiase.local` — Women's Ministry portal
+- `mens.leader@oyametiase.local` — Men's Ministry portal
+- `youth.leader@oyametiase.local` — Youth Ministry portal
+- `children.leader@oyametiase.local` — Children's Ministry portal
+- `member@oyametiase.local` — Member portal
 
 Use a strong unique password. This repository never ships a production password.
 

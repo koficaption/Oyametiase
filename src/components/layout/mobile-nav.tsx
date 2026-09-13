@@ -5,12 +5,21 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { NAV_ITEMS } from "@/lib/navigation";
+import { navForPortal } from "@/lib/navigation";
+import { PORTAL_LABELS, type PortalKind, type WorkerAssignment } from "@/types/portals";
 import { hasPermission, type Permission, type RoleSlug } from "@/types/roles";
 
-export function MobileNav({ role }: { role: RoleSlug }) {
+export function MobileNav({
+  role,
+  portal,
+  assignments = [],
+}: {
+  role: RoleSlug;
+  portal: PortalKind;
+  assignments?: WorkerAssignment[];
+}) {
   const pathname = usePathname();
-  const visible = NAV_ITEMS.filter(
+  const visible = navForPortal(portal, assignments).filter(
     (item) => !item.permission || hasPermission(role, item.permission as Permission),
   );
   return (
@@ -23,19 +32,23 @@ export function MobileNav({ role }: { role: RoleSlug }) {
       <SheetContent side="left" className="w-80">
         <SheetHeader>
           <SheetTitle>Oyame Tiase Assembly</SheetTitle>
+          <p className="text-sm text-muted-foreground">{PORTAL_LABELS[portal]}</p>
         </SheetHeader>
         <nav className="mt-4 space-y-1" aria-label="Mobile navigation">
-          {visible.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`block rounded-md px-3 py-2 text-sm ${
-                pathname.startsWith(item.href) ? "bg-accent font-medium" : "hover:bg-accent"
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {visible.map((item) => {
+            const path = item.href.split("?")[0];
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`block rounded-md px-3 py-2 text-sm ${
+                  pathname === path || pathname.startsWith(`${path}/`) ? "bg-accent font-medium" : "hover:bg-accent"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </SheetContent>
     </Sheet>

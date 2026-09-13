@@ -1,3 +1,4 @@
+import type { LedDepartment, WorkerAssignment } from "@/types/portals";
 import type { RoleSlug } from "@/types/roles";
 
 export type Gender = "male" | "female";
@@ -113,6 +114,8 @@ export type Department = {
   meeting_day: string | null;
   meeting_time: string | null;
   is_active: boolean;
+  logo_url?: string | null;
+  ministry_kind?: string | null;
 };
 
 export type CurrentUser = {
@@ -121,6 +124,8 @@ export type CurrentUser = {
   profile: Profile;
   member: Member | null;
   ledDepartmentIds: string[];
+  ledDepartments: LedDepartment[];
+  workerAssignments: WorkerAssignment[];
 };
 
 export function memberFullName(member: Pick<Member, "first_name" | "middle_name" | "last_name">) {

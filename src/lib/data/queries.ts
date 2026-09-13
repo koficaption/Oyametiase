@@ -7,7 +7,14 @@ export async function getAssembly(supabase: SupabaseClient) {
 
 export async function searchMembers(
   supabase: SupabaseClient,
-  input: { q?: string; department?: string; gender?: string; status?: string; page?: number },
+  input: {
+    q?: string;
+    department?: string;
+    gender?: string;
+    status?: string;
+    page?: number;
+    memberIds?: string[];
+  },
 ) {
   const page = input.page ?? 1;
   const pageSize = 20;
@@ -17,6 +24,14 @@ export async function searchMembers(
     .is("archived_at", null)
     .order("last_name", { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (input.memberIds) {
+    if (!input.memberIds.length) {
+      query = query.eq("id", "00000000-0000-0000-0000-000000000000");
+    } else {
+      query = query.in("id", input.memberIds);
+    }
+  }
 
   if (input.q) {
     query = query.or(

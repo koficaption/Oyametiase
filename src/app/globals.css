@@ -49,38 +49,39 @@
 }
 
 :root {
-  --background: oklch(0.985 0.008 80);
-  --foreground: oklch(0.22 0.03 25);
-  --card: oklch(0.995 0.004 80);
-  --card-foreground: oklch(0.22 0.03 25);
-  --popover: oklch(0.995 0.004 80);
-  --popover-foreground: oklch(0.22 0.03 25);
-  --primary: oklch(0.45 0.155 25);
-  --primary-foreground: oklch(0.99 0.01 85);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Church of Pentecost: royal blue, gold, white, red accent */
+  --background: oklch(0.985 0.012 95);
+  --foreground: oklch(0.22 0.05 262);
+  --card: oklch(0.995 0.004 95);
+  --card-foreground: oklch(0.22 0.05 262);
+  --popover: oklch(0.995 0.004 95);
+  --popover-foreground: oklch(0.22 0.05 262);
+  --primary: oklch(0.40 0.14 262);
+  --primary-foreground: oklch(0.99 0.01 95);
+  --secondary: oklch(0.93 0.08 98);
+  --secondary-foreground: oklch(0.28 0.08 262);
+  --muted: oklch(0.96 0.02 262);
+  --muted-foreground: oklch(0.45 0.04 262);
+  --accent: oklch(0.88 0.17 98);
+  --accent-foreground: oklch(0.25 0.08 262);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.90 0.03 262);
+  --input: oklch(0.90 0.03 262);
+  --ring: oklch(0.40 0.14 262);
+  --chart-1: oklch(0.40 0.14 262);
+  --chart-2: oklch(0.82 0.17 98);
+  --chart-3: oklch(0.55 0.22 25);
+  --chart-4: oklch(0.55 0.10 250);
+  --chart-5: oklch(0.35 0.08 262);
   --radius: 0.625rem;
-  --sidebar: oklch(0.975 0.012 80);
-  --sidebar-foreground: oklch(0.22 0.03 25);
-  --sidebar-primary: oklch(0.45 0.155 25);
-  --sidebar-primary-foreground: oklch(0.99 0.01 85);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: oklch(0.28 0.10 262);
+  --sidebar-foreground: oklch(0.98 0.01 95);
+  --sidebar-primary: oklch(0.82 0.17 98);
+  --sidebar-primary-foreground: oklch(0.22 0.08 262);
+  --sidebar-accent: oklch(0.35 0.10 262);
+  --sidebar-accent-foreground: oklch(0.98 0.01 95);
+  --sidebar-border: oklch(0.38 0.08 262);
+  --sidebar-ring: oklch(0.82 0.17 98);
 }
 
 .dark {
@@ -90,8 +91,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.72 0.12 262);
+  --primary-foreground: oklch(0.16 0.05 262);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -107,12 +108,12 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar: oklch(0.20 0.06 262);
+  --sidebar-foreground: oklch(0.97 0.01 95);
+  --sidebar-primary: oklch(0.82 0.17 98);
+  --sidebar-primary-foreground: oklch(0.16 0.05 262);
+  --sidebar-accent: oklch(0.28 0.07 262);
+  --sidebar-accent-foreground: oklch(0.97 0.01 95);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }

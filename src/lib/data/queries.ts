@@ -106,12 +106,14 @@ export async function dashboardCounts(supabase: SupabaseClient, assemblyId: stri
       .select("amount")
       .eq("assembly_id", assemblyId)
       .eq("type", "income")
+      .is("department_id", null)
       .is("archived_at", null),
     supabase
       .from("financial_transactions")
       .select("amount")
       .eq("assembly_id", assemblyId)
       .eq("type", "expense")
+      .is("department_id", null)
       .is("archived_at", null),
   ]);
 

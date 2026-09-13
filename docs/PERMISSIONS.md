@@ -22,7 +22,8 @@ Hiding a button is never the only control.
 | Capability | PE | SEC | FIN | DL | WK | MEM |
 | --- | --- | --- | --- | --- | --- | --- |
 | Assembly dashboard | Y | Y | Y | Y | Y | — |
-| Finance dashboard | R | — | Y | — | — | — |
+| Finance dashboard (assembly) | R | — | Y | — | — | — |
+| Department / ministry finance | R | — | — | S | — | — |
 | Member portal | Y | Y | Y | Y | Y | Y |
 | View members (directory) | Y | Y | S | S | S | — |
 | Create / edit / archive members | Y | Y | — | — | — | — |
@@ -43,8 +44,9 @@ Hiding a button is never the only control.
 | Prayer: authorized leaders | Y | Y | — | prayer dept | — | — |
 | Prayer: prayer team | Y | — | — | prayer dept | prayer team | — |
 | Welfare cases | Y | — | — | welfare dept | — | — |
-| Finance transactions (write) | — | — | Y | — | — | — |
-| Finance reports | Y | — | Y | — | — | — |
+| Assembly finance write | — | — | Y | — | — | — |
+| Department finance write | — | — | — | S | — | — |
+| Finance reports (assembly) | Y | — | Y | — | — | — |
 | Documents (by category ACL) | Y | S | S | S | S | S |
 | User management | Y | — | — | — | — | — |
 | Audit logs | Y | — | — | — | — | — |
@@ -62,7 +64,7 @@ A Youth Ministry leader may:
 - Manage Youth events and department announcements
 - Submit a department report
 
-They must **not** be able to query Women’s Ministry attendance, notes, or reports by changing `/departments/[id]` or calling Supabase directly.
+They must **not** be able to query Women’s Ministry attendance, notes, reports, or ministry money by changing `/departments/[id]` or calling Supabase directly.
 
 ## Prayer privacy
 
@@ -70,7 +72,11 @@ A private prayer request is visible only to the author (and the database owner /
 
 ## Finance isolation
 
-The Secretary does not automatically receive finance table `SELECT`. The Treasurer does not receive prayer or welfare `SELECT`. The Presiding Elder may read financial transactions for oversight reports but does not perform cashier data entry by default.
+Assembly treasury rows (`financial_transactions.department_id IS NULL`) are visible to the Presiding Elder and the Treasurer only. The Treasurer writes those rows. The Secretary does not receive finance table `SELECT`.
+
+Each ministry has its own books (`department_id` set). A department leader may read and write only the ministry they lead. The Treasurer cannot see department money. Other department leaders cannot see each other's books. The Presiding Elder may review every ministry book but does not record department transactions.
+
+The Treasurer does not receive prayer or welfare `SELECT`.
 
 ## Member portal denials
 

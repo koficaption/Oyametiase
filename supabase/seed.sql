@@ -289,6 +289,15 @@ BEGIN
     (aid, current_date - 8, 'expense', cat_prog, 450.00, 'DEV DATA program support', 'cash', 'DEV-PROG-1'),
     (aid, current_date - 3, 'income', cat_midweek, 210.00, 'DEV DATA midweek offering', 'cash', 'DEV-OFF-2');
 
+  INSERT INTO public.financial_transactions (
+    assembly_id, occurred_on, type, category_id, amount, description, payment_method, reference, department_id
+  ) VALUES
+    (aid, current_date - 12, 'income', cat_thanks, 180.00, 'DEV DATA PWM thanksgiving', 'cash', 'DEV-PWM-1', dept_women),
+    (aid, current_date - 9, 'expense', cat_prog, 70.00, 'DEV DATA PWM meeting snacks', 'cash', 'DEV-PWM-2', dept_women),
+    (aid, current_date - 11, 'income', cat_special, 220.00, 'DEV DATA PMM contribution', 'mobile_money', 'DEV-PMM-1', dept_men),
+    (aid, current_date - 6, 'income', cat_donation, 150.00, 'DEV DATA PYM offering', 'cash', 'DEV-PYM-1', dept_youth),
+    (aid, current_date - 5, 'expense', cat_equip, 40.00, 'DEV DATA children materials', 'cash', 'DEV-CH-1', dept_children);
+
   INSERT INTO public.welfare_cases (
     assembly_id, member_id, category, description, assistance_requested,
     assistance_provided, amount, responsible_officer_id, status, notes

@@ -95,7 +95,8 @@ async function buildRows(supabase: Awaited<ReturnType<typeof createClient>>, typ
     const { data } = await supabase
       .from("financial_transactions")
       .select("transaction_code, occurred_on, type, amount, payment_method, financial_categories(name)")
-      .eq("assembly_id", assemblyId);
+      .eq("assembly_id", assemblyId)
+      .is("department_id", null);
     return (data ?? []).map((row) => {
       const category = Array.isArray(row.financial_categories) ? row.financial_categories[0] : row.financial_categories;
       return {

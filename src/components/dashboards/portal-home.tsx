@@ -36,6 +36,8 @@ export type PortalStats = {
   otherIncome: number;
   income: number;
   expense: number;
+  ministryIncome?: number;
+  ministryExpense?: number;
   announcements: { id: string; title: string; published_at: string | null }[];
   events: { id: string; title: string; starts_at: string; venue: string | null }[];
   recentTransactions?: { id: string; amount: number; type: string; occurred_on: string }[];
@@ -151,7 +153,12 @@ export function PortalHome({
             <StatCard label="Monthly attendance" value={stats.attendanceMonth} />
             <StatCard label="Pending follow-ups" value={stats.pendingFollowups} />
             <StatCard label="Open welfare" value={stats.welfareOpen} />
-            <StatCard label="Financial balance" value={money(stats.income - stats.expense)} />
+            <StatCard label="Assembly balance" value={money(stats.income - stats.expense)} hint="Main church treasury" />
+            <StatCard
+              label="Ministry books"
+              value={money((stats.ministryIncome ?? 0) - (stats.ministryExpense ?? 0))}
+              hint="Separate from assembly tithes"
+            />
             <StatCard label="Pending reports" value={stats.pendingReports} />
             <StatCard label="Approvals waiting" value={stats.pendingApprovals} />
           </div>
@@ -189,6 +196,9 @@ export function PortalHome({
           <StatCard label="Attendance this week" value={stats.attendanceWeek} />
           <StatCard label="Follow-ups" value={stats.pendingFollowups} />
           <StatCard label="Upcoming programs" value={stats.events.length} />
+          <StatCard label="Ministry income" value={money(stats.income)} />
+          <StatCard label="Ministry expenses" value={money(stats.expense)} />
+          <StatCard label="Ministry balance" value={money(stats.income - stats.expense)} hint="This ministry only" />
         </div>
         <Lists events={stats.events} announcements={stats.announcements} />
       </div>
@@ -208,6 +218,9 @@ export function PortalHome({
         <StatCard label="Attendance this week" value={stats.attendanceWeek} />
         <StatCard label="Follow-ups" value={stats.pendingFollowups} />
         <StatCard label="Upcoming programs" value={stats.events.length} />
+        <StatCard label="Ministry income" value={money(stats.income)} />
+        <StatCard label="Ministry expenses" value={money(stats.expense)} />
+        <StatCard label="Ministry balance" value={money(stats.income - stats.expense)} hint="This ministry only" />
       </div>
       <Trend title="Attendance" data={attendanceTrend} />
       <Lists events={stats.events} announcements={stats.announcements} />

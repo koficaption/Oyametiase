@@ -46,7 +46,7 @@ export default async function DashboardPage() {
     supabase.from("announcements").select("id, title, published_at").eq("assembly_id", assemblyId).is("archived_at", null).order("published_at", { ascending: false }).limit(5),
     supabase.from("events").select("id, title, starts_at, venue, department_id").eq("assembly_id", assemblyId).gte("starts_at", new Date().toISOString()).order("starts_at").limit(5),
     supabase.from("attendance").select("attendance_date, status, department_id").eq("assembly_id", assemblyId).eq("status", "present").gte("attendance_date", monthStart),
-    supabase.from("financial_transactions").select("id, amount, type, occurred_on, financial_categories(name, slug)").eq("assembly_id", assemblyId).is("archived_at", null).order("occurred_on", { ascending: false }).limit(80),
+    supabase.from("financial_transactions").select("id, amount, type, occurred_on, department_id, financial_categories(name, slug)").eq("assembly_id", assemblyId).is("archived_at", null).order("occurred_on", { ascending: false }).limit(200),
     supabase.from("department_reports").select("id", { count: "exact", head: true }).eq("status", "submitted"),
     supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("ministry_children").select("id", { count: "exact", head: true }).is("archived_at", null),
@@ -65,7 +65,11 @@ export default async function DashboardPage() {
     return (cat?.slug ?? cat?.name ?? "").toLowerCase();
   };
 
-  const txnRows = transactions ?? [];
+  const isMinistryLeader = user.profile.role_slug === "department_leader";
+  const txnRows = (transactions ?? []).filter((row) =>
+    isMinistryLeader ? Boolean(row.department_id && scopedIds?.includes(row.department_id)) : row.department_id == null,
+  );
+  const ministryRows = (transactions ?? []).filter((row) => row.department_id != null);
   const sumWhere = (predicate: (row: (typeof txnRows)[number]) => boolean) =>
     txnRows.filter(predicate).reduce((sum, row) => sum + Number(row.amount), 0);
 
@@ -89,6 +93,8 @@ export default async function DashboardPage() {
     otherIncome: sumWhere((row) => row.type === "income" && !/(tithe|offering|donation)/.test(categoryName(row))),
     income: sumWhere((row) => row.type === "income"),
     expense: sumWhere((row) => row.type === "expense"),
+    ministryIncome: ministryRows.filter((row) => row.type === "income").reduce((sum, row) => sum + Number(row.amount), 0),
+    ministryExpense: ministryRows.filter((row) => row.type === "expense").reduce((sum, row) => sum + Number(row.amount), 0),
     announcements: announcements ?? [],
     events: scopedEvents,
     recentTransactions: txnRows.slice(0, 8).map((row) => ({

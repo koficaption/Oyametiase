@@ -44,6 +44,7 @@ export const PERMISSIONS = [
   "welfare.manage",
   "finance.view",
   "finance.manage",
+  "finance.department",
   "documents.view",
   "documents.manage",
   "reports.admin",
@@ -117,6 +118,7 @@ export const ROLE_PERMISSIONS: Record<RoleSlug, Permission[]> = {
     "children.manage",
     "documents.view",
     "reports.department",
+    "finance.department",
     "notifications.view",
   ],
   worker: [

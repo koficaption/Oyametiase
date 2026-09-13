@@ -30,6 +30,7 @@ const PE_NAV: NavItem[] = [
   { href: "/app/prayer-requests", label: "Prayer Requests", permission: "prayer.submit", section: "life" },
   { href: "/app/welfare", label: "Welfare", permission: "welfare.view", section: "stewardship" },
   { href: "/app/finance", label: "Finance Overview", permission: "finance.view", section: "stewardship" },
+  { href: "/app/department-finance", label: "Department finance", permission: "finance.department", section: "stewardship" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
   { href: "/app/approvals", label: "Approvals", permission: "approvals.view", section: "admin" },
   { href: "/app/audit-logs", label: "Audit Logs", permission: "audit.view", section: "admin" },
@@ -74,6 +75,7 @@ function ministryNav(labels: {
     { href: "/app/departments", label: "Activities", permission: "departments.view", section: "life" },
     { href: "/app/follow-ups", label: "Follow-ups", permission: "followups.view", section: "people" },
     { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
+    { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
     { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
     ...(labels.extra ?? []),
   ];
@@ -115,6 +117,7 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
       { href: "/app/attendance", label: "Attendance", permission: "attendance.view", section: "life" },
       { href: "/app/events", label: "Programs", permission: "events.view", section: "life" },
       { href: "/app/follow-ups", label: "Follow-ups", permission: "followups.view", section: "people" },
+      { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
       { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
     ];
   }

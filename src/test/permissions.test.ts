@@ -12,6 +12,7 @@ describe("authorization matrix", () => {
     expect(hasPermission("presiding_elder", "audit.view")).toBe(true);
     expect(hasPermission("presiding_elder", "finance.view")).toBe(true);
     expect(hasPermission("presiding_elder", "finance.manage")).toBe(false);
+    expect(hasPermission("presiding_elder", "finance.department")).toBe(true);
     expect(hasPermission("presiding_elder", "settings.manage")).toBe(true);
   });
 
@@ -20,6 +21,7 @@ describe("authorization matrix", () => {
     expect(hasPermission("secretary", "reports.admin")).toBe(true);
     expect(hasPermission("secretary", "finance.view")).toBe(false);
     expect(hasPermission("secretary", "finance.manage")).toBe(false);
+    expect(hasPermission("secretary", "finance.department")).toBe(false);
     expect(hasPermission("secretary", "users.manage")).toBe(false);
     expect(hasPermission("secretary", "welfare.view")).toBe(false);
     expect(hasPermission("secretary", "prayer.moderate")).toBe(false);
@@ -29,6 +31,7 @@ describe("authorization matrix", () => {
 
   it("limits the Treasurer to finance work", () => {
     expect(hasPermission("treasurer", "finance.manage")).toBe(true);
+    expect(hasPermission("treasurer", "finance.department")).toBe(false);
     expect(hasPermission("treasurer", "members.view")).toBe(false);
     expect(hasPermission("treasurer", "members.sensitive")).toBe(false);
     expect(hasPermission("treasurer", "prayer.moderate")).toBe(false);
@@ -40,6 +43,8 @@ describe("authorization matrix", () => {
     expect(hasPermission("department_leader", "members.view")).toBe(true);
     expect(hasPermission("department_leader", "members.manage")).toBe(false);
     expect(hasPermission("department_leader", "finance.view")).toBe(false);
+    expect(hasPermission("department_leader", "finance.manage")).toBe(false);
+    expect(hasPermission("department_leader", "finance.department")).toBe(true);
     expect(hasPermission("department_leader", "welfare.view")).toBe(false);
     expect(hasPermission("department_leader", "reports.department")).toBe(true);
     expect(hasPermission("department_leader", "users.manage")).toBe(false);

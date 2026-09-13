@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { writeAudit } from "@/lib/auth/audit";
 import { requirePermission, requireUser } from "@/lib/auth/session";
+import { hasPermission } from "@/types/roles";
 import { emptyToNull, opt, str } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 import { fail, ok, zodError, type ActionResult } from "@/lib/validations/common";
@@ -166,7 +167,13 @@ export async function saveWelfareAction(formData: FormData): Promise<ActionResul
 }
 
 export async function saveTransactionAction(formData: FormData): Promise<ActionResult> {
-  const user = await requirePermission("finance.manage");
+  const user = await requireUser();
+  const assemblyWrite = hasPermission(user.profile.role_slug, "finance.manage");
+  const ministryWrite = user.profile.role_slug === "department_leader";
+  if (!assemblyWrite && !ministryWrite) {
+    return fail("You are not allowed to record transactions.");
+  }
+
   const parsed = transactionSchema.safeParse({
     occurred_on: str(formData, "occurred_on"),
     type: str(formData, "type"),
@@ -177,11 +184,22 @@ export async function saveTransactionAction(formData: FormData): Promise<ActionR
     reference: opt(formData, "reference"),
   });
   if (!parsed.success) return zodError(parsed.error);
+
+  let departmentId: string | null = null;
+  if (ministryWrite) {
+    const requested = emptyToNull(opt(formData, "department_id")) ?? user.ledDepartmentIds[0] ?? null;
+    if (!requested || !user.ledDepartmentIds.includes(requested)) {
+      return fail("You can only record money for a ministry you lead.");
+    }
+    departmentId = requested;
+  }
+
   const supabase = await createClient();
   const id = opt(formData, "id");
   const payload = {
     assembly_id: user.profile.assembly_id,
     ...parsed.data,
+    department_id: departmentId,
     recorded_by: user.id,
   };
   const { data, error } = id
@@ -190,10 +208,12 @@ export async function saveTransactionAction(formData: FormData): Promise<ActionR
   if (error || !data) return fail("Unable to save the transaction.");
   await writeAudit(supabase, {
     action: id ? "finance.update" : "finance.create",
-    module: "finance",
+    module: departmentId ? "department-finance" : "finance",
     recordId: data.id,
   });
   revalidatePath("/app/finance");
+  revalidatePath("/app/department-finance");
+  revalidatePath("/app/dashboard");
   return ok("Transaction saved.");
 }
 

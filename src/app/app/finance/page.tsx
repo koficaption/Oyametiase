@@ -1,14 +1,9 @@
-import { saveTransactionAction } from "@/actions/operations";
-import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { categoryLabel, FinanceBook } from "@/components/finance/finance-book";
 import { requirePermission } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { formAction } from "@/lib/forms";
 import { hasPermission } from "@/types/roles";
 
-export const metadata = { title: "Finance" };
+export const metadata = { title: "Assembly finance" };
 
 export default async function FinancePage({
   searchParams,
@@ -20,87 +15,34 @@ export default async function FinancePage({
   const kind = typeof params.kind === "string" ? params.kind : "all";
   const supabase = await createClient();
   const [{ data: allTransactions }, { data: categories }] = await Promise.all([
-    supabase.from("financial_transactions").select("*, financial_categories(name, slug)").is("archived_at", null).order("occurred_on", { ascending: false }).limit(80),
+    supabase
+      .from("financial_transactions")
+      .select("*, financial_categories(name, slug)")
+      .is("department_id", null)
+      .is("archived_at", null)
+      .order("occurred_on", { ascending: false })
+      .limit(80),
     supabase.from("financial_categories").select("id, name, type"),
   ]);
-  const categoryOf = (row: { financial_categories?: { name?: string; slug?: string } | { name?: string; slug?: string }[] | null }) => {
-    const category = Array.isArray(row.financial_categories) ? row.financial_categories[0] : row.financial_categories;
-    return `${category?.slug ?? ""} ${category?.name ?? ""}`.toLowerCase();
-  };
-  const transactions = (allTransactions ?? []).filter((row) => {
-    if (kind === "tithes") return categoryOf(row).includes("tithe");
-    if (kind === "offerings") return categoryOf(row).includes("offering");
-    if (kind === "donations") return categoryOf(row).includes("donation");
+  const rows = allTransactions ?? [];
+  const transactions = rows.filter((row) => {
+    if (kind === "tithes") return categoryLabel(row).includes("tithe");
+    if (kind === "offerings") return categoryLabel(row).includes("offering");
+    if (kind === "donations") return categoryLabel(row).includes("donation");
     if (kind === "income") return row.type === "income";
     if (kind === "expenses") return row.type === "expense";
     return true;
   });
-  const income = (allTransactions ?? []).filter((row) => row.type === "income").reduce((sum, row) => sum + Number(row.amount), 0);
-  const expense = (allTransactions ?? []).filter((row) => row.type === "expense").reduce((sum, row) => sum + Number(row.amount), 0);
-  const tithes = (allTransactions ?? []).filter((row) => categoryOf(row).includes("tithe")).reduce((sum, row) => sum + Number(row.amount), 0);
-  const canWrite = hasPermission(user.profile.role_slug, "finance.manage");
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Assembly finance" description="Tithes, offerings, donations, and expenses. Restricted to finance officers and the Presiding Elder." />
-      <div className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Income" value={`GHS ${income.toLocaleString()}`} />
-        <StatCard label="Expenses" value={`GHS ${expense.toLocaleString()}`} />
-        <StatCard label="Tithes" value={`GHS ${tithes.toLocaleString()}`} />
-        <StatCard label="Balance" value={`GHS ${(income - expense).toLocaleString()}`} />
-      </div>
-      {canWrite ? (
-        <form action={formAction(saveTransactionAction)} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
-          <Input name="occurred_on" type="date" required />
-          <select name="type" className="h-8 rounded-lg border bg-background px-2 text-sm">
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-          <select name="category_id" required className="h-8 rounded-lg border bg-background px-2 text-sm">
-            <option value="">Category</option>
-            {categories?.map((category) => <option key={category.id} value={category.id}>{category.name} ({category.type})</option>)}
-          </select>
-          <Input name="amount" type="number" step="0.01" min="0.01" placeholder="Amount" required />
-          <select name="payment_method" className="h-8 rounded-lg border bg-background px-2 text-sm">
-            <option value="cash">Cash</option>
-            <option value="mobile_money">Mobile Money</option>
-            <option value="bank">Bank</option>
-            <option value="other">Other</option>
-          </select>
-          <Input name="reference" placeholder="Reference" />
-          <Input name="description" placeholder="Description" className="md:col-span-2" />
-          <Button type="submit">Record transaction</Button>
-        </form>
-      ) : (
-        <p className="text-sm text-muted-foreground">You can review reports. Only the Treasurer records transactions.</p>
-      )}
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left">
-            <tr>
-              <th className="px-3 py-2">Code</th>
-              <th className="px-3 py-2">Date</th>
-              <th className="px-3 py-2">Category</th>
-              <th className="px-3 py-2">Amount</th>
-              <th className="px-3 py-2">Method</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions?.map((row) => {
-              const category = Array.isArray(row.financial_categories) ? row.financial_categories[0] : row.financial_categories;
-              return (
-                <tr key={row.id} className="border-t">
-                  <td className="px-3 py-2 font-mono text-xs">{row.transaction_code}</td>
-                  <td className="px-3 py-2">{row.occurred_on}</td>
-                  <td className="px-3 py-2">{category?.name} · {row.type}</td>
-                  <td className="px-3 py-2">GHS {Number(row.amount).toLocaleString()}</td>
-                  <td className="px-3 py-2 capitalize">{row.payment_method.replace("_", " ")}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <FinanceBook
+      title="Assembly finance"
+      description="Main church tithes, offerings, donations, and expenses. Ministry money is kept on separate books."
+      transactions={transactions}
+      allTransactions={rows}
+      categories={categories ?? []}
+      canWrite={hasPermission(user.profile.role_slug, "finance.manage")}
+      writeHint="You can review assembly reports. Only the Treasurer records main-church transactions."
+    />
   );
 }

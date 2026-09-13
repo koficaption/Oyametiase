@@ -28,11 +28,16 @@ describe("portal resolution", () => {
   it("keeps the Treasurer on finance navigation only", () => {
     const hrefs = navForPortal("treasurer").map((item) => item.href);
     expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports"))).toBe(true);
+    expect(hrefs).not.toContain("/app/department-finance");
     expect(hrefs.some((href) => href.includes("members"))).toBe(false);
   });
 
-  it("does not show finance to a Women's leader", () => {
-    expect(navForPortal("womens").some((item) => item.href.includes("finance"))).toBe(false);
+  it("gives ministry leaders their own finance page, not assembly treasury", () => {
+    const hrefs = navForPortal("womens").map((item) => item.href);
+    expect(hrefs).toContain("/app/department-finance");
+    expect(hrefs).not.toContain("/app/finance");
     expect(navForPortal("womens").some((item) => item.label === "Women Members")).toBe(true);
+    expect(navForPortal("children").map((item) => item.href)).toContain("/app/department-finance");
+    expect(navForPortal("treasurer").map((item) => item.href)).not.toContain("/app/department-finance");
   });
 });

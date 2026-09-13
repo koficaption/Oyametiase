@@ -41,6 +41,7 @@ export function FinanceBook({
   showDepartmentColumn,
   defaultDepartmentId,
   filterLinks,
+  activeHref,
 }: {
   title: string;
   description: string;
@@ -53,6 +54,7 @@ export function FinanceBook({
   showDepartmentColumn?: boolean;
   defaultDepartmentId?: string | null;
   filterLinks?: { href: string; label: string }[];
+  activeHref?: string;
 }) {
   const income = allTransactions.filter((row) => row.type === "income").reduce((sum, row) => sum + Number(row.amount), 0);
   const expense = allTransactions.filter((row) => row.type === "expense").reduce((sum, row) => sum + Number(row.amount), 0);
@@ -64,7 +66,14 @@ export function FinanceBook({
       {filterLinks && filterLinks.length > 0 ? (
         <div className="flex flex-wrap gap-2 text-sm">
           {filterLinks.map((link) => (
-            <a key={link.href} href={link.href} className="rounded-full border px-3 py-1 hover:bg-muted">
+            <a
+              key={link.href}
+              href={link.href}
+              aria-current={activeHref === link.href ? "page" : undefined}
+              className={`rounded-full border px-3 py-1 hover:bg-muted ${
+                activeHref === link.href ? "border-cop-blue bg-cop-blue text-white" : ""
+              }`}
+            >
               {link.label}
             </a>
           ))}
@@ -116,6 +125,11 @@ export function FinanceBook({
       ) : (
         <p className="text-sm text-muted-foreground">{writeHint}</p>
       )}
+      {transactions.length === 0 ? (
+        <p className="rounded-xl border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
+          No records in this book yet.
+        </p>
+      ) : (
       <div className="overflow-x-auto rounded-xl border">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 text-left">
@@ -147,6 +161,7 @@ export function FinanceBook({
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }

@@ -52,6 +52,26 @@ describe("portal resolution", () => {
     expect(hrefs.some((href) => href.includes("members"))).toBe(false);
   });
 
+  it("gives the Treasurer a distinct path for each finance book", () => {
+    const hrefs = navForPortal("treasurer").map((item) => item.href);
+    expect(hrefs).toContain("/app/finance/tithes");
+    expect(hrefs).toContain("/app/finance/offerings");
+    expect(hrefs).toContain("/app/finance/donations");
+    expect(hrefs).toContain("/app/finance/income");
+    expect(hrefs).toContain("/app/finance/expenses");
+    expect(hrefs).toContain("/app/finance");
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+    expect(hrefs.some((href) => href.includes("kind="))).toBe(false);
+  });
+
+  it("does not reuse the same path for Children register, guardians, and classes", () => {
+    const hrefs = navForPortal("children").map((item) => item.href);
+    expect(hrefs).toContain("/app/children");
+    expect(hrefs).toContain("/app/children?section=guardians");
+    expect(hrefs).toContain("/app/children?section=classes");
+    expect(new Set(hrefs).size).toBe(hrefs.length);
+  });
+
   it("gives ministry leaders their own finance page, not assembly treasury", () => {
     const hrefs = navForPortal("womens").map((item) => item.href);
     expect(hrefs).toContain("/app/department-finance");

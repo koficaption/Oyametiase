@@ -5,11 +5,18 @@ import { Input } from "@/components/ui/input";
 import { canAccessChildren, requireChildrenAccess } from "@/lib/auth/session";
 import { formAction } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
+import { ScrollToSection } from "@/components/shared/scroll-to-section";
 import { memberFullName } from "@/types/database";
 
 export const metadata = { title: "Children" };
 
-export default async function ChildrenPage() {
+export default async function ChildrenPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const section = typeof params.section === "string" ? params.section : undefined;
   const user = await requireChildrenAccess();
   const supabase = await createClient();
   const childrenDept = user.ledDepartments.find((dept) => dept.slug === "children");
@@ -23,6 +30,7 @@ export default async function ChildrenPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollToSection id={section === "guardians" || section === "classes" ? section : undefined} />
       <PageHeader
         title="Children's Ministry"
         description="Children's records are private. Ordinary members cannot see this register."

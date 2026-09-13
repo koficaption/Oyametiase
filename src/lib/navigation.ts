@@ -59,11 +59,11 @@ const SECRETARY_NAV: NavItem[] = [
 
 const TREASURER_NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
-  { href: "/app/finance?kind=tithes", label: "Tithes", permission: "finance.view", section: "stewardship" },
-  { href: "/app/finance?kind=offerings", label: "Offerings", permission: "finance.view", section: "stewardship" },
-  { href: "/app/finance?kind=donations", label: "Donations", permission: "finance.view", section: "stewardship" },
-  { href: "/app/finance?kind=income", label: "Income", permission: "finance.view", section: "stewardship" },
-  { href: "/app/finance?kind=expenses", label: "Expenses", permission: "finance.view", section: "stewardship" },
+  { href: "/app/finance/tithes", label: "Tithes", permission: "finance.view", section: "stewardship" },
+  { href: "/app/finance/offerings", label: "Offerings", permission: "finance.view", section: "stewardship" },
+  { href: "/app/finance/donations", label: "Donations", permission: "finance.view", section: "stewardship" },
+  { href: "/app/finance/income", label: "Income", permission: "finance.view", section: "stewardship" },
+  { href: "/app/finance/expenses", label: "Expenses", permission: "finance.view", section: "stewardship" },
   { href: "/app/finance", label: "Transactions", permission: "finance.view", section: "stewardship" },
   { href: "/app/documents", label: "Receipts / Documents", permission: "documents.view", section: "stewardship" },
   { href: "/app/reports", label: "Financial Reports", permission: "reports.finance", section: "admin" },
@@ -104,15 +104,15 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
   if (kind === "youth") {
     return ministryNav({
       members: "Youth Members",
-      extra: [{ href: "/app/departments", label: "Evangelism", permission: "departments.view", section: "life" }],
+      extra: [{ href: "/app/departments?focus=evangelism", label: "Evangelism", permission: "departments.view", section: "life" }],
     });
   }
   if (kind === "children") {
     return [
       { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
       { href: "/app/children", label: "Children", permission: "children.view", section: "people" },
-      { href: "/app/children#guardians", label: "Parents / Guardians", permission: "children.view", section: "people" },
-      { href: "/app/children#classes", label: "Classes", permission: "children.view", section: "people" },
+      { href: "/app/children?section=guardians", label: "Parents / Guardians", permission: "children.view", section: "people" },
+      { href: "/app/children?section=classes", label: "Classes", permission: "children.view", section: "people" },
       { href: "/app/departments", label: "Workers", permission: "departments.view", section: "people" },
       { href: "/app/attendance", label: "Attendance", permission: "attendance.view", section: "life" },
       { href: "/app/events", label: "Programs", permission: "events.view", section: "life" },
@@ -127,7 +127,7 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
     return [
       { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
       { href: "/app/children", label: "Children", permission: "children.view", section: "people" },
-      { href: "/app/children#classes", label: "Classes", permission: "children.view", section: "people" },
+      { href: "/app/children?section=classes", label: "Classes", permission: "children.view", section: "people" },
       { href: "/app/attendance", label: "Attendance", permission: "attendance.view", section: "life" },
       { href: "/app/events", label: "Programs", permission: "events.view", section: "life" },
       { href: "/app/portal", label: "My Profile", section: "overview" },

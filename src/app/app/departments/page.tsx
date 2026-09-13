@@ -1,5 +1,6 @@
 import { assignDepartmentMemberAction, saveDepartmentAction, saveDepartmentActivityAction, submitDepartmentReportAction } from "@/actions/admin";
 import { PageHeader } from "@/components/shared/page-header";
+import { ScrollToSection } from "@/components/shared/scroll-to-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +11,13 @@ import { hasPermission } from "@/types/roles";
 
 export const metadata = { title: "Departments" };
 
-export default async function DepartmentsPage() {
+export default async function DepartmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const focus = typeof params.focus === "string" ? params.focus : undefined;
   const user = await requireUser();
   await requirePermission("departments.view");
   const supabase = await createClient();
@@ -25,6 +32,7 @@ export default async function DepartmentsPage() {
 
   return (
     <div className="space-y-6">
+      <ScrollToSection id={focus === "evangelism" ? "evangelism" : focus === "activities" ? "activities" : undefined} />
       <PageHeader title="Departments & ministries" description="Department leaders only see their own ministry." />
       {canManage ? (
         <form action={formAction(saveDepartmentAction)} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
@@ -36,7 +44,8 @@ export default async function DepartmentsPage() {
           <Button type="submit">Create department</Button>
         </form>
       ) : null}
-      <div className="grid gap-4">
+      <div id="activities" className="grid gap-4">
+        <div id="evangelism" className="scroll-mt-24" />
         {departments?.map((dept) => {
           const people = memberships?.filter((row) => row.department_id === dept.id) ?? [];
           return (

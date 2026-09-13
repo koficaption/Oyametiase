@@ -1,14 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { AssemblyMark } from "@/components/brand/assembly-mark";
+import { NavLink } from "@/components/layout/nav-link";
 import { navForPortal, SECTION_LABELS } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
 import { PORTAL_CHROME, PORTAL_LABELS, type PortalKind, type WorkerAssignment } from "@/types/portals";
 import { hasPermission, type Permission } from "@/types/roles";
 
-export function AppSidebar({
+function SidebarNav({
   role,
   portal,
   churchName,
@@ -21,11 +20,11 @@ export function AppSidebar({
   assemblyName: string;
   assignments?: WorkerAssignment[];
 }) {
-  const pathname = usePathname();
   const chrome = PORTAL_CHROME[portal];
   const visible = navForPortal(portal, assignments).filter(
     (item) => !item.permission || hasPermission(role, item.permission as Permission),
   );
+  const siblingHrefs = visible.map((item) => item.href);
   const sections = ["overview", "people", "life", "stewardship", "admin"] as const;
 
   return (
@@ -55,30 +54,37 @@ export function AppSidebar({
                 {SECTION_LABELS[section]}
               </p>
               <div className="space-y-1">
-                {items.map((item) => {
-                  const path = item.href.split("?")[0];
-                  const active = pathname === path || (path !== "/app" && pathname.startsWith(`${path}/`));
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      style={active ? { backgroundColor: chrome.sidebarAccent } : undefined}
-                      className={cn(
-                        "block rounded-md px-3 py-2 text-sm transition-colors",
-                        active
-                          ? "border-l-4 border-cop-gold font-medium text-white"
-                          : "border-l-4 border-transparent hover:bg-white/10",
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {items.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    siblingHrefs={siblingHrefs}
+                    activeStyle={{ backgroundColor: chrome.sidebarAccent }}
+                    className="block rounded-md border-l-4 border-transparent px-3 py-2 text-sm transition-colors hover:bg-white/10"
+                    activeClassName="border-cop-gold font-medium text-white"
+                  >
+                    {item.label}
+                  </NavLink>
+                ))}
               </div>
             </div>
           );
         })}
       </nav>
     </aside>
+  );
+}
+
+export function AppSidebar(props: {
+  role: Parameters<typeof hasPermission>[0];
+  portal: PortalKind;
+  churchName: string;
+  assemblyName: string;
+  assignments?: WorkerAssignment[];
+}) {
+  return (
+    <Suspense fallback={<aside className="hidden w-72 shrink-0 lg:block" />}>
+      <SidebarNav {...props} />
+    </Suspense>
   );
 }

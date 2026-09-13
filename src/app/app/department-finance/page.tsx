@@ -84,6 +84,13 @@ export default async function DepartmentFinancePage({
       showDepartmentColumn={isElder}
       defaultDepartmentId={defaultDepartmentId}
       filterLinks={filterLinks}
+      activeHref={
+        selectedDept
+          ? `/app/department-finance?department=${selectedDept}`
+          : kind === "all"
+            ? "/app/department-finance"
+            : `/app/department-finance?kind=${kind}`
+      }
     />
   );
 }

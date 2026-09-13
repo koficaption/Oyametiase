@@ -236,6 +236,11 @@ export async function saveTransactionAction(formData: FormData): Promise<ActionR
     recordId: data.id,
   });
   revalidatePath("/app/finance");
+  revalidatePath("/app/finance/tithes");
+  revalidatePath("/app/finance/offerings");
+  revalidatePath("/app/finance/donations");
+  revalidatePath("/app/finance/income");
+  revalidatePath("/app/finance/expenses");
   revalidatePath("/app/department-finance");
   revalidatePath("/app/dashboard");
   return ok("Transaction saved.");

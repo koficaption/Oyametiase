@@ -3,6 +3,8 @@ export const ROLES = [
   "secretary",
   "treasurer",
   "department_leader",
+  "ministry_finance",
+  "children_teacher",
   "worker",
   "member",
 ] as const;
@@ -13,7 +15,9 @@ export const ROLE_LABELS: Record<RoleSlug, string> = {
   presiding_elder: "Presiding Elder",
   secretary: "Assembly Secretary",
   treasurer: "Treasurer / Finance Officer",
-  department_leader: "Department Leader",
+  department_leader: "Ministry / department leader",
+  ministry_finance: "Ministry financial secretary",
+  children_teacher: "Children's Ministry Teacher",
   worker: "Worker / Officer",
   member: "Member",
 };
@@ -119,6 +123,23 @@ export const ROLE_PERMISSIONS: Record<RoleSlug, Permission[]> = {
     "documents.view",
     "reports.department",
     "finance.department",
+    "notifications.view",
+  ],
+  ministry_finance: [
+    "dashboard.view",
+    "finance.department",
+    "documents.view",
+    "reports.department",
+    "notifications.view",
+  ],
+  children_teacher: [
+    "dashboard.view",
+    "attendance.view",
+    "attendance.manage",
+    "children.view",
+    "events.view",
+    "announcements.view",
+    "prayer.submit",
     "notifications.view",
   ],
   worker: [

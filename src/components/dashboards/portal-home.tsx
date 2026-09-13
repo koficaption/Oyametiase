@@ -187,6 +187,33 @@ export function PortalHome({
     );
   }
 
+  if (portal === "ministry_finance") {
+    return (
+      <div className="space-y-6">
+        <PageHeader title={title} description={`${greeting} These books belong to your ministry, not the assembly treasury.`} />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Ministry income" value={money(stats.income)} />
+          <StatCard label="Ministry expenses" value={money(stats.expense)} />
+          <StatCard label="Ministry balance" value={money(stats.income - stats.expense)} hint="This ministry only" />
+        </div>
+      </div>
+    );
+  }
+
+  if (portal === "children_teacher") {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Children's class portal" description={`${greeting} You can see the children's records needed for your class.`} />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="Total children" value={stats.childrenCount} />
+          <StatCard label="Attendance this week" value={stats.attendanceWeek} />
+          <StatCard label="Upcoming programs" value={stats.events.length} />
+        </div>
+        <Lists events={stats.events} announcements={stats.announcements} />
+      </div>
+    );
+  }
+
   if (portal === "children") {
     return (
       <div className="space-y-6">

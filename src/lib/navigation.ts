@@ -35,6 +35,8 @@ const PE_NAV: NavItem[] = [
   { href: "/app/approvals", label: "Approvals", permission: "approvals.view", section: "admin" },
   { href: "/app/audit-logs", label: "Audit Logs", permission: "audit.view", section: "admin" },
   { href: "/app/settings", label: "Settings", permission: "settings.manage", section: "admin" },
+  { href: "/app/users", label: "Users & approvals", permission: "users.manage", section: "admin" },
+  { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 
 const SECRETARY_NAV: NavItem[] = [
@@ -49,6 +51,7 @@ const SECRETARY_NAV: NavItem[] = [
   { href: "/app/events", label: "Church Programs", permission: "events.view", section: "life" },
   { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
+  { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 
 const TREASURER_NAV: NavItem[] = [
@@ -61,6 +64,7 @@ const TREASURER_NAV: NavItem[] = [
   { href: "/app/finance", label: "Transactions", permission: "finance.view", section: "stewardship" },
   { href: "/app/documents", label: "Receipts / Documents", permission: "documents.view", section: "stewardship" },
   { href: "/app/reports", label: "Financial Reports", permission: "reports.finance", section: "admin" },
+  { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 
 function ministryNav(labels: {
@@ -77,6 +81,7 @@ function ministryNav(labels: {
     { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
     { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
     { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
+    { href: "/app/portal", label: "My Profile", section: "overview" },
     ...(labels.extra ?? []),
   ];
 }
@@ -89,6 +94,7 @@ const MEMBER_NAV: NavItem[] = [
   { href: "/app/events", label: "Church Programs", permission: "events.view", section: "life" },
   { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
   { href: "/app/prayer-requests", label: "Prayer Requests", permission: "prayer.submit", section: "life" },
+  { href: "/app/portal#settings", label: "Settings", section: "overview" },
 ];
 
 const WORKER_BASE: NavItem[] = [
@@ -119,6 +125,25 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
       { href: "/app/follow-ups", label: "Follow-ups", permission: "followups.view", section: "people" },
       { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
       { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
+      { href: "/app/portal", label: "My Profile", section: "overview" },
+    ];
+  }
+  if (kind === "children_teacher") {
+    return [
+      { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
+      { href: "/app/children", label: "Children", permission: "children.view", section: "people" },
+      { href: "/app/children#classes", label: "Classes", permission: "children.view", section: "people" },
+      { href: "/app/attendance", label: "Attendance", permission: "attendance.view", section: "life" },
+      { href: "/app/events", label: "Programs", permission: "events.view", section: "life" },
+      { href: "/app/portal", label: "My Profile", section: "overview" },
+    ];
+  }
+  if (kind === "ministry_finance") {
+    return [
+      { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
+      { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
+      { href: "/app/reports", label: "Ministry reports", permission: "reports.department", section: "admin" },
+      { href: "/app/portal", label: "My Profile", section: "overview" },
     ];
   }
   if (kind === "department") {

@@ -45,7 +45,9 @@ export default async function DepartmentFinancePage({
   });
 
   const ministryName = user.ledDepartments[0]?.name ?? "Ministry";
-  const canWrite = user.profile.role_slug === "department_leader" && ledIds.length > 0;
+  const canWrite =
+    (user.profile.role_slug === "department_leader" || user.profile.role_slug === "ministry_finance") &&
+    ledIds.length > 0;
   const defaultDepartmentId = !isElder && ledIds.length === 1 ? ledIds[0] : null;
   const filterLinks = isElder
     ? [

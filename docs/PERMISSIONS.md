@@ -14,8 +14,12 @@ Hiding a button is never the only control.
 - **SEC** — Assembly Secretary
 - **FIN** — Treasurer / Finance Officer
 - **DL** — Department Leader (scoped to assigned departments)
+- **MF** — Ministry financial secretary (ministry books only)
+- **CT** — Children's Ministry Teacher (class records only)
 - **WK** — Worker / officer
 - **MEM** — Member (portal)
+
+Church **position** and **responsibility** are stored on `profiles` for pastoral records. They are not permissions. Public registration always creates a pending **member** account. The Presiding Elder assigns the system role on approval.
 
 `Y` = allowed. `S` = scoped (own record, own department, or assigned follow-up). `R` = read / report only. `—` = denied.
 

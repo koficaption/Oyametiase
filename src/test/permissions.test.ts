@@ -50,6 +50,21 @@ describe("authorization matrix", () => {
     expect(hasPermission("department_leader", "users.manage")).toBe(false);
   });
 
+  it("limits ministry financial secretaries to ministry books", () => {
+    expect(hasPermission("ministry_finance", "finance.department")).toBe(true);
+    expect(hasPermission("ministry_finance", "finance.view")).toBe(false);
+    expect(hasPermission("ministry_finance", "finance.manage")).toBe(false);
+    expect(hasPermission("ministry_finance", "members.view")).toBe(false);
+    expect(hasPermission("ministry_finance", "users.manage")).toBe(false);
+  });
+
+  it("limits children's teachers to class records", () => {
+    expect(hasPermission("children_teacher", "children.view")).toBe(true);
+    expect(hasPermission("children_teacher", "children.manage")).toBe(false);
+    expect(hasPermission("children_teacher", "finance.department")).toBe(false);
+    expect(hasPermission("children_teacher", "members.manage")).toBe(false);
+  });
+
   it("keeps members in the portal", () => {
     expect(hasPermission("member", "prayer.submit")).toBe(true);
     expect(hasPermission("member", "members.view")).toBe(false);

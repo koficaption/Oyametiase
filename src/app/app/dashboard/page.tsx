@@ -10,7 +10,12 @@ export default async function DashboardPage() {
   const portal = userPortal(user);
   const supabase = await createClient();
   const assemblyId = user.profile.assembly_id;
-  const scopedIds = user.profile.role_slug === "department_leader" ? user.ledDepartmentIds : null;
+  const scopedIds =
+    user.profile.role_slug === "department_leader" ||
+    user.profile.role_slug === "ministry_finance" ||
+    user.profile.role_slug === "children_teacher"
+      ? user.ledDepartmentIds
+      : null;
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   const monthIso = startOfMonth.toISOString().slice(0, 10);
@@ -65,7 +70,7 @@ export default async function DashboardPage() {
     return (cat?.slug ?? cat?.name ?? "").toLowerCase();
   };
 
-  const isMinistryLeader = user.profile.role_slug === "department_leader";
+  const isMinistryLeader = user.profile.role_slug === "department_leader" || user.profile.role_slug === "ministry_finance";
   const txnRows = (transactions ?? []).filter((row) =>
     isMinistryLeader ? Boolean(row.department_id && scopedIds?.includes(row.department_id)) : row.department_id == null,
   );

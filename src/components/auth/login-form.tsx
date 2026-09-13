@@ -17,8 +17,8 @@ export function LoginForm() {
     <form action={action} className="space-y-4">
       <FormStatus state={state} />
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Label htmlFor="identifier">Email or username</Label>
+        <Input id="identifier" name="identifier" autoComplete="username" required />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
@@ -28,6 +28,10 @@ export function LoginForm() {
         {pending ? "Signing in..." : "Sign in"}
       </Button>
       <p className="text-center text-sm">
+        <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+          Request an account
+        </Link>
+        {" · "}
         <Link href="/forgot-password" className="text-primary underline-offset-4 hover:underline">
           Forgot password
         </Link>

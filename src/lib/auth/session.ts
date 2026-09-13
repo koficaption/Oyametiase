@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { isApprovedAccount } from "@/lib/church-directory";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { CurrentUser, Member, Profile } from "@/types/database";
@@ -21,7 +22,9 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     .eq("id", userId)
     .maybeSingle();
 
-  if (!profile || !profile.is_active) return null;
+  if (!profile) return null;
+  if (profile.account_status === "rejected" || profile.account_status === "suspended") return null;
+  if (!profile.is_active && profile.account_status !== "pending") return null;
 
   let member: Member | null = null;
   if (profile.member_id) {
@@ -65,6 +68,24 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     });
   }
 
+  if (profile.assigned_department_id && !ledDepartments.some((dept) => dept.id === profile.assigned_department_id)) {
+    const { data: assigned } = await supabase
+      .from("departments")
+      .select("id, name, slug, ministry_kind, logo_url")
+      .eq("id", profile.assigned_department_id)
+      .is("archived_at", null)
+      .maybeSingle();
+    if (assigned) {
+      ledDepartments.push({
+        id: assigned.id,
+        name: assigned.name,
+        slug: assigned.slug,
+        ministry_kind: assigned.ministry_kind ?? assigned.slug,
+        logo_url: assigned.logo_url ?? null,
+      });
+    }
+  }
+
   return {
     id: userId,
     email: profile.email,
@@ -81,6 +102,15 @@ export function userPortal(user: CurrentUser): PortalKind {
 }
 
 export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+  if (!isApprovedAccount(user.profile.account_status, user.profile.approval_status)) {
+    redirect("/pending-approval");
+  }
+  return user;
+}
+
+export async function requireSignupAccount() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   return user;
@@ -110,7 +140,11 @@ export function scopedDepartmentIds(user: CurrentUser): string[] | null {
   if (user.profile.role_slug === "presiding_elder" || user.profile.role_slug === "secretary") {
     return null;
   }
-  if (user.profile.role_slug === "department_leader") {
+  if (
+    user.profile.role_slug === "department_leader" ||
+    user.profile.role_slug === "ministry_finance" ||
+    user.profile.role_slug === "children_teacher"
+  ) {
     return user.ledDepartmentIds;
   }
   return [];

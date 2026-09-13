@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { writeAudit } from "@/lib/auth/audit";
 import { requirePermission } from "@/lib/auth/session";
+import { inferGender, splitFullName } from "@/lib/church-directory";
 import { emptyToNull, opt, str } from "@/lib/forms";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -124,6 +125,10 @@ export async function inviteUserAction(formData: FormData): Promise<ActionResult
     email,
     is_active: true,
     invited_at: new Date().toISOString(),
+    account_status: "active",
+    approval_status: "approved",
+    approved_at: new Date().toISOString(),
+    approved_by: actor.id,
   });
   await writeAudit(supabase, {
     action: "user.invite",
@@ -159,7 +164,10 @@ export async function setUserActiveAction(formData: FormData): Promise<ActionRes
   const userId = str(formData, "user_id");
   const isActive = str(formData, "is_active") === "true";
   const supabase = await createClient();
-  const { error } = await supabase.from("profiles").update({ is_active: isActive }).eq("id", userId);
+  const { error } = await supabase.from("profiles").update({
+    is_active: isActive,
+    account_status: isActive ? "active" : "suspended",
+  }).eq("id", userId);
   if (error) return fail("Unable to update the user.");
   if (!isActive) {
     try {
@@ -193,6 +201,139 @@ export async function resetUserAccessAction(formData: FormData): Promise<ActionR
   });
   if (error) return fail("Unable to send a reset link.");
   return ok("Password reset email sent.");
+}
+
+export async function updateChurchOfficeAction(formData: FormData): Promise<ActionResult> {
+  await requirePermission("users.manage");
+  const userId = str(formData, "user_id");
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      church_position: str(formData, "church_position"),
+      church_responsibility: str(formData, "church_responsibility"),
+      assigned_department_id: emptyToNull(str(formData, "assigned_department_id")),
+    })
+    .eq("id", userId);
+  if (error) return fail("Unable to update church office.");
+  await writeAudit(supabase, { action: "user.office", module: "users", recordId: userId });
+  revalidatePath("/app/users");
+  return ok("Church position and responsibility updated.");
+}
+
+export async function reviewRegistrationAction(formData: FormData): Promise<ActionResult> {
+  const actor = await requirePermission("users.manage");
+  const userId = str(formData, "user_id");
+  const decision = str(formData, "decision");
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  if (!profile) return fail("Registration not found.");
+
+  if (decision === "reject") {
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        approval_status: "rejected",
+        account_status: "rejected",
+        is_active: false,
+        approved_at: new Date().toISOString(),
+        approved_by: actor.id,
+      })
+      .eq("id", userId);
+    if (error) return fail("Unable to reject this registration.");
+    await writeAudit(supabase, { action: "user.reject", module: "users", recordId: userId });
+    revalidatePath("/app/users");
+    return ok("Registration rejected.");
+  }
+
+  const role = str(formData, "role_slug") as RoleSlug;
+  if (!ROLES.includes(role)) return fail("Assign a valid system role.");
+  const churchPosition = str(formData, "church_position") || profile.church_position || "Member";
+  const churchResponsibility = str(formData, "church_responsibility") || profile.church_responsibility || "No specific role";
+  const departmentId = emptyToNull(str(formData, "assigned_department_id"));
+
+  let memberId = profile.member_id as string | null;
+  if (!memberId) {
+    const names = splitFullName(profile.full_name);
+    const { data: member, error: memberError } = await supabase
+      .from("members")
+      .insert({
+        assembly_id: actor.profile.assembly_id,
+        first_name: names.first_name,
+        last_name: names.last_name,
+        gender: inferGender(churchPosition, churchResponsibility),
+        membership_status: "active",
+        baptism_status: "unknown",
+        primary_department_id: departmentId,
+        created_by: actor.id,
+      })
+      .select("id")
+      .single();
+    if (memberError || !member) return fail("Approved, but a member record could not be created. Try again.");
+    memberId = member.id;
+    await supabase.from("member_confidential").upsert({
+      member_id: memberId,
+      phone: profile.phone,
+      email: profile.email,
+      date_of_birth: profile.date_of_birth,
+    });
+  }
+
+  if (departmentId && memberId) {
+    await supabase.from("department_members").upsert(
+      {
+        department_id: departmentId,
+        member_id: memberId,
+        role_in_department: churchResponsibility,
+      },
+      { onConflict: "department_id,member_id" },
+    );
+    if (role === "department_leader") {
+      const { data: dept } = await supabase
+        .from("departments")
+        .select("id, leader_id, assistant_leader_id")
+        .eq("id", departmentId)
+        .maybeSingle();
+      if (dept && !dept.leader_id) {
+        await supabase.from("departments").update({ leader_id: memberId }).eq("id", dept.id);
+      } else if (dept && !dept.assistant_leader_id && dept.leader_id !== memberId) {
+        await supabase.from("departments").update({ assistant_leader_id: memberId }).eq("id", dept.id);
+      }
+    }
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      role_slug: role,
+      church_position: churchPosition,
+      church_responsibility: churchResponsibility,
+      assigned_department_id: departmentId,
+      member_id: memberId,
+      approval_status: "approved",
+      account_status: "active",
+      is_active: true,
+      approved_at: new Date().toISOString(),
+      approved_by: actor.id,
+    })
+    .eq("id", userId);
+  if (error) return fail("Unable to approve this registration.");
+
+  try {
+    const admin = createAdminClient();
+    await admin.auth.admin.updateUserById(userId, { app_metadata: { role_slug: role, provisioned_by: "admin" } });
+  } catch {
+    // profiles.role_slug is authoritative.
+  }
+
+  await writeAudit(supabase, {
+    action: "user.approve",
+    module: "users",
+    recordId: userId,
+    metadata: { role, churchPosition, churchResponsibility },
+  });
+  revalidatePath("/app/users");
+  return ok("Account approved. The member can now open their assigned portal.");
 }
 
 export async function saveSettingsAction(formData: FormData): Promise<ActionResult> {

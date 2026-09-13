@@ -1,3 +1,4 @@
+import type { AccountStatus, ApprovalStatus } from "@/lib/church-directory";
 import type { LedDepartment, WorkerAssignment } from "@/types/portals";
 import type { RoleSlug } from "@/types/roles";
 
@@ -64,6 +65,18 @@ export type Profile = {
   avatar_url: string | null;
   is_active: boolean;
   last_login_at: string | null;
+  created_at?: string;
+  username?: string | null;
+  date_of_birth?: string | null;
+  whatsapp_number?: string | null;
+  church_position?: string | null;
+  church_responsibility?: string | null;
+  requested_system_role?: string | null;
+  assigned_department_id?: string | null;
+  account_status?: AccountStatus | null;
+  approval_status?: ApprovalStatus | null;
+  approved_at?: string | null;
+  approved_by?: string | null;
 };
 
 export type Member = {

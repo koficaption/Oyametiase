@@ -27,7 +27,7 @@ describe("portal resolution", () => {
 
   it("keeps the Treasurer on finance navigation only", () => {
     const hrefs = navForPortal("treasurer").map((item) => item.href);
-    expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports"))).toBe(true);
+    expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports") || href.includes("portal"))).toBe(true);
     expect(hrefs).not.toContain("/app/department-finance");
     expect(hrefs.some((href) => href.includes("members"))).toBe(false);
   });
@@ -39,5 +39,10 @@ describe("portal resolution", () => {
     expect(navForPortal("womens").some((item) => item.label === "Women Members")).toBe(true);
     expect(navForPortal("children").map((item) => item.href)).toContain("/app/department-finance");
     expect(navForPortal("treasurer").map((item) => item.href)).not.toContain("/app/department-finance");
+    expect(navForPortal("ministry_finance").map((item) => item.href)).toContain("/app/department-finance");
+    expect(navForPortal("ministry_finance").map((item) => item.href)).not.toContain("/app/members");
+    expect(navForPortal("children_teacher").map((item) => item.href)).toContain("/app/children");
+    expect(navForPortal("children_teacher").map((item) => item.href)).not.toContain("/app/department-finance");
   });
 });
+

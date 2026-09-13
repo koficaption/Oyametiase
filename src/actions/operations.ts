@@ -169,7 +169,8 @@ export async function saveWelfareAction(formData: FormData): Promise<ActionResul
 export async function saveTransactionAction(formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
   const assemblyWrite = hasPermission(user.profile.role_slug, "finance.manage");
-  const ministryWrite = user.profile.role_slug === "department_leader";
+  const ministryWrite =
+    user.profile.role_slug === "department_leader" || user.profile.role_slug === "ministry_finance";
   if (!assemblyWrite && !ministryWrite) {
     return fail("You are not allowed to record transactions.");
   }

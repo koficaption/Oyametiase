@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const rls = readFileSync("supabase/migrations/20260913000002_rls_helpers_and_policies.sql", "utf8");
 const portals = readFileSync("supabase/migrations/20260913000006_portals_children_approvals.sql", "utf8");
 const departmentFinance = readFileSync("supabase/migrations/20260913000007_department_finance.sql", "utf8");
+const registration = readFileSync("supabase/migrations/20260913000008_registration_approval.sql", "utf8");
 
 describe("RLS source guarantees", () => {
   it("enables RLS on sensitive tables", () => {
@@ -44,6 +45,16 @@ describe("RLS source guarantees", () => {
     expect(departmentFinance).toContain("leads_department");
     expect(departmentFinance).toContain("txn.department_id IS NULL");
     expect(departmentFinance).toContain("department_leader");
+  });
+
+  it("keeps public sign-ups as pending members", () => {
+    expect(registration).toContain("'member'");
+    expect(registration).toContain("'pending'");
+    expect(registration).toContain("requested_system_role");
+    expect(registration).toContain("church_position");
+    expect(registration).toContain("church_responsibility");
+    expect(registration).toContain("Only the Presiding Elder can change roles");
+    expect(registration).toContain("lookup_login_email");
   });
 
   it("isolates children records and approvals", () => {

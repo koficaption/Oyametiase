@@ -11,6 +11,8 @@ export const PORTAL_KINDS = [
   "mens",
   "youth",
   "children",
+  "children_teacher",
+  "ministry_finance",
   "department",
   "worker",
   "member",
@@ -26,6 +28,8 @@ export const PORTAL_LABELS: Record<PortalKind, string> = {
   mens: "Men's Ministry Leader",
   youth: "Youth Ministry Leader",
   children: "Children's Ministry Leader",
+  children_teacher: "Children's Ministry Teacher",
+  ministry_finance: "Ministry financial secretary",
   department: "Department Leader",
   worker: "Worker / Officer",
   member: "Member",
@@ -66,6 +70,8 @@ export function resolvePortal(
   if (role === "treasurer") return "treasurer";
   if (role === "member") return "member";
   if (role === "worker") return "worker";
+  if (role === "ministry_finance") return "ministry_finance";
+  if (role === "children_teacher") return "children_teacher";
   if (role === "department_leader") {
     const ministry = ledDepartments.map((dept) => ministryFromDepartment(dept)).find(Boolean);
     return ministry ?? "department";

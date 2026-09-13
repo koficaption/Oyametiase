@@ -36,18 +36,20 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isAuthRoute =
     pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/pending-approval") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/update-password") ||
     pathname.startsWith("/auth");
 
-  if (!user && pathname.startsWith("/app")) {
+  if (!user && (pathname.startsWith("/app") || pathname.startsWith("/pending-approval"))) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && (pathname === "/login" || pathname === "/")) {
+  if (user && (pathname === "/login" || pathname === "/" || pathname === "/register")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/app/dashboard";
     return NextResponse.redirect(redirectUrl);

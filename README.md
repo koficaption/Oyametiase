@@ -94,10 +94,13 @@ The service-role key must never be prefixed with `NEXT_PUBLIC_`.
 supabase db push
 ```
 
+If you apply SQL with `psql` from an IPv4-only host, use the Session pooler URL from the Supabase dashboard (`aws-*-*.pooler.supabase.com:5432`). The direct `db.<ref>.supabase.co:5432` host is IPv6-only and will fail with `Network is unreachable`.
+
 5. Enable Email auth in the Supabase dashboard.
 6. Set the Site URL to your Vercel domain and add `/auth/callback` to redirect URLs.
 7. Confirm Storage buckets from `supabase/migrations/20260913000003_storage_and_views.sql`.
 8. Confirm RLS is enabled on every `public` table.
+9. Add `SUPABASE_SERVICE_ROLE_KEY` (the `sb_secret_...` or legacy `service_role` key) for officer invites and admin password resets. The publishable key is not enough for those Admin APIs.
 
 ## Database migration
 

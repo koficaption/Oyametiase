@@ -24,14 +24,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.current_assembly_id()
-RETURNS uuid
-LANGUAGE sql
-STABLE
-AS $$
-  SELECT id FROM public.assemblies ORDER BY created_at ASC LIMIT 1;
-$$;
-
 -- ---------------------------------------------------------------------------
 -- Assembly (single row in this deployment)
 -- ---------------------------------------------------------------------------
@@ -53,6 +45,14 @@ CREATE TABLE public.assemblies (
 CREATE TRIGGER assemblies_updated_at
   BEFORE UPDATE ON public.assemblies
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE OR REPLACE FUNCTION public.current_assembly_id()
+RETURNS uuid
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT id FROM public.assemblies ORDER BY created_at ASC LIMIT 1;
+$$;
 
 -- ---------------------------------------------------------------------------
 -- Roles / positions (positions are configurable; roles are system)

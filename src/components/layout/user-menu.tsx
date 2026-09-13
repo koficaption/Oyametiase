@@ -1,7 +1,6 @@
 import { logoutAction } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { ROLE_LABELS, type RoleSlug } from "@/types/roles";
-import { formAction } from "@/lib/forms";
 
 export function UserMenu({ name, role }: { name: string; role: RoleSlug }) {
   return (
@@ -10,7 +9,7 @@ export function UserMenu({ name, role }: { name: string; role: RoleSlug }) {
         <div className="text-sm font-medium">{name}</div>
         <div className="text-xs text-muted-foreground">{ROLE_LABELS[role]}</div>
       </div>
-      <form action={formAction(logoutAction)}>
+      <form action={logoutAction}>
         <Button type="submit" variant="outline" size="sm">
           Sign out
         </Button>

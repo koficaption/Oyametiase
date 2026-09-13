@@ -68,7 +68,7 @@ export function NotificationsBell({
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="flex items-center justify-between">
           Notifications
-          <form action={async () => { await markAllNotificationsReadAction(); }}>
+          <form action={markAllNotificationsReadAction}>
             <Button type="submit" variant="ghost" size="xs">
               Mark all read
             </Button>

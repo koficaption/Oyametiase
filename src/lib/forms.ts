@@ -1,7 +1,8 @@
-export function formAction(action: (formData: FormData) => Promise<unknown>) {
-  return async (formData: FormData): Promise<void> => {
-    await action(formData);
-  };
+type ServerFormAction = ((formData: FormData) => Promise<unknown>) | (() => Promise<unknown>);
+
+/** Preserve the Server Action reference. Wrapping it in a new function breaks RSC serialization. */
+export function formAction(action: ServerFormAction): (formData: FormData) => Promise<void> {
+  return action as (formData: FormData) => Promise<void>;
 }
 
 export function str(formData: FormData, key: string) {

@@ -17,7 +17,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const user = await requirePermission("members.view");
   const { id } = await params;
   const supabase = await createClient();
-  const { data: member } = await supabase.from("members").select("*, departments(name)").eq("id", id).maybeSingle();
+  const { data: member } = await supabase
+    .from("members")
+    .select("*, departments!primary_department_id(name)")
+    .eq("id", id)
+    .maybeSingle();
   if (!member) notFound();
 
   const canSensitive = hasPermission(user.profile.role_slug, "members.sensitive");

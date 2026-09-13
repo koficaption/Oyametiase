@@ -13,7 +13,7 @@ export async function searchMembers(
   const pageSize = 20;
   let query = supabase
     .from("members")
-    .select("*, departments(name)", { count: "exact" })
+    .select("*, departments!primary_department_id(name)", { count: "exact" })
     .is("archived_at", null)
     .order("last_name", { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);

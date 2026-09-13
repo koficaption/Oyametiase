@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { requirePermission } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { formAction } from "@/lib/forms";
+import { hasServiceRoleKey } from "@/lib/supabase/env";
 import { ROLE_LABELS, ROLES, type RoleSlug } from "@/types/roles";
 
 export const metadata = { title: "Users" };
@@ -18,6 +19,12 @@ export default async function UsersPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="User management" description="Only the Presiding Elder can invite users and assign roles. Members cannot change their own role." />
+      {!hasServiceRoleKey() ? (
+        <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+          Invitations and password-reset emails need <code>SUPABASE_SERVICE_ROLE_KEY</code> on the server.
+          Role changes still work.
+        </p>
+      ) : null}
       <form action={formAction(inviteUserAction)} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
         <Input name="full_name" placeholder="Full name" required />
         <Input name="email" type="email" placeholder="Email" required />

@@ -16,6 +16,10 @@ export function isSupabaseConfigured() {
   );
 }
 
+export function hasServiceRoleKey() {
+  return Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
 export function getServiceRoleKey() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) {

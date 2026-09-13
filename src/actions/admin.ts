@@ -98,7 +98,12 @@ export async function inviteUserAction(formData: FormData): Promise<ActionResult
   if (!email.includes("@")) return fail("Enter a valid email address.");
   if (!ROLES.includes(role)) return fail("Choose a valid role.");
 
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return fail("Add SUPABASE_SERVICE_ROLE_KEY on the server to send invitations.");
+  }
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: fullName },
@@ -138,8 +143,12 @@ export async function updateUserRoleAction(formData: FormData): Promise<ActionRe
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ role_slug: role }).eq("id", userId);
   if (error) return fail("Unable to change this role.");
-  const admin = createAdminClient();
-  await admin.auth.admin.updateUserById(userId, { app_metadata: { role_slug: role } });
+  try {
+    const admin = createAdminClient();
+    await admin.auth.admin.updateUserById(userId, { app_metadata: { role_slug: role } });
+  } catch {
+    // profiles.role_slug is authoritative; app_metadata is only used when a profile is created.
+  }
   await writeAudit(supabase, { action: "user.role", module: "users", recordId: userId, metadata: { role } });
   revalidatePath("/app/users");
   return ok("Role updated.");
@@ -153,8 +162,12 @@ export async function setUserActiveAction(formData: FormData): Promise<ActionRes
   const { error } = await supabase.from("profiles").update({ is_active: isActive }).eq("id", userId);
   if (error) return fail("Unable to update the user.");
   if (!isActive) {
-    const admin = createAdminClient();
-    await admin.auth.admin.signOut(userId, "global");
+    try {
+      const admin = createAdminClient();
+      await admin.auth.admin.signOut(userId, "global");
+    } catch {
+      return fail("User disabled locally. Add SUPABASE_SERVICE_ROLE_KEY to revoke their Auth sessions.");
+    }
   }
   await writeAudit(supabase, {
     action: isActive ? "user.enable" : "user.disable",
@@ -168,7 +181,12 @@ export async function setUserActiveAction(formData: FormData): Promise<ActionRes
 export async function resetUserAccessAction(formData: FormData): Promise<ActionResult> {
   await requirePermission("users.manage");
   const email = str(formData, "email");
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return fail("Add SUPABASE_SERVICE_ROLE_KEY on the server to send password reset emails.");
+  }
   const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const { error } = await admin.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/update-password`,

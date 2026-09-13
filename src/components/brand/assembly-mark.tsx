@@ -14,7 +14,7 @@ export function AssemblyMark({
       alt="The Church of Pentecost"
       width={size}
       height={size}
-      className={cn("rounded-full bg-white object-contain", className)}
+      className={cn("h-auto w-auto rounded-full bg-white object-contain", className)}
       priority
     />
   );

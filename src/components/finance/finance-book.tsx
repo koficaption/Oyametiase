@@ -130,37 +130,39 @@ export function FinanceBook({
           No records in this book yet.
         </p>
       ) : (
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left">
-            <tr>
-              <th className="px-3 py-2">Code</th>
-              <th className="px-3 py-2">Date</th>
-              {showDepartmentColumn ? <th className="px-3 py-2">Ministry</th> : null}
-              <th className="px-3 py-2">Category</th>
-              <th className="px-3 py-2">Amount</th>
-              <th className="px-3 py-2">Method</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((row) => {
-              const category = Array.isArray(row.financial_categories) ? row.financial_categories[0] : row.financial_categories;
-              return (
-                <tr key={row.id} className="border-t">
-                  <td className="px-3 py-2 font-mono text-xs">{row.transaction_code}</td>
-                  <td className="px-3 py-2">{row.occurred_on}</td>
-                  {showDepartmentColumn ? <td className="px-3 py-2">{departmentLabel(row)}</td> : null}
-                  <td className="px-3 py-2">
-                    {category?.name} · {row.type}
-                  </td>
-                  <td className="px-3 py-2">GHS {Number(row.amount).toLocaleString()}</td>
-                  <td className="px-3 py-2 capitalize">{row.payment_method.replace("_", " ")}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+        <div className="overflow-x-auto rounded-xl border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left">
+              <tr>
+                <th className="px-3 py-2">Code</th>
+                <th className="px-3 py-2">Date</th>
+                {showDepartmentColumn ? <th className="px-3 py-2">Ministry</th> : null}
+                <th className="px-3 py-2">Category</th>
+                <th className="px-3 py-2">Amount</th>
+                <th className="px-3 py-2">Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((row) => {
+                const category = Array.isArray(row.financial_categories)
+                  ? row.financial_categories[0]
+                  : row.financial_categories;
+                return (
+                  <tr key={row.id} className="border-t">
+                    <td className="px-3 py-2 font-mono text-xs">{row.transaction_code}</td>
+                    <td className="px-3 py-2">{row.occurred_on}</td>
+                    {showDepartmentColumn ? <td className="px-3 py-2">{departmentLabel(row)}</td> : null}
+                    <td className="px-3 py-2">
+                      {category?.name} · {row.type}
+                    </td>
+                    <td className="px-3 py-2">GHS {Number(row.amount).toLocaleString()}</td>
+                    <td className="px-3 py-2 capitalize">{row.payment_method.replace("_", " ")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

@@ -45,13 +45,16 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && (pathname.startsWith("/app") || pathname.startsWith("/pending-approval") || pathname.startsWith("/officer-access"))) {
     const redirectUrl = request.nextUrl.clone();
+    const next = `${pathname}${request.nextUrl.search}`;
     redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", pathname);
+    redirectUrl.search = "";
+    redirectUrl.searchParams.set("next", next);
     return NextResponse.redirect(redirectUrl);
   }
 
   if (user && (pathname === "/login" || pathname === "/" || pathname === "/register")) {
     const redirectUrl = request.nextUrl.clone();
+    redirectUrl.search = "";
     redirectUrl.pathname = "/app/dashboard";
     return NextResponse.redirect(redirectUrl);
   }

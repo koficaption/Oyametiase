@@ -18,6 +18,7 @@ describe("authorization matrix", () => {
 
   it("keeps the Secretary off unrestricted finance", () => {
     expect(hasPermission("secretary", "members.manage")).toBe(true);
+    expect(hasPermission("presiding_elder", "members.manage")).toBe(true);
     expect(hasPermission("secretary", "reports.admin")).toBe(true);
     expect(hasPermission("secretary", "finance.view")).toBe(false);
     expect(hasPermission("secretary", "finance.manage")).toBe(false);
@@ -42,6 +43,7 @@ describe("authorization matrix", () => {
   it("does not give department leaders assembly-wide sensitive access", () => {
     expect(hasPermission("department_leader", "members.view")).toBe(true);
     expect(hasPermission("department_leader", "members.manage")).toBe(false);
+    expect(hasPermission("member", "members.manage")).toBe(false);
     expect(hasPermission("department_leader", "finance.view")).toBe(false);
     expect(hasPermission("department_leader", "finance.manage")).toBe(false);
     expect(hasPermission("department_leader", "finance.department")).toBe(true);

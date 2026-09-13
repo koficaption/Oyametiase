@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { writeAudit } from "@/lib/auth/audit";
 import { requirePermission, requireUser } from "@/lib/auth/session";
 import { emptyToNull, opt, str } from "@/lib/forms";
@@ -146,15 +147,46 @@ export async function updateMemberAction(
 export async function archiveMemberAction(formData: FormData): Promise<ActionResult> {
   await requirePermission("members.manage");
   const id = str(formData, "id");
+  if (!id) return fail("Member is required.");
   const supabase = await createClient();
   const { error } = await supabase
     .from("members")
     .update({ archived_at: new Date().toISOString(), membership_status: "inactive" })
     .eq("id", id);
-  if (error) return fail("Unable to archive this member.");
+  if (error) return fail("Unable to remove this member.");
   await writeAudit(supabase, { action: "member.archive", module: "members", recordId: id });
   revalidatePath("/app/members");
-  return ok("Member archived.");
+  revalidatePath(`/app/members/${id}`);
+  return ok("Member removed from the active register.");
+}
+
+export async function restoreMemberAction(formData: FormData): Promise<ActionResult> {
+  await requirePermission("members.manage");
+  const id = str(formData, "id");
+  if (!id) return fail("Member is required.");
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("members")
+    .update({ archived_at: null, membership_status: "active" })
+    .eq("id", id);
+  if (error) return fail("Unable to restore this member.");
+  await writeAudit(supabase, { action: "member.restore", module: "members", recordId: id });
+  revalidatePath("/app/members");
+  revalidatePath(`/app/members/${id}`);
+  return ok("Member restored to the register.");
+}
+
+export async function deleteMemberPermanentlyAction(formData: FormData): Promise<ActionResult> {
+  await requirePermission("users.manage");
+  const id = str(formData, "id");
+  if (!id) return fail("Member is required.");
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ member_id: null }).eq("member_id", id);
+  const { error } = await supabase.from("members").delete().eq("id", id);
+  if (error) return fail("Unable to permanently delete this member. Attendance or other records may still be linked.");
+  await writeAudit(supabase, { action: "member.delete", module: "members", recordId: id });
+  revalidatePath("/app/members");
+  redirect("/app/members");
 }
 
 export async function updateOwnProfileAction(formData: FormData): Promise<ActionResult> {

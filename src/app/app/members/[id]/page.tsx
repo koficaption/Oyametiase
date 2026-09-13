@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { archiveMemberAction } from "@/actions/members";
+import { MemberActions } from "@/components/members/member-actions";
 import { MemberForm } from "@/components/members/member-form";
-import { ConfirmForm } from "@/components/shared/confirm-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { requirePermission } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { formAction } from "@/lib/forms";
 import { hasPermission } from "@/types/roles";
 import { memberFullName } from "@/types/database";
 
@@ -49,7 +47,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     <div className="space-y-6">
       <PageHeader
         title={memberFullName(member)}
-        description={`${member.member_code} · ${member.membership_status.replace("_", " ")} · ${dept?.name ?? "No department"}`}
+        description={`${member.member_code} · ${member.archived_at ? "removed" : member.membership_status.replace("_", " ")} · ${dept?.name ?? "No department"}`}
         actions={
           <>
             <Button asChild variant="outline">
@@ -57,15 +55,12 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 Print profile
               </Link>
             </Button>
-            {canManage ? (
-              <ConfirmForm
-                action={formAction(archiveMemberAction)}
-                title="Archive this member?"
-                description="The record will be hidden from the active register. It will not be permanently deleted."
-                triggerLabel="Archive"
-                hiddenFields={{ id }}
-              />
-            ) : null}
+            <MemberActions
+              id={id}
+              archived={Boolean(member.archived_at)}
+              canManage={canManage}
+              canDeleteForever={hasPermission(user.profile.role_slug, "users.manage")}
+            />
           </>
         }
       />

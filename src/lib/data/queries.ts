@@ -14,6 +14,7 @@ export async function searchMembers(
     status?: string;
     page?: number;
     memberIds?: string[];
+    visibility?: "active" | "removed" | "all";
   },
 ) {
   const page = input.page ?? 1;
@@ -21,9 +22,14 @@ export async function searchMembers(
   let query = supabase
     .from("members")
     .select("*, departments!primary_department_id(name)", { count: "exact" })
-    .is("archived_at", null)
     .order("last_name", { ascending: true })
     .range((page - 1) * pageSize, page * pageSize - 1);
+
+  if (input.visibility === "removed") {
+    query = query.not("archived_at", "is", null);
+  } else if (input.visibility !== "all") {
+    query = query.is("archived_at", null);
+  }
 
   if (input.memberIds) {
     if (!input.memberIds.length) {

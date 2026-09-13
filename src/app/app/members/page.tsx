@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MemberActions } from "@/components/members/member-actions";
 import { requirePermission } from "@/lib/auth/session";
 import { searchMembers } from "@/lib/data/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -6,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { hasPermission } from "@/types/roles";
 import { memberFullName } from "@/types/database";
 
 export const metadata = { title: "Members" };
@@ -21,7 +23,10 @@ export default async function MembersPage({
   const department = typeof params.department === "string" ? params.department : undefined;
   const gender = typeof params.gender === "string" ? params.gender : undefined;
   const status = typeof params.status === "string" ? params.status : undefined;
+  const visibility = params.visibility === "removed" || params.visibility === "all" ? params.visibility : "active";
   const page = Number(params.page ?? 1);
+  const canManage = hasPermission(user.profile.role_slug, "members.manage");
+  const canDeleteForever = hasPermission(user.profile.role_slug, "users.manage");
   const supabase = await createClient();
   let memberIds: string[] | undefined;
   if (user.profile.role_slug === "department_leader") {
@@ -32,20 +37,20 @@ export default async function MembersPage({
     memberIds = (links ?? []).map((row) => row.member_id);
   }
   const { data: departments } = await supabase.from("departments").select("id, name").eq("is_active", true);
-  const { data, count } = await searchMembers(supabase, { q, department, gender, status, page, memberIds });
+  const { data, count } = await searchMembers(supabase, { q, department, gender, status, page, memberIds, visibility });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Members"
-        description="Assembly membership register. Records are archived, not permanently deleted."
+        description="Assembly membership register. Remove hides a record. The Presiding Elder can permanently delete a removed record if it was a mistake."
         actions={
           <Button asChild>
             <Link href="/app/members/new">Register member</Link>
           </Button>
         }
       />
-      <form className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-5">
+      <form className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-6">
         <Input name="q" placeholder="Search name or member ID" defaultValue={q} />
         <select name="department" defaultValue={department ?? ""} className="h-8 rounded-lg border bg-background px-2 text-sm">
           <option value="">All departments</option>
@@ -68,6 +73,11 @@ export default async function MembersPage({
             </option>
           ))}
         </select>
+        <select name="visibility" defaultValue={visibility} className="h-8 rounded-lg border bg-background px-2 text-sm">
+          <option value="active">Active register</option>
+          <option value="removed">Removed members</option>
+          <option value="all">Everyone</option>
+        </select>
         <Button type="submit" variant="outline">
           Filter
         </Button>
@@ -86,6 +96,7 @@ export default async function MembersPage({
                   <th className="px-4 py-3">Gender</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Department</th>
+                  {canManage ? <th className="px-4 py-3">Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -102,6 +113,16 @@ export default async function MembersPage({
                       <td className="px-4 py-3 capitalize">{member.gender}</td>
                       <td className="px-4 py-3 capitalize">{member.membership_status.replace("_", " ")}</td>
                       <td className="px-4 py-3">{dept?.name ?? "—"}</td>
+                      {canManage ? (
+                        <td className="px-4 py-3">
+                          <MemberActions
+                            id={member.id}
+                            archived={Boolean(member.archived_at)}
+                            canManage={canManage}
+                            canDeleteForever={canDeleteForever}
+                          />
+                        </td>
+                      ) : null}
                     </tr>
                   );
                 })}
@@ -110,11 +131,19 @@ export default async function MembersPage({
           </div>
           <div className="grid gap-3 md:hidden">
             {data.map((member) => (
-              <Link key={member.id} href={`/app/members/${member.id}`} className="rounded-xl border bg-card p-4">
-                <div className="font-medium">{memberFullName(member)}</div>
-                <div className="text-xs text-muted-foreground">{member.member_code}</div>
-                <div className="mt-2 text-sm capitalize">{member.membership_status.replace("_", " ")}</div>
-              </Link>
+              <div key={member.id} className="space-y-3 rounded-xl border bg-card p-4">
+                <Link href={`/app/members/${member.id}`}>
+                  <div className="font-medium">{memberFullName(member)}</div>
+                  <div className="text-xs text-muted-foreground">{member.member_code}</div>
+                  <div className="mt-2 text-sm capitalize">{member.membership_status.replace("_", " ")}</div>
+                </Link>
+                <MemberActions
+                  id={member.id}
+                  archived={Boolean(member.archived_at)}
+                  canManage={canManage}
+                  canDeleteForever={canDeleteForever}
+                />
+              </div>
             ))}
           </div>
           <p className="text-sm text-muted-foreground">{count ?? 0} records</p>

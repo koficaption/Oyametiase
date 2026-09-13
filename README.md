@@ -158,30 +158,73 @@ Tests cover the permission matrix, validation, attendance uniqueness, prayer pri
 
 ## Deployment
 
-### Vercel
+The live site is a **Vercel** app talking to your **Supabase** project. Do not run `supabase/seed.sql` on production.
 
-1. Import the GitHub repository.
-2. Framework preset: Next.js.
-3. Add the environment variables above to Production, Preview, and Development.
-4. Deploy.
+### 1. Put the code on GitHub
 
-### Supabase
+Merge this branch into `main` (or connect Vercel to this branch). Vercel deploys on every push once the project is linked.
 
-1. Apply migrations to the production project.
-2. Do not apply `seed.sql`.
-3. Create the first Presiding Elder user in Supabase Auth.
-4. Set `raw_app_meta_data.role_slug` to `presiding_elder` for that user, or insert the matching `profiles` row.
-5. Confirm Storage policies and email templates.
+### 2. Create / open the Vercel project
+
+In [Vercel](https://vercel.com):
+
+1. **Add New… → Project** and import `koficaption/Oyametiase`.
+2. Framework preset: **Next.js**.
+3. Root directory: repository root.
+4. Add environment variables (Production, Preview, and Development):
+
+| Name | Value |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable / anon key |
+| `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` (or your custom domain) |
+| `SUPABASE_SERVICE_ROLE_KEY` | service-role / `sb_secret_...` key (server only) |
+| `SEED_DEV_DATA` | `false` |
+
+5. Deploy. The first URL looks like `https://oyametiase-….vercel.app`.
+
+Or from your laptop after `npx vercel login`:
+
+```bash
+npx vercel link
+npx vercel env pull
+npx vercel --prod
+```
+
+### 3. Point Supabase Auth at the live URL
+
+In Supabase → Authentication → URL configuration:
+
+- **Site URL**: `https://your-app.vercel.app`
+- **Redirect URLs**: `https://your-app.vercel.app/auth/callback` and `https://your-app.vercel.app/**`
+
+### 4. Apply database migrations on the live project
+
+If this Supabase project already has the earlier migrations, apply any new ones (`supabase db push` or `psql` with the session pooler). Do **not** load `seed.sql` into production.
+
+### 5. Create the first live Presiding Elder
+
+Use a real email (not `@oyametiase.local`). Either:
+
+- Register on the live site, then approve that person in **Users & approvals** and assign system role **Presiding Elder**, or
+- Invite them from Users once you already have a PE account.
+
+Then add the Secretary, Treasurer, and ministry leaders the same way.
+
+### 6. Optional custom domain
+
+Vercel → Project → Settings → Domains → add `assembly.yourchurch.org` (or similar), then set `NEXT_PUBLIC_SITE_URL` and the Supabase Site URL to that domain.
 
 Production checklist:
 
 - [ ] Environment variables set in Vercel
+- [ ] `NEXT_PUBLIC_SITE_URL` is the live https URL
 - [ ] Migrations applied
 - [ ] RLS enabled
-- [ ] Storage policies present
-- [ ] Auth redirects configured
+- [ ] Auth Site URL + `/auth/callback` configured
 - [ ] No development seed data
 - [ ] Service-role key only on the server
+- [ ] First Presiding Elder can sign in and open Users & approvals
 
 ## Security
 

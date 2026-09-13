@@ -8,6 +8,7 @@ const registration = readFileSync("supabase/migrations/20260913000008_registrati
 const openAccess = readFileSync("supabase/migrations/20260913170023_open_registration_access.sql", "utf8");
 const officerOnly = readFileSync("supabase/migrations/20260913172050_officer_only_registration.sql", "utf8");
 const themes = readFileSync("supabase/migrations/20260913000009_church_themes_and_reports.sql", "utf8");
+const publicTheme = readFileSync("supabase/migrations/20260913233300_public_active_church_theme.sql", "utf8");
 
 describe("RLS source guarantees", () => {
   it("enables RLS on sensitive tables", () => {
@@ -78,6 +79,8 @@ describe("RLS source guarantees", () => {
     expect(themes).toContain("welfare_payments");
     expect(themes).toContain("can_write_welfare");
     expect(themes).toContain("treasurer");
+    expect(publicTheme).toContain("church_themes_public_active");
+    expect(publicTheme).toContain("GRANT SELECT ON public.church_themes TO anon");
   });
 
   it("isolates children records and approvals", () => {

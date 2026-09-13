@@ -13,12 +13,13 @@ export async function searchMembers(
     gender?: string;
     status?: string;
     page?: number;
+    pageSize?: number;
     memberIds?: string[];
     visibility?: "active" | "removed" | "all";
   },
 ) {
   const page = input.page ?? 1;
-  const pageSize = 20;
+  const pageSize = input.pageSize ?? 20;
   let query = supabase
     .from("members")
     .select("*, departments!primary_department_id(name)", { count: "exact" })

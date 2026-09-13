@@ -1,10 +1,24 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import ExcelJS from "exceljs";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { EMPTY_PERIOD, type BuiltReport } from "@/lib/reports/types";
 
-const BLUE: [number, number, number] = [0, 80, 200];
-const GOLD: [number, number, number] = [255, 209, 0];
+const BLACK: [number, number, number] = [0, 0, 0];
+const WHITE: [number, number, number] = [255, 255, 255];
+
+function emblemBytes() {
+  try {
+    return readFileSync(join(process.cwd(), "public", "cop-emblem.png"));
+  } catch {
+    return null;
+  }
+}
+
+function emblemDataUrl(bytes: Buffer) {
+  return `data:image/png;base64,${bytes.toString("base64")}`;
+}
 
 export async function workbookToBuffer(rows: Record<string, unknown>[], sheetName: string) {
   const workbook = new ExcelJS.Workbook();
@@ -20,20 +34,28 @@ export async function workbookToBuffer(rows: Record<string, unknown>[], sheetNam
   return workbook.xlsx.writeBuffer();
 }
 
-export function tablePdf(title: string, columns: string[], rows: (string | number)[][]) {
+export async function tablePdf(title: string, columns: string[], rows: (string | number)[][]) {
   const doc = new jsPDF();
-  doc.setFontSize(14);
-  doc.text("The Church of Pentecost", 14, 16);
-  doc.setFontSize(11);
-  doc.text("Oyame Tiase Assembly", 14, 22);
+  const emblem = emblemBytes();
+  if (emblem) {
+    doc.addImage(emblemDataUrl(emblem), "PNG", 96, 8, 18, 18);
+  }
+  doc.setTextColor(...BLACK);
   doc.setFontSize(13);
-  doc.text(title, 14, 32);
+  doc.setFont("helvetica", "bold");
+  doc.text("The Church of Pentecost", 105, 32, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("Oyame Tiase Assembly", 105, 38, { align: "center" });
+  doc.setFontSize(12);
+  doc.text(title, 105, 46, { align: "center" });
   autoTable(doc, {
-    startY: 38,
+    startY: 52,
     head: [columns],
     body: rows.length ? rows : [[EMPTY_PERIOD]],
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9, textColor: BLACK, lineColor: BLACK, lineWidth: 0.2 },
+    headStyles: { fillColor: WHITE, textColor: BLACK, fontStyle: "bold", lineColor: BLACK, lineWidth: 0.3 },
   });
+  stampWatermark(doc, emblem);
   return doc.output("arraybuffer");
 }
 
@@ -70,39 +92,50 @@ export async function reportWorkbook(report: BuiltReport) {
   workbook.creator = report.assemblyName;
   workbook.created = new Date();
   const cover = workbook.addWorksheet("Report");
-  cover.mergeCells("A1:D1");
-  cover.getCell("A1").value = report.churchName.toUpperCase();
-  cover.getCell("A1").font = { bold: true, size: 16, color: { argb: "FF0B2447" } };
-  cover.mergeCells("A2:D2");
-  cover.getCell("A2").value = report.assemblyName.toUpperCase();
-  cover.getCell("A2").font = { bold: true, size: 14 };
-  cover.mergeCells("A3:D3");
-  cover.getCell("A3").value = report.title;
-  cover.getCell("A3").font = { bold: true, size: 12 };
-  cover.getCell("A5").value = "Theme";
-  cover.mergeCells("B5:D5");
-  cover.getCell("B5").value = report.theme?.title
+  const emblem = emblemBytes();
+  if (emblem) {
+    const imageId = workbook.addImage({
+      buffer: emblem as unknown as Parameters<ExcelJS.Workbook["addImage"]>[0]["buffer"],
+      extension: "png",
+    });
+    cover.addImage(imageId, { tl: { col: 1.6, row: 0 }, ext: { width: 64, height: 64 } });
+  }
+  cover.mergeCells("A5:D5");
+  cover.getCell("A5").value = report.churchName.toUpperCase();
+  cover.getCell("A5").font = { bold: true, size: 16, color: { argb: "FF000000" } };
+  cover.getCell("A5").alignment = { horizontal: "center" };
+  cover.mergeCells("A6:D6");
+  cover.getCell("A6").value = report.assemblyName.toUpperCase();
+  cover.getCell("A6").font = { bold: true, size: 13, color: { argb: "FF000000" } };
+  cover.getCell("A6").alignment = { horizontal: "center" };
+  cover.mergeCells("A7:D7");
+  cover.getCell("A7").value = report.title;
+  cover.getCell("A7").font = { bold: true, size: 12, color: { argb: "FF000000" } };
+  cover.getCell("A7").alignment = { horizontal: "center" };
+  cover.getCell("A9").value = "Theme";
+  cover.mergeCells("B9:D9");
+  cover.getCell("B9").value = report.theme?.title
     ? `“${report.theme.title}”`
     : "No theme recorded for this year.";
   if (report.theme?.scripture) {
-    cover.getCell("A6").value = "Theme scripture";
-    cover.mergeCells("B6:D6");
-    cover.getCell("B6").value = report.theme.scripture;
+    cover.getCell("A10").value = "Theme scripture";
+    cover.mergeCells("B10:D10");
+    cover.getCell("B10").value = report.theme.scripture;
   }
-  cover.getCell("A8").value = "Period";
-  cover.getCell("B8").value = report.periodLabel;
-  cover.getCell("A9").value = "Generated";
-  cover.getCell("B9").value = formatStamp(report.generatedAt);
-  cover.getCell("A10").value = "Prepared by";
-  cover.getCell("B10").value = report.preparedBy;
-  cover.getCell("A11").value = "Approved by";
-  cover.getCell("B11").value = report.approvedBy;
+  cover.getCell("A12").value = "Period";
+  cover.getCell("B12").value = report.periodLabel;
+  cover.getCell("A13").value = "Generated";
+  cover.getCell("B13").value = formatStamp(report.generatedAt);
+  cover.getCell("A14").value = "Prepared by";
+  cover.getCell("B14").value = report.preparedBy;
+  cover.getCell("A15").value = "Approved by";
+  cover.getCell("B15").value = report.approvedBy;
 
-  let rowNumber = 13;
+  let rowNumber = 17;
   for (const section of report.sections) {
     cover.mergeCells(`A${rowNumber}:D${rowNumber}`);
     cover.getCell(`A${rowNumber}`).value = section.title;
-    cover.getCell(`A${rowNumber}`).font = { bold: true };
+    cover.getCell(`A${rowNumber}`).font = { bold: true, color: { argb: "FF000000" } };
     rowNumber += 1;
     if (section.empty) {
       cover.getCell(`A${rowNumber}`).value = EMPTY_PERIOD;
@@ -119,7 +152,7 @@ export async function reportWorkbook(report: BuiltReport) {
     if (section.columns && section.rows) {
       section.columns.forEach((column, index) => {
         cover.getCell(rowNumber, index + 1).value = column;
-        cover.getCell(rowNumber, index + 1).font = { bold: true };
+        cover.getCell(rowNumber, index + 1).font = { bold: true, color: { argb: "FF000000" } };
       });
       rowNumber += 1;
       for (const row of section.rows) {
@@ -149,32 +182,31 @@ export async function reportWorkbook(report: BuiltReport) {
   return workbook.xlsx.writeBuffer();
 }
 
-export function reportPdf(report: BuiltReport) {
+export async function reportPdf(report: BuiltReport) {
   const doc = new jsPDF();
+  const emblem = emblemBytes();
   const pageWidth = doc.internal.pageSize.getWidth();
-  doc.setFillColor(...BLUE);
-  doc.rect(0, 0, pageWidth, 28, "F");
-  doc.setFillColor(...GOLD);
-  doc.rect(0, 28, pageWidth, 2, "F");
-  doc.setTextColor(255, 255, 255);
+  if (emblem) {
+    doc.addImage(emblemDataUrl(emblem), "PNG", pageWidth / 2 - 11, 8, 22, 22);
+  }
+  doc.setTextColor(...BLACK);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text(report.churchName.toUpperCase(), pageWidth / 2, 12, { align: "center" });
-  doc.setFontSize(12);
-  doc.text(report.assemblyName.toUpperCase(), pageWidth / 2, 19, { align: "center" });
-  doc.setTextColor(11, 36, 71);
   doc.setFontSize(13);
-  doc.text(report.title, pageWidth / 2, 40, { align: "center" });
+  doc.text(report.churchName.toUpperCase(), pageWidth / 2, 36, { align: "center" });
+  doc.setFontSize(11);
+  doc.text(report.assemblyName.toUpperCase(), pageWidth / 2, 42, { align: "center" });
+  doc.setFontSize(12);
+  doc.text(report.title, pageWidth / 2, 50, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text("Theme:", 14, 50);
+  doc.text("Theme:", 14, 60);
   const themeText = report.theme?.title
     ? `“${report.theme.title}”`
     : "No theme recorded for this year.";
   const themeLines = doc.splitTextToSize(themeText, pageWidth - 28);
   doc.setFont("helvetica", "italic");
-  doc.text(themeLines, 14, 56);
-  let cursor = 56 + themeLines.length * 5 + 4;
+  doc.text(themeLines, 14, 66);
+  let cursor = 66 + themeLines.length * 5 + 4;
   if (report.theme?.scripture) {
     doc.setFont("helvetica", "normal");
     const scripture = doc.splitTextToSize(`Theme scripture: ${report.theme.scripture}`, pageWidth - 28);
@@ -192,6 +224,12 @@ export function reportPdf(report: BuiltReport) {
   doc.text(`Approved by: ${report.approvedBy}`, 14, cursor);
   cursor += 8;
 
+  const tableTheme = {
+    styles: { fontSize: 9, textColor: BLACK, lineColor: BLACK, lineWidth: 0.2 },
+    headStyles: { fillColor: WHITE, textColor: BLACK, fontStyle: "bold" as const, lineColor: BLACK, lineWidth: 0.3 },
+    margin: { left: 14, right: 14 },
+  };
+
   for (const section of report.sections) {
     if (cursor > 250) {
       doc.addPage();
@@ -199,6 +237,7 @@ export function reportPdf(report: BuiltReport) {
     }
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
+    doc.setTextColor(...BLACK);
     doc.text(section.title, 14, cursor);
     cursor += 6;
     doc.setFont("helvetica", "normal");
@@ -213,9 +252,7 @@ export function reportPdf(report: BuiltReport) {
         startY: cursor,
         head: [["Item", "Value"]],
         body: section.stats.map((stat) => [stat.label, stat.value]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: BLUE },
-        margin: { left: 14, right: 14 },
+        ...tableTheme,
       });
       cursor = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? cursor) + 8;
     }
@@ -224,9 +261,9 @@ export function reportPdf(report: BuiltReport) {
         startY: cursor,
         head: [section.columns],
         body: section.rows.map((row) => row.map(String)),
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: BLUE },
-        margin: { left: 14, right: 14 },
+        styles: { ...tableTheme.styles, fontSize: 8 },
+        headStyles: tableTheme.headStyles,
+        margin: tableTheme.margin,
       });
       cursor = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? cursor) + 8;
     }
@@ -242,6 +279,7 @@ export function reportPdf(report: BuiltReport) {
     cursor = 24;
   }
   doc.setFont("helvetica", "bold");
+  doc.setTextColor(...BLACK);
   doc.text("Authorization", 14, cursor);
   cursor += 10;
   doc.setFont("helvetica", "normal");
@@ -256,7 +294,28 @@ export function reportPdf(report: BuiltReport) {
   cursor += 12;
   doc.text("Date: ________________________", 14, cursor);
   doc.text("Date: ________________________", 110, cursor);
+
+  stampWatermark(doc, emblem);
   return doc.output("arraybuffer");
+}
+
+function stampWatermark(doc: jsPDF, emblem: Buffer | null) {
+  if (!emblem) return;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const image = emblemDataUrl(emblem);
+  const pages = doc.getNumberOfPages();
+  for (let page = 1; page <= pages; page += 1) {
+    doc.setPage(page);
+    doc.saveGraphicsState();
+    const GState = (jsPDF as unknown as { GState: new (opts: { opacity: number }) => object }).GState;
+    doc.setGState(new GState({ opacity: 0.08 }));
+    doc.addImage(image, "PNG", pageWidth / 2 - 38, pageHeight / 2 - 38, 76, 76);
+    doc.restoreGraphicsState();
+    doc.setTextColor(...BLACK);
+    doc.setFontSize(8);
+    doc.text(`Page ${page} of ${pages}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+  }
 }
 
 function csvRow(values: (string | number)[]) {

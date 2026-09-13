@@ -6,11 +6,17 @@ export function BrandShell({
   eyebrow = "The Church of Pentecost",
   title,
   description,
+  themeYear,
+  themeTitle,
+  themeScripture,
 }: {
   children: ReactNode;
   eyebrow?: string;
   title: string;
   description?: string;
+  themeYear?: number;
+  themeTitle?: string;
+  themeScripture?: string | null;
 }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-cop-navy px-4 py-10">
@@ -24,7 +30,19 @@ export function BrandShell({
             {eyebrow}
           </p>
           <h1 className="mt-2 text-2xl font-semibold tracking-normal text-cop-navy">{title}</h1>
-          {description ? (
+          {themeTitle ? (
+            <div className="mt-4 max-w-sm space-y-2">
+              <p className="text-xs font-semibold tracking-normal text-cop-blue">
+                {themeYear ? `${themeYear} Church Theme` : "Church Theme"}
+              </p>
+              <p className="text-base font-medium leading-7 tracking-normal text-cop-navy">
+                “{themeTitle}”
+              </p>
+              {themeScripture ? (
+                <p className="text-sm leading-6 tracking-normal text-cop-navy/80">{themeScripture}</p>
+              ) : null}
+            </div>
+          ) : description ? (
             <p className="mt-3 max-w-sm text-base leading-7 tracking-normal text-cop-navy/85">
               {description}
             </p>

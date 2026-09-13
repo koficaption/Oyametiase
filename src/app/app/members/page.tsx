@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { MemberActions } from "@/components/members/member-actions";
-import { requirePermission, userPortal } from "@/lib/auth/session";
+import { canAccessChildren, requirePermission, userPortal } from "@/lib/auth/session";
 import { searchMembers } from "@/lib/data/queries";
+import {
+  MEMBER_GROUPS,
+  canChooseMemberGroup,
+  defaultMemberGroup,
+  isMemberGroupKey,
+  memberGroupByKey,
+  memberIdsInMinistry,
+} from "@/lib/members/groups";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { hasPermission } from "@/types/roles";
 import { memberFullName } from "@/types/database";
 
@@ -19,32 +28,47 @@ export default async function MembersPage({
 }) {
   const user = await requirePermission("members.view");
   const portal = userPortal(user);
-  const registerTitle =
-    portal === "womens" ? "Women Members" : portal === "mens" ? "Men Members" : portal === "youth" ? "Youth Members" : "Members";
-  const registerDescription =
-    portal === "presiding_elder" || portal === "secretary"
-      ? "Assembly membership register. Department leaders only see their own ministry."
-      : "Members assigned to your ministry only. You cannot open another department's register.";
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : "";
-  const department = typeof params.department === "string" ? params.department : undefined;
   const gender = typeof params.gender === "string" ? params.gender : undefined;
   const status = typeof params.status === "string" ? params.status : undefined;
   const visibility = params.visibility === "removed" || params.visibility === "all" ? params.visibility : "active";
   const page = Number(params.page ?? 1);
+  const requestedGroup = typeof params.group === "string" && isMemberGroupKey(params.group) ? params.group : undefined;
+  const group = canChooseMemberGroup(portal) ? (requestedGroup ?? defaultMemberGroup(portal)) : defaultMemberGroup(portal);
+  const groupMeta = memberGroupByKey(group);
+  const registerTitle = canChooseMemberGroup(portal) ? `${groupMeta.label} Members` : (
+    portal === "womens" ? "Women Members" : portal === "mens" ? "Men Members" : portal === "youth" ? "Youth Members" : portal === "children" || portal === "children_teacher" ? "Children" : "Members"
+  );
+  const registerDescription = canChooseMemberGroup(portal)
+    ? "Assembly members grouped as Men's, Women's, Youth, and Children."
+    : "Members assigned to your ministry only. You cannot open another department's register.";
   const canManage = hasPermission(user.profile.role_slug, "members.manage");
   const canDeleteForever = hasPermission(user.profile.role_slug, "users.manage");
+  const showChildrenRegister = group === "children" && canAccessChildren(user);
   const supabase = await createClient();
-  let memberIds: string[] | undefined;
+
+  let memberIds = await memberIdsInMinistry(supabase, groupMeta.slug);
   if (user.profile.role_slug === "department_leader") {
     const { data: links } = await supabase
       .from("department_members")
       .select("member_id")
       .in("department_id", user.ledDepartmentIds.length ? user.ledDepartmentIds : ["00000000-0000-0000-0000-000000000000"]);
-    memberIds = (links ?? []).map((row) => row.member_id);
+    const scoped = new Set((links ?? []).map((row) => row.member_id));
+    memberIds = memberIds.filter((id) => scoped.has(id));
   }
-  const { data: departments } = await supabase.from("departments").select("id, name").eq("is_active", true);
-  const { data, count } = await searchMembers(supabase, { q, department, gender, status, page, memberIds, visibility });
+
+  const [{ data, count }, childrenResult] = await Promise.all([
+    searchMembers(supabase, { q, gender, status, page, pageSize: 50, memberIds, visibility }),
+    showChildrenRegister
+      ? supabase
+          .from("ministry_children")
+          .select("id, first_name, last_name, gender, class_name")
+          .is("archived_at", null)
+          .order("last_name")
+      : Promise.resolve({ data: [] as { id: string; first_name: string; last_name: string; gender: string; class_name: string | null }[] }),
+  ]);
+  const children = childrenResult.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -59,16 +83,30 @@ export default async function MembersPage({
           ) : null
         }
       />
-      <form className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-6">
+      {canChooseMemberGroup(portal) ? (
+        <nav className="flex flex-wrap gap-2" aria-label="Member groups">
+          {MEMBER_GROUPS.map((item) => {
+            const href = `/app/members?group=${item.key}${q ? `&q=${encodeURIComponent(q)}` : ""}${visibility !== "active" ? `&visibility=${visibility}` : ""}`;
+            const active = group === item.key;
+            return (
+              <Link
+                key={item.key}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-sm",
+                  active ? "border-cop-navy bg-cop-navy text-white" : "hover:bg-muted",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
+      <form className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-5">
+        <input type="hidden" name="group" value={group} />
         <Input name="q" placeholder="Search name or member ID" defaultValue={q} />
-        <select name="department" defaultValue={department ?? ""} className="h-8 rounded-lg border bg-background px-2 text-sm">
-          <option value="">All departments</option>
-          {departments?.map((dept) => (
-            <option key={dept.id} value={dept.id}>
-              {dept.name}
-            </option>
-          ))}
-        </select>
         <select name="gender" defaultValue={gender ?? ""} className="h-8 rounded-lg border bg-background px-2 text-sm">
           <option value="">All genders</option>
           <option value="male">Male</option>
@@ -92,8 +130,49 @@ export default async function MembersPage({
         </Button>
       </form>
 
+      {showChildrenRegister ? (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Children's Ministry</h2>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/app/children">Open children's register</Link>
+            </Button>
+          </div>
+          {!children.length ? (
+            <EmptyState title="No children recorded" description="Register a child from the children's page." />
+          ) : (
+            <div className="overflow-x-auto rounded-xl border">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left">
+                  <tr>
+                    <th className="px-4 py-3">Name</th>
+                    <th className="px-4 py-3">Gender</th>
+                    <th className="px-4 py-3">Class</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {children.map((child) => (
+                    <tr key={child.id} className="border-t">
+                      <td className="px-4 py-3 font-medium">{child.first_name} {child.last_name}</td>
+                      <td className="px-4 py-3 capitalize">{child.gender}</td>
+                      <td className="px-4 py-3">{child.class_name ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground">{children.length} children</p>
+        </section>
+      ) : null}
+
+      {group === "children" ? <h2 className="text-lg font-semibold">Children's ministry workers</h2> : null}
+
       {!data?.length ? (
-        <EmptyState title="No members found" description="Adjust filters or register a new member." />
+        <EmptyState
+          title={group === "children" ? "No workers listed" : "No members found"}
+          description={group === "children" ? "Adults assigned to Children's Ministry appear here." : "Adjust filters or register a new member."}
+        />
       ) : (
         <>
           <div className="hidden overflow-x-auto rounded-xl border md:block">

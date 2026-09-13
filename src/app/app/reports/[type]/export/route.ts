@@ -59,7 +59,7 @@ export async function GET(
     });
   }
 
-  const buffer = reportPdf(report);
+  const buffer = await reportPdf(report);
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/pdf",

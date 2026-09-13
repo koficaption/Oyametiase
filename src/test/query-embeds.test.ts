@@ -9,4 +9,11 @@ describe("PostgREST relationship embeds", () => {
     expect(profile).toContain("departments!primary_department_id(name)");
     expect(queries).not.toContain('select("*, departments(name)"');
   });
+
+  it("disambiguates welfare_cases.members via the assisted member", () => {
+    const reports = readFileSync("src/lib/reports/build.ts", "utf8");
+    const welfare = readFileSync("src/app/app/welfare/page.tsx", "utf8");
+    expect(reports).toContain("members!welfare_cases_member_id_fkey");
+    expect(welfare).toContain("members!welfare_cases_member_id_fkey");
+  });
 });

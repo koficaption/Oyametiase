@@ -301,7 +301,7 @@ async function visitorSections(supabase: AnyClient, user: CurrentUser, period: {
 async function welfareSections(supabase: AnyClient, user: CurrentUser, period: { from: string; to: string }) {
   const { data: cases } = await supabase
     .from("welfare_cases")
-    .select("id, category, status, amount, description, created_at, members(first_name, last_name)")
+    .select("id, category, status, amount, description, created_at, members!welfare_cases_member_id_fkey(first_name, last_name)")
     .eq("assembly_id", user.profile.assembly_id)
     .is("archived_at", null);
   const inPeriod = (cases ?? []).filter((row) => {

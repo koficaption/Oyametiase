@@ -12,7 +12,7 @@ export const metadata = { title: "Welfare" };
 export default async function WelfarePage() {
   await requirePermission("welfare.view");
   const supabase = await createClient();
-  const { data: cases } = await supabase.from("welfare_cases").select("*, members(first_name, last_name)").is("archived_at", null).order("created_at", { ascending: false });
+  const { data: cases } = await supabase.from("welfare_cases").select("*, members!welfare_cases_member_id_fkey(first_name, last_name)").is("archived_at", null).order("created_at", { ascending: false });
   const { data: members } = await supabase.from("members").select("id, first_name, last_name");
   const { data: payments } = await supabase.from("welfare_payments").select("id, case_id, amount, paid_on, notes").order("paid_on", { ascending: false });
 

@@ -32,6 +32,8 @@ export type PortalStats = {
   pendingReports: number;
   pendingApprovals: number;
   childrenCount: number;
+  childrenClasses?: number;
+  childrenWorkers?: number;
   tithes: number;
   offerings: number;
   donations: number;
@@ -55,6 +57,8 @@ export function PortalHome({
   attendanceTrend,
   incomeTrend,
   expenseTrend,
+  titheTrend = [],
+  offeringTrend = [],
   departmentStats,
   churchTheme,
 }: {
@@ -65,6 +69,8 @@ export function PortalHome({
   attendanceTrend: ChartPoint[];
   incomeTrend: ChartPoint[];
   expenseTrend: ChartPoint[];
+  titheTrend?: ChartPoint[];
+  offeringTrend?: ChartPoint[];
   departmentStats: ChartPoint[];
   churchTheme?: Pick<ChurchThemeRecord, "year" | "title" | "scripture" | "description"> | null;
 }) {
@@ -74,12 +80,10 @@ export function PortalHome({
   if (portal === "member") {
     return (
       <div className="space-y-6">
-        <PageHeader title="Welcome" description={`${greeting} This is your personal church home — not an administration desk.`} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <StatCard label="Next program" value={stats.events[0]?.title ?? "None listed"} />
-          <StatCard label="Latest announcement" value={stats.announcements[0]?.title ?? "None yet"} />
-        </div>
-        <Lists events={stats.events} announcements={stats.announcements} />
+        <PageHeader
+          title="Officer access required"
+          description={`${greeting} This CMS is for the Presiding Elder, Secretary, Treasurer, and ministry leaders only. There is no member portal.`}
+        />
       </div>
     );
   }
@@ -101,6 +105,8 @@ export function PortalHome({
         <div className="grid gap-4 xl:grid-cols-2">
           <Trend title="Income" data={incomeTrend} />
           <Trend title="Expenses" data={expenseTrend} />
+          <Trend title="Tithes" data={titheTrend} />
+          <Trend title="Offerings" data={offeringTrend} />
         </div>
         <Card>
           <CardHeader>
@@ -134,6 +140,8 @@ export function PortalHome({
           <StatCard label="New converts" value={stats.newConverts} />
           <StatCard label="Attendance this week" value={stats.attendanceWeek} />
           <StatCard label="Pending follow-ups" value={stats.pendingFollowups} />
+          <StatCard label="Upcoming programs" value={stats.events.length} />
+          <StatCard label="Reports this month" value={stats.pendingReports} />
         </div>
         <Lists events={stats.events} announcements={stats.announcements} />
       </div>
@@ -225,6 +233,8 @@ export function PortalHome({
         <PageHeader title="Children's Ministry portal" description={`${greeting} Children's records stay inside this ministry.`} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Total children" value={stats.childrenCount} />
+          <StatCard label="Classes" value={stats.childrenClasses ?? 0} />
+          <StatCard label="Children's workers" value={stats.childrenWorkers ?? 0} />
           <StatCard label="Attendance this week" value={stats.attendanceWeek} />
           <StatCard label="Follow-ups" value={stats.pendingFollowups} />
           <StatCard label="Upcoming programs" value={stats.events.length} />

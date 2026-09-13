@@ -43,6 +43,8 @@ export default async function DashboardPage() {
     { count: pendingReports },
     { count: pendingApprovals },
     { count: childrenCount },
+    { data: childRows },
+    { count: childrenWorkers },
     { data: deptRows },
     churchTheme,
   ] = await Promise.all([
@@ -57,6 +59,8 @@ export default async function DashboardPage() {
     supabase.from("department_reports").select("id", { count: "exact", head: true }).eq("status", "submitted"),
     supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("ministry_children").select("id", { count: "exact", head: true }).is("archived_at", null),
+    supabase.from("ministry_children").select("class_name").is("archived_at", null),
+    supabase.from("workers").select("id", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("department_members").select("department_id, departments(name)").limit(400),
     getActiveTheme(supabase),
   ]);
@@ -95,6 +99,8 @@ export default async function DashboardPage() {
     pendingReports: pendingReports ?? 0,
     pendingApprovals: pendingApprovals ?? 0,
     childrenCount: childrenCount ?? 0,
+    childrenClasses: new Set((childRows ?? []).map((row) => row.class_name).filter(Boolean)).size,
+    childrenWorkers: childrenWorkers ?? 0,
     tithes: sumWhere((row) => row.type === "income" && categoryName(row).includes("tithe")),
     offerings: sumWhere((row) => row.type === "income" && categoryName(row).includes("offering")),
     donations: sumWhere((row) => row.type === "income" && categoryName(row).includes("donation")),
@@ -132,16 +138,21 @@ export default async function DashboardPage() {
       }, {}),
   );
 
-  const expenseTrend = Object.values(
-    txnRows
-      .filter((row) => row.type === "expense")
-      .reduce<Record<string, { label: string; value: number }>>((acc, row) => {
-        const key = row.occurred_on.slice(0, 7);
-        acc[key] = acc[key] ?? { label: key, value: 0 };
-        acc[key].value += Number(row.amount);
-        return acc;
-      }, {}),
-  );
+  const monthTrend = (predicate: (row: (typeof txnRows)[number]) => boolean) =>
+    Object.values(
+      txnRows
+        .filter(predicate)
+        .reduce<Record<string, { label: string; value: number }>>((acc, row) => {
+          const key = row.occurred_on.slice(0, 7);
+          acc[key] = acc[key] ?? { label: key, value: 0 };
+          acc[key].value += Number(row.amount);
+          return acc;
+        }, {}),
+    );
+
+  const expenseTrend = monthTrend((row) => row.type === "expense");
+  const titheTrend = monthTrend((row) => row.type === "income" && categoryName(row).includes("tithe"));
+  const offeringTrend = monthTrend((row) => row.type === "income" && categoryName(row).includes("offering"));
 
   const departmentStats = Object.values(
     (deptRows ?? []).reduce<Record<string, { label: string; value: number }>>((acc, row) => {
@@ -162,6 +173,8 @@ export default async function DashboardPage() {
       attendanceTrend={attendanceTrend}
       incomeTrend={incomeTrend}
       expenseTrend={expenseTrend}
+      titheTrend={titheTrend}
+      offeringTrend={offeringTrend}
       departmentStats={departmentStats}
       churchTheme={churchTheme}
     />

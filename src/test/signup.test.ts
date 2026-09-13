@@ -26,8 +26,8 @@ describe("registration requests", () => {
     expect(result.success).toBe(true);
   });
 
-  it("lets pending and active accounts into the portal, but not rejected ones", () => {
-    expect(isApprovedAccount("pending", "pending")).toBe(true);
+  it("only treats approved active accounts as officer-ready", () => {
+    expect(isApprovedAccount("pending", "pending")).toBe(false);
     expect(isApprovedAccount("active", "approved")).toBe(true);
     expect(isApprovedAccount("rejected", "rejected")).toBe(false);
     expect(isApprovedAccount("suspended", "approved")).toBe(false);

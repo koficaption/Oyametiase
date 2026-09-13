@@ -5,7 +5,9 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { submitDepartmentReportAction } from "@/actions/admin";
 import { requireUser } from "@/lib/auth/session";
+import { formAction } from "@/lib/forms";
 import { buildReport } from "@/lib/reports/build";
 import { currentReportYear, firstParam, parseReportType } from "@/lib/reports/period";
 import { allowedReportTypes, canGenerateReport, scopedReportDepartmentId } from "@/lib/reports/permissions";
@@ -71,11 +73,18 @@ export default async function ReportsPage({
         title="Reports"
         description="Generate reports from live church records. Empty periods show “No data available for this period.” The selected year’s official theme is attached automatically."
       />
-      {user.profile.role_slug === "department_leader" ? (
-        <p className="rounded-xl border bg-card p-4 text-sm">
-          Submit a ministry report to the Presiding Elder from{" "}
-          <a className="underline" href="/app/departments">Departments</a>. Generated reports below stay limited to your ministry.
-        </p>
+      {user.profile.role_slug === "department_leader" && user.ledDepartments[0] ? (
+        <form action={formAction(submitDepartmentReportAction)} className="space-y-3 rounded-xl border bg-card p-4">
+          <h2 className="font-semibold">Submit ministry report to the Presiding Elder</h2>
+          <input type="hidden" name="department_id" value={user.ledDepartments[0].id} />
+          <Input name="title" required placeholder="Monthly attendance, activities, membership changes" />
+          <Textarea name="content" required placeholder="Activities, membership changes, program report, challenges, recommendations" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <Input name="period_start" type="date" />
+            <Input name="period_end" type="date" />
+          </div>
+          <Button type="submit">Submit to Presiding Elder</Button>
+        </form>
       ) : null}
       <form method="get" className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2 xl:grid-cols-3">
         <label className="space-y-1 text-sm">

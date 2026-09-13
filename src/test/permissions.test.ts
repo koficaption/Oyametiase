@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   hasPermission,
+  isOfficerRole,
   ROLE_PERMISSIONS,
   type Permission,
   type RoleSlug,
@@ -79,8 +80,12 @@ describe("authorization matrix", () => {
     expect(hasPermission("children_teacher", "members.manage")).toBe(false);
   });
 
-  it("keeps members in the portal", () => {
-    expect(hasPermission("member", "prayer.submit")).toBe(true);
+  it("keeps ordinary members out of the officer CMS", () => {
+    expect(isOfficerRole("member")).toBe(false);
+    expect(isOfficerRole("presiding_elder")).toBe(true);
+    expect(isOfficerRole("secretary")).toBe(true);
+    expect(isOfficerRole("treasurer")).toBe(true);
+    expect(isOfficerRole("department_leader")).toBe(true);
     expect(hasPermission("member", "members.view")).toBe(false);
     expect(hasPermission("member", "finance.view")).toBe(false);
     expect(hasPermission("member", "audit.view")).toBe(false);

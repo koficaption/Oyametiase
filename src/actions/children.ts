@@ -1,15 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requirePermission } from "@/lib/auth/session";
+import { requireChildrenAccess } from "@/lib/auth/session";
+import { hasPermission } from "@/types/roles";
 import { emptyToNull, str } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 import { fail, ok, type ActionResult } from "@/lib/validations/common";
 
 export async function saveChildAction(formData: FormData): Promise<ActionResult> {
-  const user = await requirePermission("children.manage");
+  const user = await requireChildrenAccess();
+  if (!hasPermission(user.profile.role_slug, "children.manage")) {
+    return fail("You cannot change children's records.");
+  }
   if (user.profile.role_slug === "department_leader") {
-    const childrenDept = user.ledDepartments.find((dept) => dept.slug === "children");
+    const childrenDept = user.ledDepartments.find((dept) => dept.slug === "children" || dept.ministry_kind === "children");
     if (!childrenDept) return fail("You can only manage children in your own ministry.");
   }
   const supabase = await createClient();

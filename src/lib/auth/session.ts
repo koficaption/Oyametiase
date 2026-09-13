@@ -6,7 +6,7 @@ import type { CurrentUser, Member, Profile } from "@/types/database";
 import type { LedDepartment, PortalKind, WorkerAssignment } from "@/types/portals";
 import { resolvePortal } from "@/types/portals";
 import type { Permission, RoleSlug } from "@/types/roles";
-import { hasPermission } from "@/types/roles";
+import { hasPermission, isOfficerRole } from "@/types/roles";
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!isSupabaseConfigured()) return null;
@@ -101,12 +101,30 @@ export function userPortal(user: CurrentUser): PortalKind {
   return resolvePortal(user.profile.role_slug, user.ledDepartments);
 }
 
+export function canAccessChildren(user: CurrentUser) {
+  const role = user.profile.role_slug;
+  if (role === "presiding_elder" || role === "secretary" || role === "children_teacher") return true;
+  if (role === "department_leader") {
+    return user.ledDepartments.some((dept) => dept.slug === "children" || dept.ministry_kind === "children");
+  }
+  return false;
+}
+
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!isApprovedAccount(user.profile.account_status, user.profile.approval_status)) {
-    redirect("/pending-approval");
+  if (!isOfficerRole(user.profile.role_slug)) {
+    redirect("/officer-access");
   }
+  if (!isApprovedAccount(user.profile.account_status, user.profile.approval_status)) {
+    redirect("/officer-access");
+  }
+  return user;
+}
+
+export async function requireChildrenAccess() {
+  const user = await requireUser();
+  if (!canAccessChildren(user)) redirect("/unauthorized");
   return user;
 }
 

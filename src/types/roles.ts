@@ -175,3 +175,18 @@ export function hasAnyRole(role: RoleSlug | null | undefined, allowed: RoleSlug[
 
 export const LEADERSHIP_ROLES: RoleSlug[] = ["presiding_elder", "secretary"];
 export const FINANCE_ROLES: RoleSlug[] = ["presiding_elder", "treasurer"];
+
+/** This CMS is for assembly officers, not ordinary members. */
+export const OFFICER_ROLES: RoleSlug[] = [
+  "presiding_elder",
+  "secretary",
+  "treasurer",
+  "department_leader",
+  "ministry_finance",
+  "children_teacher",
+  "worker",
+];
+
+export function isOfficerRole(role: RoleSlug | null | undefined) {
+  return !!role && OFFICER_ROLES.includes(role);
+}

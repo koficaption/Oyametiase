@@ -34,6 +34,7 @@ const PE_NAV: NavItem[] = [
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
   { href: "/app/themes", label: "Church Theme", permission: "themes.manage", section: "admin" },
   { href: "/app/approvals", label: "Approvals", permission: "approvals.view", section: "admin" },
+  { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
   { href: "/app/audit-logs", label: "Audit Logs", permission: "audit.view", section: "admin" },
   { href: "/app/settings", label: "Settings", permission: "settings.manage", section: "admin" },
   { href: "/app/users", label: "Users & approvals", permission: "users.manage", section: "admin" },
@@ -52,6 +53,7 @@ const SECRETARY_NAV: NavItem[] = [
   { href: "/app/events", label: "Church Programs", permission: "events.view", section: "life" },
   { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
+  { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
   { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 
@@ -65,6 +67,7 @@ const TREASURER_NAV: NavItem[] = [
   { href: "/app/finance", label: "Transactions", permission: "finance.view", section: "stewardship" },
   { href: "/app/documents", label: "Receipts / Documents", permission: "documents.view", section: "stewardship" },
   { href: "/app/reports", label: "Financial Reports", permission: "reports.finance", section: "admin" },
+  { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
   { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 
@@ -82,21 +85,11 @@ function ministryNav(labels: {
     { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
     { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
     { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
+    { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
     { href: "/app/portal", label: "My Profile", section: "overview" },
     ...(labels.extra ?? []),
   ];
 }
-
-const MEMBER_NAV: NavItem[] = [
-  { href: "/app/dashboard", label: "Home", section: "overview" },
-  { href: "/app/portal", label: "My Profile", section: "overview" },
-  { href: "/app/portal#attendance", label: "My Attendance", section: "life" },
-  { href: "/app/portal#department", label: "My Department", section: "life" },
-  { href: "/app/events", label: "Church Programs", permission: "events.view", section: "life" },
-  { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
-  { href: "/app/prayer-requests", label: "Prayer Requests", permission: "prayer.submit", section: "life" },
-  { href: "/app/portal#settings", label: "Settings", section: "overview" },
-];
 
 const WORKER_BASE: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
@@ -126,6 +119,7 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
       { href: "/app/follow-ups", label: "Follow-ups", permission: "followups.view", section: "people" },
       { href: "/app/department-finance", label: "Ministry finance", permission: "finance.department", section: "stewardship" },
       { href: "/app/reports", label: "Reports", permission: "reports.department", section: "admin" },
+      { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
       { href: "/app/portal", label: "My Profile", section: "overview" },
     ];
   }
@@ -150,7 +144,7 @@ export function navForPortal(kind: PortalKind, assignments: WorkerAssignment[] =
   if (kind === "department") {
     return ministryNav({ members: "Department Members" });
   }
-  if (kind === "member") return MEMBER_NAV;
+  if (kind === "member") return [];
 
   const slugs = assignments.map((item) => item.positionSlug ?? "");
   const items = [...WORKER_BASE];

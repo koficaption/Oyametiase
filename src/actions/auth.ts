@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { writeAudit } from "@/lib/auth/audit";
 import { isApprovedAccount, suggestedSystemRole } from "@/lib/church-directory";
+import { isOfficerRole, type RoleSlug } from "@/types/roles";
 import { fail, ok, zodError, type ActionResult } from "@/lib/validations/common";
 import { loginIdentifierSchema, signupSchema } from "@/lib/validations/signup";
 import { createClient } from "@/lib/supabase/server";
@@ -43,7 +44,7 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
   const userId = (await supabase.auth.getClaims()).data?.claims?.sub ?? "";
   const { data: profile } = await supabase
     .from("profiles")
-    .select("account_status, approval_status, is_active")
+    .select("account_status, approval_status, is_active, role_slug")
     .eq("id", userId)
     .maybeSingle();
 
@@ -59,8 +60,8 @@ export async function loginAction(_prev: ActionResult, formData: FormData): Prom
   await supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", userId);
   await writeAudit(supabase, { action: "login", module: "auth" });
 
-  if (!isApprovedAccount(profile?.account_status, profile?.approval_status)) {
-    redirect("/pending-approval");
+  if (!isOfficerRole(profile?.role_slug as RoleSlug) || !isApprovedAccount(profile?.account_status, profile?.approval_status)) {
+    redirect("/officer-access");
   }
   redirect("/app/dashboard");
 }
@@ -92,7 +93,7 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/app/dashboard`,
+      emailRedirectTo: `${origin}/auth/callback?next=/officer-access`,
       data: {
         registration: "public",
         full_name: parsed.data.full_name,
@@ -114,10 +115,10 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
   }
 
   if (data.user && !data.session) {
-    return ok("Account created. Confirm your email if asked, then sign in.");
+    return ok("Request received. Confirm your email if asked. The Presiding Elder must assign an officer office before you can sign in.");
   }
 
-  redirect("/app/dashboard");
+  redirect("/officer-access");
 }
 
 export async function logoutAction() {

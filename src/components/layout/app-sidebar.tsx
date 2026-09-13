@@ -34,7 +34,7 @@ export function AppSidebar({
         <div className="flex items-center gap-3">
           <AssemblyMark size={44} />
           <div>
-            <div className="text-[10px] uppercase tracking-[0.16em] text-sidebar-primary">{churchName}</div>
+            <div className="text-xs font-semibold tracking-normal text-sidebar-primary">{churchName}</div>
             <div className="font-semibold leading-tight">{assemblyName}</div>
             <div className="mt-1 text-xs text-sidebar-primary">{PORTAL_LABELS[portal]}</div>
           </div>

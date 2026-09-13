@@ -143,7 +143,8 @@ export function suggestedDepartmentSlug(responsibility: string): string | null {
 export function isApprovedAccount(status?: string | null, approval?: string | null) {
   if (status === "rejected" || status === "suspended") return false;
   if (approval === "rejected") return false;
-  return true;
+  if (!status && !approval) return true;
+  return status === "active" && (approval === "approved" || !approval);
 }
 
 export function inferGender(position: string, responsibility: string): "male" | "female" {

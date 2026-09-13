@@ -6,6 +6,7 @@ const portals = readFileSync("supabase/migrations/20260913000006_portals_childre
 const departmentFinance = readFileSync("supabase/migrations/20260913000007_department_finance.sql", "utf8");
 const registration = readFileSync("supabase/migrations/20260913000008_registration_approval.sql", "utf8");
 const openAccess = readFileSync("supabase/migrations/20260913170023_open_registration_access.sql", "utf8");
+const officerOnly = readFileSync("supabase/migrations/20260913172050_officer_only_registration.sql", "utf8");
 const themes = readFileSync("supabase/migrations/20260913000009_church_themes_and_reports.sql", "utf8");
 
 describe("RLS source guarantees", () => {
@@ -64,6 +65,8 @@ describe("RLS source guarantees", () => {
     expect(openAccess).toContain("account_status SET DEFAULT 'active'");
     expect(openAccess).toContain("approval_status SET DEFAULT 'approved'");
     expect(openAccess).not.toContain("raw_user_meta_data->>'role");
+    expect(officerOnly).toContain("assigned_status text := 'pending'");
+    expect(officerOnly).toContain("assigned_role := 'presiding_elder'");
   });
 
   it("stores church themes by year and limits writes to the Presiding Elder", () => {

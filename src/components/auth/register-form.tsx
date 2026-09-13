@@ -58,7 +58,7 @@ export function RegisterForm() {
       <fieldset className="space-y-3">
         <legend className="text-base font-semibold text-cop-navy">Church information</legend>
         <p className="text-sm leading-6 tracking-normal text-cop-navy/80">
-          Position is your official standing. Responsibility is the work you currently do. The first account becomes Presiding Elder. Later accounts open as members.
+          Position is your official standing. Responsibility is the work you currently do. This system is for officers only. The Presiding Elder assigns Secretary, Treasurer, or a ministry.
         </p>
         <div className="space-y-2">
           <Label htmlFor="church_position" className="text-base font-semibold text-cop-navy">Position at church</Label>

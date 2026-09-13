@@ -38,11 +38,12 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/pending-approval") ||
+    pathname.startsWith("/officer-access") ||
     pathname.startsWith("/forgot-password") ||
     pathname.startsWith("/update-password") ||
     pathname.startsWith("/auth");
 
-  if (!user && (pathname.startsWith("/app") || pathname.startsWith("/pending-approval"))) {
+  if (!user && (pathname.startsWith("/app") || pathname.startsWith("/pending-approval") || pathname.startsWith("/officer-access"))) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", pathname);

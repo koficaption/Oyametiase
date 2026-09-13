@@ -19,10 +19,9 @@ describe("portal resolution", () => {
     expect(resolvePortal("department_leader", [children])).toBe("children");
   });
 
-  it("does not put members on an administration dashboard", () => {
+  it("does not give ordinary members a CMS portal", () => {
     expect(resolvePortal("member")).toBe("member");
-    expect(navForPortal("member").some((item) => item.href === "/app/finance")).toBe(false);
-    expect(navForPortal("member").some((item) => item.href === "/app/users")).toBe(false);
+    expect(navForPortal("member")).toEqual([]);
   });
 
   it("gives the Presiding Elder church theme and full assembly navigation", () => {
@@ -32,12 +31,14 @@ describe("portal resolution", () => {
     expect(hrefs).toContain("/app/approvals");
     expect(navForPortal("secretary").map((item) => item.href)).not.toContain("/app/themes");
     expect(navForPortal("treasurer").map((item) => item.href)).not.toContain("/app/themes");
-    expect(navForPortal("member").map((item) => item.href)).not.toContain("/app/reports");
+    expect(navForPortal("presiding_elder").map((item) => item.href)).toContain("/app/notifications");
+    expect(navForPortal("secretary").map((item) => item.href)).toContain("/app/notifications");
+    expect(navForPortal("womens").map((item) => item.href)).toContain("/app/notifications");
   });
 
   it("keeps the Treasurer on finance navigation only", () => {
     const hrefs = navForPortal("treasurer").map((item) => item.href);
-    expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports") || href.includes("portal"))).toBe(true);
+    expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports") || href.includes("notifications") || href.includes("portal"))).toBe(true);
     expect(hrefs).not.toContain("/app/department-finance");
     expect(hrefs.some((href) => href.includes("members"))).toBe(false);
   });

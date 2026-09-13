@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MemberActions } from "@/components/members/member-actions";
-import { requirePermission } from "@/lib/auth/session";
+import { requirePermission, userPortal } from "@/lib/auth/session";
 import { searchMembers } from "@/lib/data/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/shared/page-header";
@@ -18,6 +18,13 @@ export default async function MembersPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const user = await requirePermission("members.view");
+  const portal = userPortal(user);
+  const registerTitle =
+    portal === "womens" ? "Women Members" : portal === "mens" ? "Men Members" : portal === "youth" ? "Youth Members" : "Members";
+  const registerDescription =
+    portal === "presiding_elder" || portal === "secretary"
+      ? "Assembly membership register. Department leaders only see their own ministry."
+      : "Members assigned to your ministry only. You cannot open another department's register.";
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : "";
   const department = typeof params.department === "string" ? params.department : undefined;
@@ -42,8 +49,8 @@ export default async function MembersPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Members"
-        description="Assembly membership register. Remove hides a record. The Presiding Elder can permanently delete a removed record if it was a mistake."
+        title={registerTitle}
+        description={registerDescription}
         actions={
           canManage ? (
             <Button asChild>

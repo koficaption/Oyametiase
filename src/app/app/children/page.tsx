@@ -2,7 +2,7 @@ import { saveChildAction } from "@/actions/children";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { requirePermission } from "@/lib/auth/session";
+import { canAccessChildren, requireChildrenAccess } from "@/lib/auth/session";
 import { formAction } from "@/lib/forms";
 import { createClient } from "@/lib/supabase/server";
 import { memberFullName } from "@/types/database";
@@ -10,7 +10,7 @@ import { memberFullName } from "@/types/database";
 export const metadata = { title: "Children" };
 
 export default async function ChildrenPage() {
-  const user = await requirePermission("children.view");
+  const user = await requireChildrenAccess();
   const supabase = await createClient();
   const childrenDept = user.ledDepartments.find((dept) => dept.slug === "children");
   const [{ data: children }, { data: parents }, { data: departments }] = await Promise.all([
@@ -18,7 +18,7 @@ export default async function ChildrenPage() {
     supabase.from("members").select("id, first_name, last_name").is("archived_at", null).order("last_name"),
     supabase.from("departments").select("id, name, slug").eq("slug", "children"),
   ]);
-  const canManage = user.profile.role_slug !== "member";
+  const canManage = canAccessChildren(user) && user.profile.role_slug !== "children_teacher";
   const classes = [...new Set((children ?? []).map((row) => row.class_name).filter(Boolean))];
 
   return (

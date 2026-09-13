@@ -7,7 +7,7 @@ import { isApprovedAccount } from "@/lib/church-directory";
 import { ROLE_LABELS } from "@/types/roles";
 import { redirect } from "next/navigation";
 
-export const metadata = { title: "Awaiting approval" };
+export const metadata = { title: "Account status" };
 
 export default async function PendingApprovalPage() {
   const user = await requireSignupAccount();
@@ -17,8 +17,8 @@ export default async function PendingApprovalPage() {
 
   return (
     <BrandShell
-      title="Registration received"
-      description={`Peace be with you, ${user.profile.full_name}. Your account is waiting for the Presiding Elder. Church position and responsibility were recorded for review. They did not grant a portal.`}
+      title="Account needs attention"
+      description={`Peace be with you, ${user.profile.full_name}. This account is not active. Sign out and contact the assembly if you think this is a mistake.`}
     >
         <dl className="space-y-2 rounded-xl border bg-muted/40 p-4 text-left text-sm">
           <div className="flex justify-between gap-3">
@@ -47,8 +47,8 @@ export default async function PendingApprovalPage() {
             Sign out
           </Button>
         </form>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Approved members sign in at <Link className="underline" href="/login">the login page</Link>.
+        <p className="mt-4 text-base tracking-normal text-cop-navy/80">
+          Go back to <Link className="font-medium underline" href="/login">the login page</Link>.
         </p>
     </BrandShell>
   );

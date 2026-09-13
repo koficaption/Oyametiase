@@ -92,7 +92,7 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=/pending-approval`,
+      emailRedirectTo: `${origin}/auth/callback?next=/app/dashboard`,
       data: {
         registration: "public",
         full_name: parsed.data.full_name,
@@ -108,16 +108,16 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
   });
   if (error) {
     if (error.message.toLowerCase().includes("already")) {
-      return fail("An account with this email already exists. Sign in or wait for approval.");
+      return fail("An account with this email already exists. Sign in instead.");
     }
     return fail(error.message || "Unable to submit this registration.");
   }
 
   if (data.user && !data.session) {
-    return ok("Registration submitted. Confirm your email if asked, then wait for the Presiding Elder to approve your access.");
+    return ok("Account created. Confirm your email if asked, then sign in.");
   }
 
-  redirect("/pending-approval");
+  redirect("/app/dashboard");
 }
 
 export async function logoutAction() {

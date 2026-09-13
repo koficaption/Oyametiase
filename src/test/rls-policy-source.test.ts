@@ -5,6 +5,7 @@ const rls = readFileSync("supabase/migrations/20260913000002_rls_helpers_and_pol
 const portals = readFileSync("supabase/migrations/20260913000006_portals_children_approvals.sql", "utf8");
 const departmentFinance = readFileSync("supabase/migrations/20260913000007_department_finance.sql", "utf8");
 const registration = readFileSync("supabase/migrations/20260913000008_registration_approval.sql", "utf8");
+const openAccess = readFileSync("supabase/migrations/20260913170023_open_registration_access.sql", "utf8");
 const themes = readFileSync("supabase/migrations/20260913000009_church_themes_and_reports.sql", "utf8");
 
 describe("RLS source guarantees", () => {
@@ -48,14 +49,21 @@ describe("RLS source guarantees", () => {
     expect(departmentFinance).toContain("department_leader");
   });
 
-  it("keeps public sign-ups as pending members", () => {
+  it("records church office on public sign-ups without reading user_metadata roles", () => {
     expect(registration).toContain("'member'");
-    expect(registration).toContain("'pending'");
     expect(registration).toContain("requested_system_role");
     expect(registration).toContain("church_position");
     expect(registration).toContain("church_responsibility");
     expect(registration).toContain("Only the Presiding Elder can change roles");
     expect(registration).toContain("lookup_login_email");
+  });
+
+  it("opens public accounts immediately and bootstraps the first real Presiding Elder", () => {
+    expect(openAccess).toContain("assigned_role := 'presiding_elder'");
+    expect(openAccess).toContain("%@oyametiase.local");
+    expect(openAccess).toContain("account_status SET DEFAULT 'active'");
+    expect(openAccess).toContain("approval_status SET DEFAULT 'approved'");
+    expect(openAccess).not.toContain("raw_user_meta_data->>'role");
   });
 
   it("stores church themes by year and limits writes to the Presiding Elder", () => {

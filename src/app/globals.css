@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
   --font-heading: var(--font-sans);
   --color-cop-blue: var(--cop-blue);
@@ -69,7 +69,7 @@
   --secondary: #ffd100;
   --secondary-foreground: #0a2266;
   --muted: #e8eefb;
-  --muted-foreground: #3d4f7c;
+  --muted-foreground: #1e3266;
   --accent: #ffe14a;
   --accent-foreground: #0a2266;
   --destructive: #e30613;
@@ -131,9 +131,9 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground tracking-normal antialiased;
   }
   html {
-    @apply font-sans;
+    @apply font-sans tracking-normal;
   }
 }

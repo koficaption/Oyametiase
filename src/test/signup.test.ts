@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { suggestedSystemRole } from "@/lib/church-directory";
+import { isApprovedAccount, suggestedSystemRole } from "@/lib/church-directory";
 import { signupSchema } from "@/lib/validations/signup";
 
 describe("registration requests", () => {
@@ -24,6 +24,13 @@ describe("registration requests", () => {
       confirm: "AssemblyPass12",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("lets pending and active accounts into the portal, but not rejected ones", () => {
+    expect(isApprovedAccount("pending", "pending")).toBe(true);
+    expect(isApprovedAccount("active", "approved")).toBe(true);
+    expect(isApprovedAccount("rejected", "rejected")).toBe(false);
+    expect(isApprovedAccount("suspended", "approved")).toBe(false);
   });
 
   it("rejects a short password and a missing church position", () => {

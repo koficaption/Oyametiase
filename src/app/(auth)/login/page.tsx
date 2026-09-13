@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <BrandShell
       title="Oyame Tiase Assembly"
-      description="Sign in with your email or username. New accounts wait for Presiding Elder approval before any portal opens."
+      description="Sign in with your email or username. The first church account becomes the Presiding Elder. Later accounts open as members."
     >
       {!isSupabaseConfigured() ? (
         <p className="rounded-md border border-cop-gold bg-cop-gold/20 px-3 py-2 text-sm text-cop-navy">

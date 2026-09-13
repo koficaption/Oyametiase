@@ -4,10 +4,10 @@ import { EMPTY_PERIOD, type BuiltReport } from "@/lib/reports/types";
 export function ReportPreview({ report }: { report: BuiltReport }) {
   return (
     <div className="space-y-6 rounded-xl border bg-card p-5">
-      <div className="space-y-1 text-center">
-        <p className="text-xs font-semibold tracking-[0.2em] text-primary">{report.churchName.toUpperCase()}</p>
-        <p className="text-sm font-semibold tracking-wide">{report.assemblyName.toUpperCase()}</p>
-        <h2 className="text-xl font-semibold">{report.title}</h2>
+      <div className="space-y-1 border-b-4 border-cop-gold pb-4 text-center">
+        <p className="text-xs font-semibold tracking-[0.2em] text-cop-blue">{report.churchName.toUpperCase()}</p>
+        <p className="text-sm font-semibold tracking-wide text-cop-navy">{report.assemblyName.toUpperCase()}</p>
+        <h2 className="text-xl font-semibold text-cop-navy">{report.title}</h2>
         <p className="text-sm text-muted-foreground">{report.periodLabel}</p>
       </div>
       <ThemeBanner theme={report.theme} compact />

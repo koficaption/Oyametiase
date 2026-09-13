@@ -29,20 +29,22 @@ export function MobileNav({
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80">
+      <SheetContent side="left" className="w-80 border-sidebar-border bg-cop-navy text-white">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-cop-gold" />
         <SheetHeader>
-          <SheetTitle>Oyame Tiase Assembly</SheetTitle>
-          <p className="text-sm text-muted-foreground">{PORTAL_LABELS[portal]}</p>
+          <SheetTitle className="text-white">Oyame Tiase Assembly</SheetTitle>
+          <p className="text-sm text-cop-gold">{PORTAL_LABELS[portal]}</p>
         </SheetHeader>
         <nav className="mt-4 space-y-1" aria-label="Mobile navigation">
           {visible.map((item) => {
             const path = item.href.split("?")[0];
+            const active = pathname === path || pathname.startsWith(`${path}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`block rounded-md px-3 py-2 text-sm ${
-                  pathname === path || pathname.startsWith(`${path}/`) ? "bg-accent font-medium" : "hover:bg-accent"
+                  active ? "border-l-4 border-cop-gold bg-sidebar-accent font-medium" : "hover:bg-sidebar-accent/70"
                 }`}
               >
                 {item.label}

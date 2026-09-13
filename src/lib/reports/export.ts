@@ -3,8 +3,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { EMPTY_PERIOD, type BuiltReport } from "@/lib/reports/types";
 
-const BLUE: [number, number, number] = [11, 36, 71];
-const GOLD: [number, number, number] = [196, 149, 56];
+const BLUE: [number, number, number] = [0, 80, 200];
+const GOLD: [number, number, number] = [255, 209, 0];
 
 export async function workbookToBuffer(rows: Record<string, unknown>[], sheetName: string) {
   const workbook = new ExcelJS.Workbook();

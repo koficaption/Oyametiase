@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AssemblyMark } from "@/components/brand/assembly-mark";
+import { BrandShell } from "@/components/brand/brand-shell";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/actions/auth";
 import { requireSignupAccount } from "@/lib/auth/session";
@@ -16,13 +16,10 @@ export default async function PendingApprovalPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_oklch(0.92_0.12_98),_transparent_40%),radial-gradient(circle_at_bottom,_oklch(0.40_0.14_262/_0.18),_transparent_50%)] px-4 py-10">
-      <div className="w-full max-w-md space-y-5 rounded-2xl border bg-card p-8 text-center shadow-sm">
-        <AssemblyMark size={72} />
-        <h1 className="text-2xl font-semibold">Registration received</h1>
-        <p className="text-sm text-muted-foreground">
-          Peace be with you, {user.profile.full_name}. Your account is waiting for the Presiding Elder. Church position and responsibility were recorded for review. They did not grant a portal.
-        </p>
+    <BrandShell
+      title="Registration received"
+      description={`Peace be with you, ${user.profile.full_name}. Your account is waiting for the Presiding Elder. Church position and responsibility were recorded for review. They did not grant a portal.`}
+    >
         <dl className="space-y-2 rounded-xl border bg-muted/40 p-4 text-left text-sm">
           <div className="flex justify-between gap-3">
             <dt className="text-muted-foreground">Username</dt>
@@ -45,15 +42,14 @@ export default async function PendingApprovalPage() {
             <dd className="capitalize">{user.profile.account_status ?? "pending"}</dd>
           </div>
         </dl>
-        <form action={logoutAction}>
+        <form action={logoutAction} className="mt-4">
           <Button type="submit" variant="outline" className="w-full">
             Sign out
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground">
+        <p className="mt-4 text-xs text-muted-foreground">
           Approved members sign in at <Link className="underline" href="/login">the login page</Link>.
         </p>
-      </div>
-    </div>
+    </BrandShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updatePasswordAction } from "@/actions/auth";
+import { BrandShell } from "@/components/brand/brand-shell";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,8 @@ const initial: ActionResult = { ok: false };
 export default function UpdatePasswordPage() {
   const [state, action, pending] = useActionState(updatePasswordAction, initial);
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <form action={action} className="w-full max-w-md space-y-4 rounded-2xl border bg-card p-8">
-        <h1 className="text-xl font-semibold">Choose a new password</h1>
+    <BrandShell title="Choose a new password" description="Use at least 10 characters.">
+      <form action={action} className="space-y-4">
         <FormStatus state={state} />
         <div className="space-y-2">
           <Label htmlFor="password">New password</Label>
@@ -29,6 +29,6 @@ export default function UpdatePasswordPage() {
           Update password
         </Button>
       </form>
-    </div>
+    </BrandShell>
   );
 }

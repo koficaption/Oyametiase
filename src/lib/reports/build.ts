@@ -299,22 +299,31 @@ async function visitorSections(supabase: AnyClient, user: CurrentUser, period: {
 }
 
 async function welfareSections(supabase: AnyClient, user: CurrentUser, period: { from: string; to: string }) {
+  type WelfareRow = {
+    id: string;
+    category: string;
+    status: string;
+    amount: number | null;
+    description: string | null;
+    created_at: string;
+    members?: { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
+  };
   const welfareSelect =
     "id, category, status, amount, description, created_at, members!welfare_cases_member_id_fkey(first_name, last_name)";
-  let { data: cases, error: welfareError } = await supabase
+  const firstTry = await supabase
     .from("welfare_cases")
     .select(welfareSelect)
     .eq("assembly_id", user.profile.assembly_id)
     .is("archived_at", null);
-  if (welfareError) {
-    const fallback = await supabase
-      .from("welfare_cases")
-      .select("id, category, status, amount, description, created_at")
-      .eq("assembly_id", user.profile.assembly_id)
-      .is("archived_at", null);
-    cases = fallback.data;
-  }
-  const inPeriod = (cases ?? []).filter((row) => {
+  const fallback = firstTry.error
+    ? await supabase
+        .from("welfare_cases")
+        .select("id, category, status, amount, description, created_at")
+        .eq("assembly_id", user.profile.assembly_id)
+        .is("archived_at", null)
+    : null;
+  const cases = (fallback?.data ?? firstTry.data ?? []) as WelfareRow[];
+  const inPeriod = cases.filter((row) => {
     const created = String(row.created_at ?? "").slice(0, 10);
     return !created || (created >= period.from && created <= period.to);
   });

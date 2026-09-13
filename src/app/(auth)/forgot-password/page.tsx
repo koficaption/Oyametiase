@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { forgotPasswordAction } from "@/actions/auth";
+import { BrandShell } from "@/components/brand/brand-shell";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +15,8 @@ const initial: ActionResult = { ok: false };
 export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(forgotPasswordAction, initial);
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <form action={action} className="w-full max-w-md space-y-4 rounded-2xl border bg-card p-8">
-        <h1 className="text-xl font-semibold">Reset your password</h1>
+    <BrandShell title="Reset your password" description="Enter the email on your assembly account.">
+      <form action={action} className="space-y-4">
         <FormStatus state={state} />
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
@@ -25,10 +25,10 @@ export default function ForgotPasswordPage() {
         <Button type="submit" disabled={pending} className="w-full">
           Send reset link
         </Button>
-        <Link href="/login" className="block text-center text-sm text-primary">
+        <Link href="/login" className="block text-center text-sm text-cop-blue">
           Back to sign in
         </Link>
       </form>
-    </div>
+    </BrandShell>
   );
 }

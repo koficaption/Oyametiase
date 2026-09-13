@@ -28,7 +28,8 @@ export function AppSidebar({
   const sections = ["overview", "people", "life", "stewardship", "admin"] as const;
 
   return (
-    <aside className="hidden w-72 shrink-0 border-r bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+    <aside className="hidden w-72 shrink-0 border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex lg:flex-col">
+      <div className="h-1.5 bg-cop-gold" />
       <div className="border-b border-sidebar-border px-5 py-5">
         <div className="flex items-center gap-3">
           <AssemblyMark size={44} />
@@ -59,8 +60,8 @@ export function AppSidebar({
                       className={cn(
                         "block rounded-md px-3 py-2 text-sm transition-colors",
                         active
-                          ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                          : "hover:bg-sidebar-accent/70",
+                          ? "border-l-4 border-cop-gold bg-sidebar-accent font-medium text-white"
+                          : "border-l-4 border-transparent hover:bg-sidebar-accent/70",
                       )}
                     >
                       {item.label}

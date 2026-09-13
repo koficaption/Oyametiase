@@ -29,18 +29,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         assignments={user.workerAssignments}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b bg-background/90 px-4 py-3 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b bg-cop-navy text-white">
+          <div className="h-1 bg-cop-gold" />
+          <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <MobileNav role={user.profile.role_slug} portal={portal} assignments={user.workerAssignments} />
             <div className="lg:hidden">
               <div className="text-sm font-semibold">Oyame Tiase Assembly</div>
-              <div className="text-xs text-muted-foreground">Church of Pentecost</div>
+              <div className="text-xs text-cop-gold">The Church of Pentecost</div>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <NotificationsBell initialItems={notifications ?? []} userId={user.id} />
-            <ThemeToggle />
+            <div className="flex items-center [&_button]:text-white [&_button:hover]:bg-white/10 [&_button:hover]:text-white">
+              <NotificationsBell initialItems={notifications ?? []} userId={user.id} />
+              <ThemeToggle />
+            </div>
             <UserMenu name={user.profile.full_name} portal={portal} />
+          </div>
           </div>
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>

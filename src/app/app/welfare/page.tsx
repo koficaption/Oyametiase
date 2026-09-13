@@ -1,4 +1,4 @@
-import { saveWelfareAction } from "@/actions/operations";
+import { recordWelfarePaymentAction, saveWelfareAction } from "@/actions/operations";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ export default async function WelfarePage() {
   const supabase = await createClient();
   const { data: cases } = await supabase.from("welfare_cases").select("*, members(first_name, last_name)").is("archived_at", null).order("created_at", { ascending: false });
   const { data: members } = await supabase.from("members").select("id, first_name, last_name");
+  const { data: payments } = await supabase.from("welfare_payments").select("id, case_id, amount, paid_on, notes").order("paid_on", { ascending: false });
 
   return (
     <div className="space-y-6">
@@ -47,6 +48,19 @@ export default async function WelfarePage() {
               <div className="font-medium">{member ? `${member.first_name} ${member.last_name}` : "Unnamed case"}</div>
               <div className="text-sm capitalize text-muted-foreground">{item.category} · {item.status.replace("_", " ")}</div>
               <p className="mt-2 text-sm">{item.description}</p>
+              {item.amount != null ? <p className="mt-1 text-sm text-muted-foreground">Expected: GHS {Number(item.amount).toLocaleString()}</p> : null}
+              <ul className="mt-2 text-sm text-muted-foreground">
+                {(payments ?? []).filter((payment) => payment.case_id === item.id).map((payment) => (
+                  <li key={payment.id}>Paid {payment.paid_on}: GHS {Number(payment.amount).toLocaleString()}{payment.notes ? ` · ${payment.notes}` : ""}</li>
+                ))}
+              </ul>
+              <form action={formAction(recordWelfarePaymentAction)} className="mt-3 grid gap-2 sm:grid-cols-3">
+                <input type="hidden" name="case_id" value={item.id} />
+                <Input name="amount" type="number" step="0.01" placeholder="Payment amount" required />
+                <Input name="paid_on" type="date" />
+                <Input name="notes" placeholder="Payment note" />
+                <Button type="submit" variant="outline" className="sm:col-span-3">Record payment</Button>
+              </form>
             </article>
           );
         })}

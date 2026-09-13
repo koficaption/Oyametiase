@@ -32,6 +32,7 @@ const PE_NAV: NavItem[] = [
   { href: "/app/finance", label: "Finance Overview", permission: "finance.view", section: "stewardship" },
   { href: "/app/department-finance", label: "Department finance", permission: "finance.department", section: "stewardship" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
+  { href: "/app/themes", label: "Church Theme", permission: "themes.manage", section: "admin" },
   { href: "/app/approvals", label: "Approvals", permission: "approvals.view", section: "admin" },
   { href: "/app/audit-logs", label: "Audit Logs", permission: "audit.view", section: "admin" },
   { href: "/app/settings", label: "Settings", permission: "settings.manage", section: "admin" },

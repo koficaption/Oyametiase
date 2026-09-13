@@ -1,5 +1,6 @@
 import { PortalHome, type PortalStats } from "@/components/dashboards/portal-home";
 import { requirePermission, userPortal } from "@/lib/auth/session";
+import { getActiveTheme } from "@/lib/data/themes";
 import { daysAgoIso } from "@/lib/dates";
 import { createClient } from "@/lib/supabase/server";
 
@@ -43,6 +44,7 @@ export default async function DashboardPage() {
     { count: pendingApprovals },
     { count: childrenCount },
     { data: deptRows },
+    churchTheme,
   ] = await Promise.all([
     memberQuery,
     supabase.from("visitors").select("id", { count: "exact", head: true }).eq("assembly_id", assemblyId).is("archived_at", null),
@@ -56,6 +58,7 @@ export default async function DashboardPage() {
     supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("ministry_children").select("id", { count: "exact", head: true }).is("archived_at", null),
     supabase.from("department_members").select("department_id, departments(name)").limit(400),
+    getActiveTheme(supabase),
   ]);
 
   const scopedEvents = scopedIds
@@ -160,6 +163,7 @@ export default async function DashboardPage() {
       incomeTrend={incomeTrend}
       expenseTrend={expenseTrend}
       departmentStats={departmentStats}
+      churchTheme={churchTheme}
     />
   );
 }

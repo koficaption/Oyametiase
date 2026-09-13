@@ -42,6 +42,18 @@ export type PrayerStatus =
 export type FinancialType = "income" | "expense";
 export type PaymentMethod = "cash" | "mobile_money" | "bank" | "other";
 
+export type ChurchTheme = {
+  id: string;
+  assembly_id: string;
+  year: number;
+  title: string;
+  scripture: string | null;
+  description: string | null;
+  is_active: boolean;
+  archived_at: string | null;
+  created_at: string;
+};
+
 export type Assembly = {
   id: string;
   church_name: string;

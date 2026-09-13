@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { savePositionAction, saveSettingsAction } from "@/actions/admin";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Assembly settings" description="Configurable local assembly identity. Defaults to Church of Pentecost, Oyame Tiase Assembly." />
+      <p className="rounded-xl border bg-card p-4 text-sm">
+        Manage the official annual theme from{" "}
+        <Link className="underline" href="/app/themes">Church Theme</Link>
+        . It is stored by year and used automatically on the dashboard and reports.
+      </p>
       <form action={formAction(saveSettingsAction)} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
         <Input name="church_name" defaultValue={assembly?.church_name ?? "The Church of Pentecost"} />
         <Input name="assembly_name" defaultValue={assembly?.assembly_name ?? "Oyame Tiase Assembly"} />

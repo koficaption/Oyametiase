@@ -25,6 +25,16 @@ describe("portal resolution", () => {
     expect(navForPortal("member").some((item) => item.href === "/app/users")).toBe(false);
   });
 
+  it("gives the Presiding Elder church theme and full assembly navigation", () => {
+    const hrefs = navForPortal("presiding_elder").map((item) => item.href);
+    expect(hrefs).toContain("/app/themes");
+    expect(hrefs).toContain("/app/reports");
+    expect(hrefs).toContain("/app/approvals");
+    expect(navForPortal("secretary").map((item) => item.href)).not.toContain("/app/themes");
+    expect(navForPortal("treasurer").map((item) => item.href)).not.toContain("/app/themes");
+    expect(navForPortal("member").map((item) => item.href)).not.toContain("/app/reports");
+  });
+
   it("keeps the Treasurer on finance navigation only", () => {
     const hrefs = navForPortal("treasurer").map((item) => item.href);
     expect(hrefs.every((href) => href.startsWith("/app/dashboard") || href.includes("finance") || href.includes("documents") || href.includes("reports") || href.includes("portal"))).toBe(true);

@@ -55,6 +55,7 @@ export const PERMISSIONS = [
   "reports.finance",
   "reports.welfare",
   "reports.department",
+  "themes.manage",
   "children.view",
   "children.manage",
   "approvals.view",
@@ -103,6 +104,7 @@ export const ROLE_PERMISSIONS: Record<RoleSlug, Permission[]> = {
     "finance.manage",
     "documents.view",
     "reports.finance",
+    "reports.welfare",
     "notifications.view",
   ],
   department_leader: [

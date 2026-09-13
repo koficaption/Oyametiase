@@ -11,9 +11,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { ThemeBanner } from "@/components/church/theme-banner";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ChurchThemeRecord } from "@/lib/reports/types";
 import { PORTAL_LABELS, type PortalKind } from "@/types/portals";
 
 export type PortalStats = {
@@ -54,6 +56,7 @@ export function PortalHome({
   incomeTrend,
   expenseTrend,
   departmentStats,
+  churchTheme,
 }: {
   portal: PortalKind;
   name: string;
@@ -63,6 +66,7 @@ export function PortalHome({
   incomeTrend: ChartPoint[];
   expenseTrend: ChartPoint[];
   departmentStats: ChartPoint[];
+  churchTheme?: Pick<ChurchThemeRecord, "year" | "title" | "scripture" | "description"> | null;
 }) {
   const title = ministryName ? `${ministryName} portal` : `${PORTAL_LABELS[portal]} portal`;
   const greeting = `Peace be with you, ${name}.`;
@@ -140,6 +144,7 @@ export function PortalHome({
     return (
       <div className="space-y-6">
         <PageHeader title="Presiding Elder portal" description={`${greeting} Assembly overview for Oyame Tiase.`} />
+        <ThemeBanner theme={churchTheme ?? null} />
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Assembly Overview</h2>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

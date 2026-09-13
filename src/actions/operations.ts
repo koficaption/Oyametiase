@@ -166,6 +166,29 @@ export async function saveWelfareAction(formData: FormData): Promise<ActionResul
   return ok("Welfare case saved.");
 }
 
+export async function recordWelfarePaymentAction(formData: FormData): Promise<ActionResult> {
+  const user = await requirePermission("welfare.manage");
+  const caseId = str(formData, "case_id");
+  const amount = Number(str(formData, "amount"));
+  const paidOn = str(formData, "paid_on") || new Date().toISOString().slice(0, 10);
+  if (!caseId) return fail("Select a welfare case.");
+  if (!Number.isFinite(amount) || amount <= 0) return fail("Enter a payment amount.");
+  const supabase = await createClient();
+  const { error } = await supabase.from("welfare_payments").insert({
+    assembly_id: user.profile.assembly_id,
+    case_id: caseId,
+    amount,
+    paid_on: paidOn,
+    recorded_by: user.id,
+    notes: emptyToNull(str(formData, "notes")),
+  });
+  if (error) return fail("Unable to record the welfare payment.");
+  await writeAudit(supabase, { action: "welfare.payment", module: "welfare", recordId: caseId });
+  revalidatePath("/app/welfare");
+  revalidatePath("/app/reports");
+  return ok("Payment recorded.");
+}
+
 export async function saveTransactionAction(formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
   const assemblyWrite = hasPermission(user.profile.role_slug, "finance.manage");

@@ -5,6 +5,7 @@ const rls = readFileSync("supabase/migrations/20260913000002_rls_helpers_and_pol
 const portals = readFileSync("supabase/migrations/20260913000006_portals_children_approvals.sql", "utf8");
 const departmentFinance = readFileSync("supabase/migrations/20260913000007_department_finance.sql", "utf8");
 const registration = readFileSync("supabase/migrations/20260913000008_registration_approval.sql", "utf8");
+const themes = readFileSync("supabase/migrations/20260913000009_church_themes_and_reports.sql", "utf8");
 
 describe("RLS source guarantees", () => {
   it("enables RLS on sensitive tables", () => {
@@ -55,6 +56,17 @@ describe("RLS source guarantees", () => {
     expect(registration).toContain("church_responsibility");
     expect(registration).toContain("Only the Presiding Elder can change roles");
     expect(registration).toContain("lookup_login_email");
+  });
+
+  it("stores church themes by year and limits writes to the Presiding Elder", () => {
+    expect(themes).toContain("CREATE TABLE IF NOT EXISTS public.church_themes");
+    expect(themes).toContain("UNIQUE (assembly_id, year)");
+    expect(themes).toContain("The Church Unleashed to Transform Society Through the Gospel and the Power of the Holy Spirit.");
+    expect(themes).toContain("ensure_single_active_theme");
+    expect(themes).toContain("app_private.is_admin()");
+    expect(themes).toContain("welfare_payments");
+    expect(themes).toContain("can_write_welfare");
+    expect(themes).toContain("treasurer");
   });
 
   it("isolates children records and approvals", () => {

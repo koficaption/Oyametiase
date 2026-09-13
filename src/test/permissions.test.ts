@@ -14,6 +14,10 @@ describe("authorization matrix", () => {
     expect(hasPermission("presiding_elder", "finance.manage")).toBe(false);
     expect(hasPermission("presiding_elder", "finance.department")).toBe(true);
     expect(hasPermission("presiding_elder", "settings.manage")).toBe(true);
+    expect(hasPermission("presiding_elder", "themes.manage")).toBe(true);
+    expect(hasPermission("presiding_elder", "reports.admin")).toBe(true);
+    expect(hasPermission("presiding_elder", "reports.finance")).toBe(true);
+    expect(hasPermission("presiding_elder", "reports.welfare")).toBe(true);
   });
 
   it("keeps the Secretary off unrestricted finance", () => {
@@ -28,6 +32,9 @@ describe("authorization matrix", () => {
     expect(hasPermission("secretary", "prayer.moderate")).toBe(false);
     expect(hasPermission("secretary", "settings.manage")).toBe(false);
     expect(hasPermission("secretary", "audit.view")).toBe(false);
+    expect(hasPermission("secretary", "themes.manage")).toBe(false);
+    expect(hasPermission("secretary", "reports.finance")).toBe(false);
+    expect(hasPermission("secretary", "reports.welfare")).toBe(false);
   });
 
   it("limits the Treasurer to finance work", () => {
@@ -38,6 +45,11 @@ describe("authorization matrix", () => {
     expect(hasPermission("treasurer", "prayer.moderate")).toBe(false);
     expect(hasPermission("treasurer", "settings.manage")).toBe(false);
     expect(hasPermission("treasurer", "users.manage")).toBe(false);
+    expect(hasPermission("treasurer", "reports.finance")).toBe(true);
+    expect(hasPermission("treasurer", "reports.welfare")).toBe(true);
+    expect(hasPermission("treasurer", "reports.admin")).toBe(false);
+    expect(hasPermission("treasurer", "welfare.view")).toBe(false);
+    expect(hasPermission("treasurer", "themes.manage")).toBe(false);
   });
 
   it("does not give department leaders assembly-wide sensitive access", () => {
@@ -73,6 +85,9 @@ describe("authorization matrix", () => {
     expect(hasPermission("member", "finance.view")).toBe(false);
     expect(hasPermission("member", "audit.view")).toBe(false);
     expect(hasPermission("member", "settings.manage")).toBe(false);
+    expect(hasPermission("member", "reports.admin")).toBe(false);
+    expect(hasPermission("member", "reports.finance")).toBe(false);
+    expect(hasPermission("member", "themes.manage")).toBe(false);
   });
 
   it("never allows a member to escalate through the client permission map", () => {

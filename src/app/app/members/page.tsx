@@ -45,9 +45,11 @@ export default async function MembersPage({
         title="Members"
         description="Assembly membership register. Remove hides a record. The Presiding Elder can permanently delete a removed record if it was a mistake."
         actions={
-          <Button asChild>
-            <Link href="/app/members/new">Register member</Link>
-          </Button>
+          canManage ? (
+            <Button asChild>
+              <Link href="/app/members/new">Register member</Link>
+            </Button>
+          ) : null
         }
       />
       <form className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-6">

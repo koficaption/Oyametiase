@@ -299,14 +299,24 @@ async function visitorSections(supabase: AnyClient, user: CurrentUser, period: {
 }
 
 async function welfareSections(supabase: AnyClient, user: CurrentUser, period: { from: string; to: string }) {
-  const { data: cases } = await supabase
+  const welfareSelect =
+    "id, category, status, amount, description, created_at, members!welfare_cases_member_id_fkey(first_name, last_name)";
+  let { data: cases, error: welfareError } = await supabase
     .from("welfare_cases")
-    .select("id, category, status, amount, description, created_at, members!welfare_cases_member_id_fkey(first_name, last_name)")
+    .select(welfareSelect)
     .eq("assembly_id", user.profile.assembly_id)
     .is("archived_at", null);
+  if (welfareError) {
+    const fallback = await supabase
+      .from("welfare_cases")
+      .select("id, category, status, amount, description, created_at")
+      .eq("assembly_id", user.profile.assembly_id)
+      .is("archived_at", null);
+    cases = fallback.data;
+  }
   const inPeriod = (cases ?? []).filter((row) => {
-    const created = row.created_at.slice(0, 10);
-    return created >= period.from && created <= period.to;
+    const created = String(row.created_at ?? "").slice(0, 10);
+    return !created || (created >= period.from && created <= period.to);
   });
   const caseIds = inPeriod.map((row) => row.id);
   const { data: payments } = caseIds.length

@@ -18,6 +18,7 @@ export const SECTION_LABELS = {
 
 const PE_NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
+  { href: "/app/users", label: "Assign officers", permission: "users.manage", section: "overview" },
   { href: "/app/members", label: "Members", permission: "members.view", section: "people" },
   { href: "/app/children", label: "Children", permission: "children.view", section: "people" },
   { href: "/app/visitors", label: "Visitors", permission: "visitors.view", section: "people" },
@@ -33,11 +34,10 @@ const PE_NAV: NavItem[] = [
   { href: "/app/department-finance", label: "Department finance", permission: "finance.department", section: "stewardship" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
   { href: "/app/themes", label: "Church Theme", permission: "themes.manage", section: "admin" },
-  { href: "/app/approvals", label: "Approvals", permission: "approvals.view", section: "admin" },
+  { href: "/app/approvals", label: "Record approvals", permission: "approvals.view", section: "admin" },
   { href: "/app/notifications", label: "Notifications", permission: "notifications.view", section: "admin" },
   { href: "/app/audit-logs", label: "Audit Logs", permission: "audit.view", section: "admin" },
   { href: "/app/settings", label: "Settings", permission: "settings.manage", section: "admin" },
-  { href: "/app/users", label: "Users & approvals", permission: "users.manage", section: "admin" },
   { href: "/app/portal", label: "My Profile", section: "overview" },
 ];
 

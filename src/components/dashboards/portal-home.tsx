@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Bar,
   BarChart,
@@ -31,6 +32,7 @@ export type PortalStats = {
   welfareOpen: number;
   pendingReports: number;
   pendingApprovals: number;
+  pendingOfficerRequests?: number;
   childrenCount: number;
   childrenClasses?: number;
   childrenWorkers?: number;
@@ -153,6 +155,19 @@ export function PortalHome({
       <div className="space-y-6">
         <PageHeader title={chrome.desk} description={greeting} />
         <ThemeBanner theme={churchTheme ?? null} />
+        <Link
+          href="/app/users"
+          className="block rounded-xl border-2 border-cop-gold bg-cop-navy p-4 text-white"
+        >
+          <div className="text-lg font-semibold">
+            {(stats.pendingOfficerRequests ?? 0) > 0
+              ? `${stats.pendingOfficerRequests} waiting for an office`
+              : "Assign officers"}
+          </div>
+          <p className="mt-1 text-sm text-white/85">
+            Tap here to give a new person Secretary, Treasurer, or a ministry. Until you assign them, they cannot open the system.
+          </p>
+        </Link>
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Assembly Overview</h2>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

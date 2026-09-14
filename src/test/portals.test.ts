@@ -28,7 +28,9 @@ describe("portal resolution", () => {
     const hrefs = navForPortal("presiding_elder").map((item) => item.href);
     expect(hrefs).toContain("/app/themes");
     expect(hrefs).toContain("/app/reports");
-    expect(hrefs).toContain("/app/approvals");
+    expect(hrefs).toContain("/app/users");
+    expect(hrefs.indexOf("/app/users")).toBeLessThan(hrefs.indexOf("/app/members"));
+    expect(navForPortal("presiding_elder").some((item) => item.label === "Assign officers")).toBe(true);
     expect(navForPortal("secretary").map((item) => item.href)).not.toContain("/app/themes");
     expect(navForPortal("treasurer").map((item) => item.href)).not.toContain("/app/themes");
     expect(navForPortal("presiding_elder").map((item) => item.href)).toContain("/app/notifications");

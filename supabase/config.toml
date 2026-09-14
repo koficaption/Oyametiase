@@ -12,7 +12,12 @@ major_version = 15
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+additional_redirect_urls = [
+  "http://localhost:3000/auth/callback",
+  "https://oyametiase-uokw.vercel.app/auth/callback",
+  "https://oyametiase-oacj.vercel.app/auth/callback",
+  "https://oyametiase-znij.vercel.app/auth/callback",
+]
 
 [realtime]
 enabled = true

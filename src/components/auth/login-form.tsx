@@ -17,6 +17,9 @@ export function LoginForm() {
   return (
     <form action={action} className="space-y-4">
       <FormStatus state={state} />
+      <p className="text-sm leading-6 text-cop-navy/80">
+        If a confirmation email opened localhost, ignore that link and sign in here.
+      </p>
       <div className="space-y-2">
         <Label htmlFor="identifier" className="text-base font-semibold text-cop-navy">
           Email or username

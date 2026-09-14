@@ -6,6 +6,7 @@ import { writeAudit } from "@/lib/auth/audit";
 import { requirePermission } from "@/lib/auth/session";
 import { inferGender, splitFullName } from "@/lib/church-directory";
 import { emptyToNull, opt, str } from "@/lib/forms";
+import { publicAppOrigin } from "@/lib/site-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { fail, ok, type ActionResult } from "@/lib/validations/common";
@@ -106,7 +107,7 @@ export async function inviteUserAction(formData: FormData): Promise<ActionResult
   } catch {
     return fail("Add SUPABASE_SERVICE_ROLE_KEY on the server to send invitations.");
   }
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const origin = await publicAppOrigin();
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
     data: { full_name: fullName },
     redirectTo: `${origin}/auth/callback?next=/update-password`,
@@ -196,7 +197,7 @@ export async function resetUserAccessAction(formData: FormData): Promise<ActionR
   } catch {
     return fail("Add SUPABASE_SERVICE_ROLE_KEY on the server to send password reset emails.");
   }
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const origin = await publicAppOrigin();
   const { error } = await admin.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/callback?next=/update-password`,
   });

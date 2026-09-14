@@ -39,7 +39,7 @@ export default async function OfficerAccessPage() {
         </div>
       </dl>
       <p className="mt-4 text-base leading-7 tracking-normal text-cop-navy/85">
-        Ask the Presiding Elder to assign you Secretary, Treasurer, or a ministry leadership office. Then sign in again.
+        Ask the Presiding Elder to open <strong>Assign officers</strong> in the menu, choose your office, and tap Assign this office. Then sign in again.
       </p>
       <form action={logoutAction} className="mt-4">
         <Button type="submit" className="h-11 w-full text-base">

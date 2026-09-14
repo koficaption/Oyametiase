@@ -10,6 +10,7 @@ import { loginIdentifierSchema, signupSchema } from "@/lib/validations/signup";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { str } from "@/lib/forms";
+import { publicAppOrigin } from "@/lib/site-url";
 
 export async function loginAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) {
@@ -87,7 +88,7 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
 
   const supabase = await createClient();
   const requested = suggestedSystemRole(parsed.data.church_position, parsed.data.church_responsibility);
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const origin = await publicAppOrigin();
 
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -115,7 +116,7 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
   }
 
   if (data.user && !data.session) {
-    return ok("Request received. Confirm your email if asked. The Presiding Elder must assign an officer office before you can sign in.");
+    return ok("Request received. Confirm your email if asked. Open Assign officers in the Presiding Elder menu to give this person an office before they can sign in.");
   }
 
   redirect("/officer-access");
@@ -139,7 +140,7 @@ export async function forgotPasswordAction(
   if (!parsed.success) return fail("Enter a valid email address.");
 
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const origin = await publicAppOrigin();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
     redirectTo: `${origin}/auth/callback?next=/update-password`,
   });

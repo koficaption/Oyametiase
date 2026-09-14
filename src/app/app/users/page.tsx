@@ -16,7 +16,7 @@ import { formAction } from "@/lib/forms";
 import { hasServiceRoleKey } from "@/lib/supabase/env";
 import { ROLE_LABELS, ROLES, type RoleSlug } from "@/types/roles";
 
-export const metadata = { title: "Users & approvals" };
+export const metadata = { title: "Assign officers" };
 
 export default async function UsersPage() {
   await requirePermission("users.manage");
@@ -33,8 +33,8 @@ export default async function UsersPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Users & approvals"
-        description="Church position and responsibility are recorded for review. Only an approved system role opens a portal."
+        title="Assign officers"
+        description="When someone creates an account, they wait here. Choose Secretary, Treasurer, or a ministry, then tap Assign this office. Until you do that, they cannot open the system."
       />
       {!hasServiceRoleKey() ? (
         <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
@@ -44,9 +44,9 @@ export default async function UsersPage() {
       ) : null}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Pending registrations</h2>
+        <h2 className="text-lg font-semibold">Waiting for an office</h2>
         {pending.length === 0 ? (
-          <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">No registrations waiting.</p>
+          <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">No one is waiting. New sign-ups will appear here.</p>
         ) : (
           pending.map((profile) => {
             const suggested = suggestedSystemRole(profile.church_position ?? "", profile.church_responsibility ?? "");
@@ -99,7 +99,7 @@ export default async function UsersPage() {
                     </select>
                   </label>
                   <div className="flex flex-wrap gap-2 md:col-span-2">
-                    <Button type="submit">Approve</Button>
+                    <Button type="submit" className="h-11 w-full text-base sm:w-auto">Assign this office</Button>
                   </div>
                 </form>
                 <form action={formAction(reviewRegistrationAction)}>

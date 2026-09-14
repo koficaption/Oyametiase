@@ -5,15 +5,19 @@ import { describe, expect, it } from "vitest";
 import { PasswordInput } from "@/components/ui/password-input";
 
 describe("password visibility", () => {
-  it("hides the password until the eye is tapped", async () => {
+  it("hides the password until the eye is tapped and keeps what was typed", async () => {
     const user = userEvent.setup();
-    render(<PasswordInput id="password" name="password" defaultValue="secret-word" />);
-    const field = screen.getByDisplayValue("secret-word");
+    render(<PasswordInput id="password" name="password" aria-label="Password" />);
+    const field = screen.getByLabelText("Password");
+    await user.type(field, "secret-word");
     expect(field).toHaveAttribute("type", "password");
+    expect(field).toHaveValue("secret-word");
     await user.click(screen.getByRole("button", { name: "Show password" }));
     expect(field).toHaveAttribute("type", "text");
+    expect(field).toHaveValue("secret-word");
     await user.click(screen.getByRole("button", { name: "Hide password" }));
     expect(field).toHaveAttribute("type", "password");
+    expect(field).toHaveValue("secret-word");
   });
 
   it("is used on login, register, and password reset", () => {

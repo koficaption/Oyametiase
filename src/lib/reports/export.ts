@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import ExcelJS from "exceljs";
-import jsPDF from "jspdf";
+import jsPDF, { GState } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { EMPTY_PERIOD, type BuiltReport } from "@/lib/reports/types";
 
@@ -38,7 +38,7 @@ export async function tablePdf(title: string, columns: string[], rows: (string |
   const doc = new jsPDF();
   const emblem = emblemBytes();
   if (emblem) {
-    doc.addImage(emblemDataUrl(emblem), "PNG", 96, 8, 18, 18);
+    doc.addImage(emblemDataUrl(emblem), "PNG", 96, 8, 18, 18, "cop-emblem", "FAST");
   }
   doc.setTextColor(...BLACK);
   doc.setFontSize(13);
@@ -187,7 +187,7 @@ export async function reportPdf(report: BuiltReport) {
   const emblem = emblemBytes();
   const pageWidth = doc.internal.pageSize.getWidth();
   if (emblem) {
-    doc.addImage(emblemDataUrl(emblem), "PNG", pageWidth / 2 - 11, 8, 22, 22);
+    doc.addImage(emblemDataUrl(emblem), "PNG", pageWidth / 2 - 11, 8, 22, 22, "cop-emblem", "FAST");
   }
   doc.setTextColor(...BLACK);
   doc.setFont("helvetica", "bold");
@@ -308,9 +308,8 @@ function stampWatermark(doc: jsPDF, emblem: Buffer | null) {
   for (let page = 1; page <= pages; page += 1) {
     doc.setPage(page);
     doc.saveGraphicsState();
-    const GState = (jsPDF as unknown as { GState: new (opts: { opacity: number }) => object }).GState;
     doc.setGState(new GState({ opacity: 0.08 }));
-    doc.addImage(image, "PNG", pageWidth / 2 - 38, pageHeight / 2 - 38, 76, 76);
+    doc.addImage(image, "PNG", pageWidth / 2 - 38, pageHeight / 2 - 38, 76, 76, "cop-emblem", "FAST");
     doc.restoreGraphicsState();
     doc.setTextColor(...BLACK);
     doc.setFontSize(8);

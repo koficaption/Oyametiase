@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ASSEMBLY_SLUG } from "@/lib/assembly";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isApprovedAccount } from "@/lib/church-directory";
 import { buildReport } from "@/lib/reports/build";
@@ -39,7 +40,7 @@ export async function GET(
   const supabase = await createClient();
   const report = await buildReport(supabase, user, filters);
   const format = url.searchParams.get("format") ?? "pdf";
-  const filename = `oyame-tiase-${type}-${filters.year}.${format === "xlsx" ? "xlsx" : format === "csv" ? "csv" : "pdf"}`;
+  const filename = `${ASSEMBLY_SLUG}-${type}-${filters.year}.${format === "xlsx" ? "xlsx" : format === "csv" ? "csv" : "pdf"}`;
 
   if (format === "csv") {
     return new NextResponse(reportCsv(report), {

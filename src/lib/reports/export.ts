@@ -3,6 +3,7 @@ import { join } from "node:path";
 import ExcelJS from "exceljs";
 import jsPDF, { GState } from "jspdf";
 import autoTable from "jspdf-autotable";
+import { ASSEMBLY_NAME } from "@/lib/assembly";
 import { EMPTY_PERIOD, type BuiltReport } from "@/lib/reports/types";
 
 const BLACK: [number, number, number] = [0, 0, 0];
@@ -22,7 +23,7 @@ function emblemDataUrl(bytes: Buffer) {
 
 export async function workbookToBuffer(rows: Record<string, unknown>[], sheetName: string) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Oyame Tiase Assembly";
+  workbook.creator = ASSEMBLY_NAME;
   const sheet = workbook.addWorksheet(sheetName);
   if (!rows.length) {
     sheet.addRow(["No records"]);
@@ -34,7 +35,12 @@ export async function workbookToBuffer(rows: Record<string, unknown>[], sheetNam
   return workbook.xlsx.writeBuffer();
 }
 
-export async function tablePdf(title: string, columns: string[], rows: (string | number)[][]) {
+export async function tablePdf(
+  title: string,
+  columns: string[],
+  rows: (string | number)[][],
+  assemblyName = ASSEMBLY_NAME,
+) {
   const doc = new jsPDF();
   const emblem = emblemBytes();
   if (emblem) {
@@ -45,7 +51,7 @@ export async function tablePdf(title: string, columns: string[], rows: (string |
   doc.setFont("helvetica", "bold");
   doc.text("The Church of Pentecost", 105, 32, { align: "center" });
   doc.setFontSize(11);
-  doc.text("Oyame Tiase Assembly", 105, 38, { align: "center" });
+  doc.text(assemblyName, 105, 38, { align: "center" });
   doc.setFontSize(12);
   doc.text(title, 105, 46, { align: "center" });
   autoTable(doc, {

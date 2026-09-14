@@ -1,5 +1,6 @@
 import { BrandShell } from "@/components/brand/brand-shell";
 import { RegisterForm } from "@/components/auth/register-form";
+import { ASSEMBLY_NAME } from "@/lib/assembly";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export const metadata = { title: "Create an account" };
@@ -7,7 +8,7 @@ export const metadata = { title: "Create an account" };
 export default function RegisterPage() {
   return (
     <BrandShell
-      title="Oyame Tiase Assembly"
+      title={ASSEMBLY_NAME}
       description="Request officer access. The first account becomes Presiding Elder. After that, the Presiding Elder assigns Secretary, Treasurer, or a ministry."
     >
       {!isSupabaseConfigured() ? (

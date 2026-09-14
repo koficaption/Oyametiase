@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { writeAudit } from "@/lib/auth/audit";
 import { requirePermission } from "@/lib/auth/session";
 import { inferGender, splitFullName } from "@/lib/church-directory";
@@ -342,8 +343,8 @@ export async function saveSettingsAction(formData: FormData): Promise<ActionResu
   const { error } = await supabase
     .from("assemblies")
     .update({
-      church_name: str(formData, "church_name") || "The Church of Pentecost",
-      assembly_name: str(formData, "assembly_name") || "Oyame Tiase Assembly",
+      church_name: str(formData, "church_name") || CHURCH_NAME,
+      assembly_name: str(formData, "assembly_name") || ASSEMBLY_NAME,
       phone: emptyToNull(str(formData, "phone")),
       email: emptyToNull(str(formData, "email")),
       address: emptyToNull(str(formData, "address")),

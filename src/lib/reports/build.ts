@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { getAssembly } from "@/lib/data/queries";
 import { getThemeForYear } from "@/lib/data/themes";
 import { ageOn, money, periodLabel, resolvePeriod } from "@/lib/reports/period";
@@ -106,8 +107,8 @@ export async function buildReport(
   return {
     type: filters.type,
     title: heading,
-    churchName: assembly?.church_name ?? "The Church of Pentecost",
-    assemblyName: assembly?.assembly_name ?? "Oyame Tiase Assembly",
+    churchName: assembly?.church_name ?? CHURCH_NAME,
+    assemblyName: assembly?.assembly_name ?? ASSEMBLY_NAME,
     year: filters.year,
     periodLabel: periodLabel(filters),
     from: period.from,

@@ -3,6 +3,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { NotificationsBell } from "@/components/layout/notifications-bell";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
+import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { requireUser, userPortal } from "@/lib/auth/session";
 import { getAssembly } from "@/lib/data/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -14,6 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const chrome = PORTAL_CHROME[portal];
   const supabase = await createClient();
   const assembly = await getAssembly(supabase);
+  const assemblyName = assembly?.assembly_name ?? ASSEMBLY_NAME;
   const { data: notifications } = await supabase
     .from("notifications")
     .select("id, title, body, link, is_read, created_at")
@@ -26,8 +28,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <AppSidebar
         role={user.profile.role_slug}
         portal={portal}
-        churchName={assembly?.church_name ?? "The Church of Pentecost"}
-        assemblyName={assembly?.assembly_name ?? "Oyame Tiase Assembly"}
+        churchName={assembly?.church_name ?? CHURCH_NAME}
+        assemblyName={assemblyName}
         assignments={user.workerAssignments}
       />
       <div className="flex min-w-0 flex-1 flex-col">
@@ -35,9 +37,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="h-1 bg-cop-gold" />
           <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
-            <MobileNav role={user.profile.role_slug} portal={portal} assignments={user.workerAssignments} />
+            <MobileNav
+              role={user.profile.role_slug}
+              portal={portal}
+              assignments={user.workerAssignments}
+              assemblyName={assemblyName}
+            />
             <div className="lg:hidden">
-              <div className="text-sm font-semibold">Oyame Tiase Assembly</div>
+              <div className="text-sm font-semibold">{assemblyName}</div>
               <div className="text-xs text-cop-gold">{chrome.desk}</div>
             </div>
           </div>

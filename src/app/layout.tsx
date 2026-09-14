@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Source_Code_Pro } from "next/font/google";
+import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -17,11 +18,10 @@ const sourceCode = Source_Code_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "Oyame Tiase Assembly",
-    template: "%s · Oyame Tiase Assembly",
+    default: ASSEMBLY_NAME,
+    template: `%s · ${ASSEMBLY_NAME}`,
   },
-  description:
-    "Local assembly management system for The Church of Pentecost, Oyame Tiase Assembly.",
+  description: `Local assembly management system for ${CHURCH_NAME}, ${ASSEMBLY_NAME}.`,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

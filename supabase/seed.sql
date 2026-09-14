@@ -178,7 +178,7 @@ BEGIN
   UPDATE public.member_confidential SET
     phone = '+233201000001',
     email = 'kwame.mensah.dev@example.com',
-    residential_address = 'House 12, Oyame Tiase (DEV DATA)',
+    residential_address = 'House 12, Oyame Tease (DEV DATA)',
     date_of_birth = '1974-03-11',
     occupation = 'Teacher',
     marital_status = 'married',
@@ -191,7 +191,7 @@ BEGIN
   UPDATE public.member_confidential SET
     phone = '+233201000002',
     email = 'abena.owusu.dev@example.com',
-    residential_address = 'House 4, Oyame Tiase (DEV DATA)',
+    residential_address = 'House 4, Oyame Tease (DEV DATA)',
     date_of_birth = '1982-09-22',
     occupation = 'Administrator',
     marital_status = 'married',
@@ -204,7 +204,7 @@ BEGIN
   UPDATE public.member_confidential SET
     phone = '+233201000003',
     email = 'yaw.boateng.dev@example.com',
-    residential_address = 'House 8, Oyame Tiase (DEV DATA)',
+    residential_address = 'House 8, Oyame Tease (DEV DATA)',
     date_of_birth = '1986-01-18',
     occupation = 'Accountant',
     marital_status = 'married',
@@ -245,7 +245,7 @@ BEGIN
   ) VALUES
     (aid, 'Samuel Oppong (DEV)', '+233241000101', 'Nearby community', current_date - 14, svc_sunday, 'Invitation from a friend', 'Family health', m_youth, 'contacted', 'DEVELOPMENT DATA'),
     (aid, 'Grace Nkrumah (DEV)', '+233241000102', 'Market area', current_date - 7, svc_sunday, 'Evangelism outreach', NULL, m_secretary, 'follow_up_scheduled', 'DEVELOPMENT DATA'),
-    (aid, 'Daniel Osei (DEV)', '+233241000103', 'Oyame Tiase', current_date - 2, svc_midweek, 'Walk-in', 'Job search', m_youth, 'new', 'DEVELOPMENT DATA');
+    (aid, 'Daniel Osei (DEV)', '+233241000103', 'Oyame Tease', current_date - 2, svc_midweek, 'Walk-in', 'Job search', m_youth, 'new', 'DEVELOPMENT DATA');
 
   INSERT INTO public.visitor_followups (visitor_id, follow_up_date, method, notes)
   SELECT id, date_visited + 2, 'phone', 'DEV DATA follow-up call'
@@ -270,12 +270,12 @@ BEGIN
   ) VALUES
     (aid, 'Sunday Worship Service', 'Weekly assembly worship', date_trunc('week', now()) + interval '7 days' + interval '8 hours', date_trunc('week', now()) + interval '7 days' + interval '11 hours', 'Main auditorium', m_elder, NULL, 'scheduled'),
     (aid, 'Youth All-Night (DEV)', 'Youth prayer and teaching', now() + interval '10 days', now() + interval '10 days 6 hours', 'Youth hall', m_youth, dept_youth, 'scheduled'),
-    (aid, 'Community Evangelism (DEV)', 'House-to-house outreach', now() - interval '14 days', now() - interval '14 days' + interval '3 hours', 'Oyame Tiase community', m_elder, dept_evangelism, 'completed');
+    (aid, 'Community Evangelism (DEV)', 'House-to-house outreach', now() - interval '14 days', now() - interval '14 days' + interval '3 hours', 'Oyame Tease community', m_elder, dept_evangelism, 'completed');
 
   INSERT INTO public.announcements (
     assembly_id, title, content, category, audience, published_at, author_id
   ) VALUES
-    (aid, 'Welcome to the assembly system (DEV)', 'This announcement is development seed data for Oyame Tiase Assembly.', 'information', 'everyone', now(), NULL),
+    (aid, 'Welcome to the assembly system (DEV)', 'This announcement is development seed data for Oyame Tease Assembly.', 'information', 'everyone', now(), NULL),
     (aid, 'Youth meeting this Friday (DEV)', 'All youth are encouraged to attend.', 'reminder', 'youth', now(), NULL);
 
   INSERT INTO public.financial_transactions (

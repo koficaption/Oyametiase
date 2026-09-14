@@ -13,10 +13,12 @@ function MobileNavSheet({
   role,
   portal,
   assignments = [],
+  assemblyName,
 }: {
   role: RoleSlug;
   portal: PortalKind;
   assignments?: WorkerAssignment[];
+  assemblyName: string;
 }) {
   const [open, setOpen] = useState(false);
   const chrome = PORTAL_CHROME[portal];
@@ -35,7 +37,7 @@ function MobileNavSheet({
       <SheetContent side="left" className="w-80 border-white/10 text-white" style={{ backgroundColor: chrome.sidebar }}>
         <div className="absolute inset-x-0 top-0 h-1.5 bg-cop-gold" />
         <SheetHeader>
-          <SheetTitle className="text-white">Oyame Tiase Assembly</SheetTitle>
+          <SheetTitle className="text-white">{assemblyName}</SheetTitle>
           <p className="text-sm text-cop-gold">{PORTAL_LABELS[portal]}</p>
           <p className="text-sm text-white/80">{chrome.desk}</p>
         </SheetHeader>
@@ -62,6 +64,7 @@ export function MobileNav(props: {
   role: RoleSlug;
   portal: PortalKind;
   assignments?: WorkerAssignment[];
+  assemblyName: string;
 }) {
   return (
     <Suspense fallback={

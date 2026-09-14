@@ -1,4 +1,4 @@
--- Oyame Tiase Assembly Management System
+-- Oyame Tease Assembly Management System
 -- Phase 2: normalized schema for a single local assembly.
 -- assembly_id is present for future district expansion; this app is single-assembly.
 
@@ -31,7 +31,7 @@ $$;
 CREATE TABLE public.assemblies (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   church_name text NOT NULL DEFAULT 'The Church of Pentecost',
-  assembly_name text NOT NULL DEFAULT 'Oyame Tiase Assembly',
+  assembly_name text NOT NULL DEFAULT 'Oyame Tease Assembly',
   logo_url text,
   phone text,
   email citext,
@@ -703,8 +703,8 @@ CREATE TABLE public.department_activities (
 INSERT INTO public.assemblies (church_name, assembly_name, location, phone, service_times)
 VALUES (
   'The Church of Pentecost',
-  'Oyame Tiase Assembly',
-  'Oyame Tiase',
+  'Oyame Tease Assembly',
+  'Oyame Tease',
   NULL,
   '[
     {"name":"Sunday Worship","day":"Sunday","time":"08:00"},

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ASSEMBLY_NAME } from "@/lib/assembly";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -7,7 +8,7 @@ export default function NotFound() {
       <p className="text-sm text-muted-foreground">404</p>
       <h1 className="text-2xl font-semibold">This page is not available</h1>
       <p className="max-w-md text-sm text-muted-foreground">
-        The record or route you requested does not exist in the Oyame Tiase Assembly system.
+        The record or route you requested does not exist in the {ASSEMBLY_NAME} system.
       </p>
       <Button asChild>
         <Link href="/app/dashboard">Return to dashboard</Link>

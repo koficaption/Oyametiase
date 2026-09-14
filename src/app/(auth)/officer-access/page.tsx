@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/actions/auth";
 import { requireSignupAccount } from "@/lib/auth/session";
 import { isApprovedAccount } from "@/lib/church-directory";
+import { ASSEMBLY_NAME } from "@/lib/assembly";
 import { isOfficerRole, ROLE_LABELS } from "@/types/roles";
 import { redirect } from "next/navigation";
 
@@ -21,7 +22,7 @@ export default async function OfficerAccessPage() {
   return (
     <BrandShell
       title="This system is for church officers"
-      description={`Peace be with you, ${user.profile.full_name}. Oyame Tiase Assembly CMS is for the Presiding Elder, Secretary, Treasurer, and ministry leaders only. There is no member portal.`}
+      description={`Peace be with you, ${user.profile.full_name}. ${ASSEMBLY_NAME} CMS is for the Presiding Elder, Secretary, Treasurer, and ministry leaders only. There is no member portal.`}
     >
       <dl className="space-y-2 rounded-xl border bg-muted/40 p-4 text-left text-base text-cop-navy">
         <div className="flex justify-between gap-3">

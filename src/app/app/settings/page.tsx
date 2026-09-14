@@ -3,6 +3,7 @@ import { savePositionAction, saveSettingsAction } from "@/actions/admin";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { requirePermission } from "@/lib/auth/session";
 import { getAssembly } from "@/lib/data/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -18,15 +19,15 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Assembly settings" description="Configurable local assembly identity. Defaults to Church of Pentecost, Oyame Tiase Assembly." />
+      <PageHeader title="Assembly settings" description={`Configurable local assembly identity. Defaults to ${CHURCH_NAME}, ${ASSEMBLY_NAME}.`} />
       <p className="rounded-xl border bg-card p-4 text-sm">
         Manage the official annual theme from{" "}
         <Link className="underline" href="/app/themes">Church Theme</Link>
         . It is stored by year and used automatically on the dashboard and reports.
       </p>
       <form action={formAction(saveSettingsAction)} className="grid gap-3 rounded-xl border bg-card p-4 md:grid-cols-2">
-        <Input name="church_name" defaultValue={assembly?.church_name ?? "The Church of Pentecost"} />
-        <Input name="assembly_name" defaultValue={assembly?.assembly_name ?? "Oyame Tiase Assembly"} />
+        <Input name="church_name" defaultValue={assembly?.church_name ?? CHURCH_NAME} />
+        <Input name="assembly_name" defaultValue={assembly?.assembly_name ?? ASSEMBLY_NAME} />
         <Input name="phone" defaultValue={assembly?.phone ?? ""} placeholder="Phone" />
         <Input name="email" defaultValue={assembly?.email ?? ""} placeholder="Email" />
         <Input name="location" defaultValue={assembly?.location ?? ""} placeholder="Location" />

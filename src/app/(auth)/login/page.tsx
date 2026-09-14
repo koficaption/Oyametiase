@@ -1,5 +1,6 @@
 import { BrandShell } from "@/components/brand/brand-shell";
 import { LoginForm } from "@/components/auth/login-form";
+import { ASSEMBLY_NAME } from "@/lib/assembly";
 import { getActiveTheme } from "@/lib/data/themes";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -11,11 +12,11 @@ export default async function LoginPage() {
 
   return (
     <BrandShell
-      title="Oyame Tiase Assembly"
+      title={ASSEMBLY_NAME}
       themeYear={theme?.year}
       themeTitle={theme?.title}
       themeScripture={theme?.scripture}
-      description="Peace be with you. Sign in to serve Oyame Tiase Assembly."
+      description={`Peace be with you. Sign in to serve ${ASSEMBLY_NAME}.`}
     >
       {!isSupabaseConfigured() ? (
         <p className="rounded-md border border-cop-gold bg-cop-gold/20 px-3 py-2 text-sm text-cop-navy">

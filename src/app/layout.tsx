@@ -23,8 +23,11 @@ export const metadata: Metadata = {
   description:
     "Local assembly management system for The Church of Pentecost, Oyame Tiase Assembly.",
   icons: {
-    icon: "/cop-emblem.png",
-    apple: "/cop-emblem.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: "/apple-icon.png",
   },
 };
 

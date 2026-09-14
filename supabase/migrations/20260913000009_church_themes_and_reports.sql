@@ -54,7 +54,7 @@ SELECT
   2026,
   'The Church Unleashed to Transform Society Through the Gospel and the Power of the Holy Spirit.',
   NULL,
-  'Official annual theme for The Church of Pentecost, Oyame Tease Assembly.',
+  'Official annual theme for The Church of Pentecost, Onyame Tease Assembly.',
   true
 FROM public.assemblies a
 ON CONFLICT (assembly_id, year) DO UPDATE

@@ -1,6 +1,6 @@
-# Church of Pentecost — Oyame Tease Assembly
+# Church of Pentecost — Onyame Tease Assembly
 
-Local assembly management system for **The Church of Pentecost, Oyame Tease Assembly**.
+Local assembly management system for **The Church of Pentecost, Onyame Tease Assembly**.
 
 This is a **single local assembly** application. The Presiding Elder is the highest local authority. It is not a multi-branch church platform, school system, or generic CRM.
 
@@ -106,7 +106,7 @@ If you apply SQL with `psql` from an IPv4-only host, use the Session pooler URL 
 
 Migrations are ordered:
 
-1. Schema and default assembly (`The Church of Pentecost` / `Oyame Tease Assembly`)
+1. Schema and default assembly (`The Church of Pentecost` / `Onyame Tease Assembly`)
 2. RLS helpers and policies
 3. Storage buckets and directory view
 4. Confidential member fields
@@ -238,4 +238,4 @@ Production checklist:
 
 ## License
 
-Private assembly software for Oyame Tease Assembly.
+Private assembly software for Onyame Tease Assembly.

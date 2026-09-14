@@ -1,4 +1,4 @@
-# Local Supabase configuration for the Oyame Tease Assembly system.
+# Local Supabase configuration for the Onyame Tease Assembly system.
 # Apply migrations with `supabase db push` after linking a project.
 
 project_id = "oyame-tiase-assembly"

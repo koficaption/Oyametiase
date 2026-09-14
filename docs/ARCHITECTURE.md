@@ -1,6 +1,6 @@
-# Architecture — Church of Pentecost, Oyame Tease Assembly
+# Architecture — Church of Pentecost, Onyame Tease Assembly
 
-This document describes the production architecture for the **Oyame Tease Assembly Management System**. It is a **single local assembly** system. The Presiding Elder is the highest local authority. Multi-branch church administration is intentionally not implemented.
+This document describes the production architecture for the **Onyame Tease Assembly Management System**. It is a **single local assembly** system. The Presiding Elder is the highest local authority. Multi-branch church administration is intentionally not implemented.
 
 ## 1. Purpose
 
@@ -18,7 +18,7 @@ Digitally manage the day-to-day life of one Church of Pentecost local assembly:
 
 ```
 The Church of Pentecost
- └── Oyame Tease Assembly          ← this software instance
+ └── Onyame Tease Assembly          ← this software instance
       └── Presiding Elder          ← highest local authority
            └── Assembly officers / workers
                 └── Departments / ministries

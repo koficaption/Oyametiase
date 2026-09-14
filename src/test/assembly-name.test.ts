@@ -14,14 +14,15 @@ function walk(dir: string, acc: string[] = []) {
 }
 
 describe("assembly name", () => {
-  it("is Oyame Tease Assembly", () => {
-    expect(ASSEMBLY_NAME).toBe("Oyame Tease Assembly");
-    expect(ASSEMBLY_LOCATION).toBe("Oyame Tease");
-    expect(ASSEMBLY_SLUG).toBe("oyame-tease");
+  it("is Onyame Tease Assembly", () => {
+    expect(ASSEMBLY_NAME).toBe("Onyame Tease Assembly");
+    expect(ASSEMBLY_LOCATION).toBe("Onyame Tease");
+    expect(ASSEMBLY_SLUG).toBe("onyame-tease");
     expect(ASSEMBLY_NAME).not.toMatch(/Tiase/i);
+    expect(ASSEMBLY_NAME).not.toMatch(/\bOyame\b/i);
   });
 
-  it("does not show the misspelling Tiase on user-facing surfaces", () => {
+  it("does not show Oyame or Tiase on user-facing surfaces", () => {
     const files = [
       ...walk("src/app"),
       ...walk("src/components"),
@@ -33,12 +34,13 @@ describe("assembly name", () => {
     for (const file of files) {
       const text = readFileSync(file, "utf8");
       expect(text, file).not.toMatch(/Oyame Tiase/i);
+      expect(text, file).not.toMatch(/\bOyame\b/);
     }
   });
 
   it("renames the live assembly row in a follow-up migration", () => {
-    const sql = readFileSync("supabase/migrations/20260914071400_oyame_tease_assembly_name.sql", "utf8");
-    expect(sql).toContain("Oyame Tease Assembly");
+    const sql = readFileSync("supabase/migrations/20260914074500_onyame_tease_assembly_name.sql", "utf8");
+    expect(sql).toContain("Onyame Tease Assembly");
     expect(sql).toContain("UPDATE public.assemblies");
     expect(sql).toContain("UPDATE public.church_themes");
   });

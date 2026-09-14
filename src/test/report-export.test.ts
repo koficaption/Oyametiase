@@ -7,7 +7,7 @@ const sample: BuiltReport = {
   type: "membership",
   title: "Membership Report",
   churchName: "The Church of Pentecost",
-  assemblyName: "Oyame Tease Assembly",
+  assemblyName: "Onyame Tease Assembly",
   year: 2026,
   periodLabel: "Year 2026",
   from: "2026-01-01",

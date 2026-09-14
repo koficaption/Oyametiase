@@ -5,7 +5,7 @@ import { updatePasswordAction } from "@/actions/auth";
 import { BrandShell } from "@/components/brand/brand-shell";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/validations/common";
 
@@ -19,11 +19,11 @@ export default function UpdatePasswordPage() {
         <FormStatus state={state} />
         <div className="space-y-2">
           <Label htmlFor="password">New password</Label>
-          <Input id="password" name="password" type="password" minLength={10} required />
+          <PasswordInput id="password" name="password" autoComplete="new-password" minLength={10} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm">Confirm password</Label>
-          <Input id="confirm" name="confirm" type="password" minLength={10} required />
+          <PasswordInput id="confirm" name="confirm" autoComplete="new-password" minLength={10} required />
         </div>
         <Button type="submit" disabled={pending} className="w-full">
           Update password

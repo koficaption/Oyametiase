@@ -6,6 +6,7 @@ import { signupAction } from "@/actions/auth";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { FieldSelect } from "@/components/ui/field-select";
 import { CHURCH_POSITIONS, CHURCH_RESPONSIBILITIES } from "@/lib/church-directory";
@@ -32,7 +33,7 @@ export function RegisterForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="username" className="text-base font-semibold text-cop-navy">Username</Label>
-          <Input id="username" name="username" autoComplete="username" required />
+          <Input id="username" name="username" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} required />
           <FieldError errors={state.fieldErrors?.username} />
         </div>
         <div className="space-y-2">
@@ -89,12 +90,12 @@ export function RegisterForm() {
         <legend className="text-base font-semibold text-cop-navy">Password</legend>
         <div className="space-y-2">
           <Label htmlFor="password" className="text-base font-semibold text-cop-navy">Password</Label>
-          <Input id="password" name="password" type="password" autoComplete="new-password" required />
+          <PasswordInput id="password" name="password" autoComplete="new-password" required />
           <FieldError errors={state.fieldErrors?.password} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm" className="text-base font-semibold text-cop-navy">Confirm password</Label>
-          <Input id="confirm" name="confirm" type="password" autoComplete="new-password" required />
+          <PasswordInput id="confirm" name="confirm" autoComplete="new-password" required />
           <FieldError errors={state.fieldErrors?.confirm} />
         </div>
       </fieldset>

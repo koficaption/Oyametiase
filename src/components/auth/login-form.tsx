@@ -6,6 +6,7 @@ import { loginAction } from "@/actions/auth";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import type { ActionResult } from "@/lib/validations/common";
 
@@ -24,6 +25,9 @@ export function LoginForm() {
           id="identifier"
           name="identifier"
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           required
           className="h-11 rounded-lg border-cop-navy/25 bg-white text-base text-cop-navy tracking-normal"
         />
@@ -32,10 +36,9 @@ export function LoginForm() {
         <Label htmlFor="password" className="text-base font-semibold text-cop-navy">
           Password
         </Label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           className="h-11 rounded-lg border-cop-navy/25 bg-white text-base text-cop-navy tracking-normal"

@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-source-sans), Arial, Helvetica, sans-serif;
-  --font-mono: var(--font-source-code), ui-monospace, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --font-heading: var(--font-sans);
   --color-cop-blue: var(--cop-blue);
   --color-cop-navy: var(--cop-navy);
@@ -141,6 +141,7 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* System fonts on fields so phones do not lag while typing. */
   input,
   select,
   textarea,
@@ -148,9 +149,14 @@
   option,
   label,
   legend {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
     letter-spacing: 0;
-    word-spacing: 0.1em;
+    word-spacing: normal;
     font-variant-ligatures: none;
+  }
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
 }

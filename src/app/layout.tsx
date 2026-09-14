@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Source_Sans_3, Source_Code_Pro } from "next/font/google";
+import { Source_Sans_3 } from "next/font/google";
 import { ASSEMBLY_NAME, CHURCH_NAME } from "@/lib/assembly";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -7,13 +7,10 @@ import "./globals.css";
 const sourceSans = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sourceCode = Source_Code_Pro({
-  variable: "--font-source-code",
-  subsets: ["latin"],
   weight: ["400", "600"],
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -36,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sourceSans.variable} ${sourceSans.className} ${sourceCode.variable} h-full`}
+      className={`${sourceSans.variable} h-full`}
     >
       <body className="min-h-full bg-background font-sans text-foreground">
         <Providers>{children}</Providers>

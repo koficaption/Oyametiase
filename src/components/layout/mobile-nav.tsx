@@ -34,14 +34,21 @@ function MobileNavSheet({
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 border-white/10 text-white" style={{ backgroundColor: chrome.sidebar }}>
+      <SheetContent
+        side="left"
+        className="w-80 overflow-hidden border-white/10 text-white"
+        style={{ backgroundColor: chrome.sidebar }}
+      >
         <div className="absolute inset-x-0 top-0 h-1.5 bg-cop-gold" />
-        <SheetHeader>
+        <SheetHeader className="shrink-0">
           <SheetTitle className="text-white">{assemblyName}</SheetTitle>
           <p className="text-sm text-cop-gold">{PORTAL_LABELS[portal]}</p>
           <p className="text-sm text-white/80">{chrome.desk}</p>
         </SheetHeader>
-        <nav className="mt-4 space-y-1" aria-label="Mobile navigation">
+        <nav
+          className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-4 pb-4"
+          aria-label="Mobile navigation"
+        >
           {visible.map((item) => (
             <NavLink
               key={item.href}

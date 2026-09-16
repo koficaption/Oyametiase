@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .limit(12);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-svh overflow-hidden bg-background">
       <AppSidebar
         role={user.profile.role_slug}
         portal={portal}
@@ -32,8 +32,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         assemblyName={assemblyName}
         assignments={user.workerAssignments}
       />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b text-white" style={{ backgroundColor: chrome.header }}>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="z-20 shrink-0 border-b text-white" style={{ backgroundColor: chrome.header }}>
           <div className="h-1 bg-cop-gold" />
           <div className="flex items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
@@ -57,7 +57,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
           </div>
         </header>
-        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main
+          data-scroll-pane="main"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-6 lg:px-8"
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

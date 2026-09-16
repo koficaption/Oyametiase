@@ -29,11 +29,12 @@ function SidebarNav({
 
   return (
     <aside
-      className="hidden w-72 shrink-0 border-r border-white/10 text-white lg:flex lg:flex-col"
+      data-scroll-pane="sidebar"
+      className="hidden h-full min-h-0 w-72 shrink-0 overflow-hidden border-r border-white/10 text-white lg:flex lg:flex-col"
       style={{ backgroundColor: chrome.sidebar }}
     >
-      <div className="h-1.5 bg-cop-gold" />
-      <div className="border-b border-white/15 px-5 py-5">
+      <div className="h-1.5 shrink-0 bg-cop-gold" />
+      <div className="shrink-0 border-b border-white/15 px-5 py-5">
         <div className="flex items-center gap-3">
           <AssemblyMark size={44} />
           <div>
@@ -44,7 +45,10 @@ function SidebarNav({
           </div>
         </div>
       </div>
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4" aria-label="Assembly navigation">
+      <nav
+        className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-3 py-4"
+        aria-label="Assembly navigation"
+      >
         {sections.map((section) => {
           const items = visible.filter((item) => item.section === section);
           if (!items.length) return null;
@@ -83,7 +87,7 @@ export function AppSidebar(props: {
   assignments?: WorkerAssignment[];
 }) {
   return (
-    <Suspense fallback={<aside className="hidden w-72 shrink-0 lg:block" />}>
+    <Suspense fallback={<aside className="hidden h-full w-72 shrink-0 lg:block" />}>
       <SidebarNav {...props} />
     </Suspense>
   );

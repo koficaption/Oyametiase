@@ -1,21 +1,51 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { writeAudit } from "@/lib/auth/audit";
+import { captchaFailureMessage, verifyCaptchaToken } from "@/lib/auth/captcha";
+import { AUTH_RATE_LIMIT_MESSAGE, isAuthRateLimited } from "@/lib/auth/rate-limit";
+import { clientIpFromHeaders, hashClientIp } from "@/lib/auth/request-ip";
+import { issueSignupTicket, profileIdentityTaken } from "@/lib/auth/signup-ticket";
 import { isApprovedAccount, suggestedSystemRole } from "@/lib/church-directory";
 import { isOfficerRole, type RoleSlug } from "@/types/roles";
 import { fail, ok, zodError, type ActionResult } from "@/lib/validations/common";
 import { loginIdentifierSchema, signupSchema } from "@/lib/validations/signup";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { hasServiceRoleKey, isSupabaseConfigured } from "@/lib/supabase/env";
 import { str } from "@/lib/forms";
 import { publicAppOrigin } from "@/lib/site-url";
+
+async function clientFingerprint() {
+  const ip = clientIpFromHeaders(await headers());
+  return { ip, ipHash: hashClientIp(ip) };
+}
+
+async function rejectIfRateLimited(action: "signup" | "login" | "forgot"): Promise<ActionResult | null> {
+  if (!hasServiceRoleKey()) {
+    if (action === "signup") {
+      return fail("Registration is temporarily unavailable. Add the server service role key.");
+    }
+    return null;
+  }
+  try {
+    const { ipHash } = await clientFingerprint();
+    if (await isAuthRateLimited(action, ipHash)) return fail(AUTH_RATE_LIMIT_MESSAGE);
+    return null;
+  } catch {
+    if (action === "signup") return fail("Registration is temporarily unavailable. Try again later.");
+    return null;
+  }
+}
 
 export async function loginAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   if (!isSupabaseConfigured()) {
     return fail("Supabase is not configured. Add environment variables from .env.example.");
   }
+
+  const limited = await rejectIfRateLimited("login");
+  if (limited) return limited;
 
   const parsed = loginIdentifierSchema.safeParse({
     identifier: str(formData, "identifier") || str(formData, "email"),
@@ -72,6 +102,20 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
     return fail("Supabase is not configured. Add environment variables from .env.example.");
   }
 
+  if (str(formData, "fax_number")) {
+    return fail("Unable to submit this registration.");
+  }
+
+  const limited = await rejectIfRateLimited("signup");
+  if (limited) return limited;
+
+  const captchaToken = str(formData, "captcha_token") || str(formData, "g-recaptcha-response");
+  const { ip } = await clientFingerprint();
+  const captcha = await verifyCaptchaToken(captchaToken, ip);
+  if (!captcha.ok) {
+    return fail(captchaFailureMessage(captcha.reason), { captcha_token: [captchaFailureMessage(captcha.reason)] });
+  }
+
   const parsed = signupSchema.safeParse({
     full_name: str(formData, "full_name"),
     username: str(formData, "username"),
@@ -86,6 +130,38 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
   });
   if (!parsed.success) return zodError(parsed.error);
 
+  if (!hasServiceRoleKey()) {
+    return fail("Registration is temporarily unavailable. Add the server service role key.");
+  }
+
+  let ticket: string;
+  try {
+    const taken = await profileIdentityTaken(parsed.data.email, parsed.data.username);
+    if (taken.emailTaken) {
+      return fail("An account with this email already exists. Sign in instead.", {
+        email: ["An account with this email already exists. Sign in instead."],
+      });
+    }
+    if (taken.usernameTaken) {
+      return fail("This username is already taken. Choose another one.", {
+        username: ["This username is already taken. Choose another one."],
+      });
+    }
+
+    ticket = await issueSignupTicket({
+      email: parsed.data.email,
+      username: parsed.data.username,
+      captchaToken,
+      source: "captcha",
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message === "expired") {
+      return fail(captchaFailureMessage("expired"), { captcha_token: [captchaFailureMessage("expired")] });
+    }
+    return fail("Unable to submit this registration.");
+  }
+
   const supabase = await createClient();
   const requested = suggestedSystemRole(parsed.data.church_position, parsed.data.church_responsibility);
   const origin = await publicAppOrigin();
@@ -97,8 +173,9 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
       emailRedirectTo: `${origin}/auth/callback?next=/officer-access`,
       data: {
         registration: "public",
+        signup_ticket: ticket,
         full_name: parsed.data.full_name,
-        username: parsed.data.username.toLowerCase(),
+        username: parsed.data.username,
         date_of_birth: parsed.data.date_of_birth,
         phone: parsed.data.phone,
         whatsapp_number: parsed.data.whatsapp_number,
@@ -112,7 +189,10 @@ export async function signupAction(_prev: ActionResult, formData: FormData): Pro
     if (error.message.toLowerCase().includes("already")) {
       return fail("An account with this email already exists. Sign in instead.");
     }
-    return fail(error.message || "Unable to submit this registration.");
+    if (error.message.toLowerCase().includes("captcha") || error.message.toLowerCase().includes("username")) {
+      return fail(error.message);
+    }
+    return fail("Unable to submit this registration.");
   }
 
   if (data.user && !data.session) {
@@ -135,8 +215,10 @@ export async function forgotPasswordAction(
   formData: FormData,
 ): Promise<ActionResult> {
   if (!isSupabaseConfigured()) return fail("Supabase is not configured.");
+  const limited = await rejectIfRateLimited("forgot");
+  if (limited) return limited;
   const email = str(formData, "email");
-  const parsed = z.string().email().safeParse(email);
+  const parsed = z.string().trim().toLowerCase().email().safeParse(email);
   if (!parsed.success) return fail("Enter a valid email address.");
 
   const supabase = await createClient();
@@ -155,6 +237,7 @@ export async function updatePasswordAction(
   const password = str(formData, "password");
   const confirm = str(formData, "confirm");
   if (password.length < 10) return fail("Use at least 10 characters.");
+  if (password.length > 128) return fail("Password is too long.");
   if (password !== confirm) return fail("Passwords do not match.");
 
   const supabase = await createClient();

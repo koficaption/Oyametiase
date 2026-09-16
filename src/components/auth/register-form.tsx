@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { signupAction } from "@/actions/auth";
+import { CaptchaField } from "@/components/auth/captcha-field";
 import { FormStatus } from "@/components/shared/form-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 export function RegisterForm() {
   const [state, action, pending] = useActionState(signupAction, initial);
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="relative space-y-6">
       <FormStatus state={state} />
       <fieldset className="space-y-3">
         <legend className="text-base font-semibold text-cop-navy">Personal information</legend>
@@ -99,6 +100,11 @@ export function RegisterForm() {
           <FieldError errors={state.fieldErrors?.confirm} />
         </div>
       </fieldset>
+      <div className="sr-only" aria-hidden="true">
+        <label htmlFor="fax_number">Fax</label>
+        <input id="fax_number" name="fax_number" tabIndex={-1} autoComplete="off" />
+      </div>
+      <CaptchaField error={state.fieldErrors?.captcha_token?.[0]} />
       <Button type="submit" className="h-11 w-full text-base" disabled={pending}>
         {pending ? "Creating account..." : "Create account"}
       </Button>

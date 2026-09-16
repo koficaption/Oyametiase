@@ -7,6 +7,7 @@ const departmentFinance = readFileSync("supabase/migrations/20260913000007_depar
 const registration = readFileSync("supabase/migrations/20260913000008_registration_approval.sql", "utf8");
 const openAccess = readFileSync("supabase/migrations/20260913170023_open_registration_access.sql", "utf8");
 const officerOnly = readFileSync("supabase/migrations/20260913172050_officer_only_registration.sql", "utf8");
+const captcha = readFileSync("supabase/migrations/20260916183301_signup_captcha_and_rate_limits.sql", "utf8");
 const themes = readFileSync("supabase/migrations/20260913000009_church_themes_and_reports.sql", "utf8");
 const publicTheme = readFileSync("supabase/migrations/20260913233300_public_active_church_theme.sql", "utf8");
 
@@ -68,6 +69,15 @@ describe("RLS source guarantees", () => {
     expect(openAccess).not.toContain("raw_user_meta_data->>'role");
     expect(officerOnly).toContain("assigned_status text := 'pending'");
     expect(officerOnly).toContain("assigned_role := 'presiding_elder'");
+  });
+
+  it("rejects Auth sign-up unless a server-issued CAPTCHA ticket is consumed", () => {
+    expect(captcha).toContain("app_private.consume_signup_ticket");
+    expect(captcha).toContain("RAISE EXCEPTION 'Registration requires a verified CAPTCHA'");
+    expect(captcha).toContain("GRANT EXECUTE ON FUNCTION public.issue_signup_ticket");
+    expect(captcha).toContain("TO service_role");
+    expect(captcha).not.toContain("GRANT EXECUTE ON FUNCTION public.issue_signup_ticket(text, text, text, integer) TO anon");
+    expect(captcha).toContain("profiles_email_unique");
   });
 
   it("stores church themes by year and limits writes to the Presiding Elder", () => {

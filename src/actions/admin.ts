@@ -7,7 +7,6 @@ import { requirePermission } from "@/lib/auth/session";
 import { inferGender, splitFullName } from "@/lib/church-directory";
 import { emptyToNull, opt, str } from "@/lib/forms";
 import { publicAppOrigin } from "@/lib/site-url";
-import { issueSignupTicket } from "@/lib/auth/signup-ticket";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { fail, ok, type ActionResult } from "@/lib/validations/common";
@@ -95,7 +94,7 @@ export async function savePositionAction(formData: FormData): Promise<ActionResu
 
 export async function inviteUserAction(formData: FormData): Promise<ActionResult> {
   const actor = await requirePermission("users.manage");
-  const email = str(formData, "email").toLowerCase();
+  const email = str(formData, "email");
   const fullName = str(formData, "full_name");
   const role = str(formData, "role_slug") as RoleSlug;
   const memberId = emptyToNull(str(formData, "member_id"));
@@ -109,18 +108,8 @@ export async function inviteUserAction(formData: FormData): Promise<ActionResult
     return fail("Add SUPABASE_SERVICE_ROLE_KEY on the server to send invitations.");
   }
   const origin = await publicAppOrigin();
-  let ticket: string;
-  try {
-    ticket = await issueSignupTicket({
-      email,
-      username: (fullName || email).split("@")[0]?.replace(/[^a-zA-Z0-9._]/g, "") || "officer",
-      source: "invite",
-    });
-  } catch {
-    return fail("Unable to start this invitation. Try again.");
-  }
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { full_name: fullName, registration: "invite", signup_ticket: ticket },
+    data: { full_name: fullName },
     redirectTo: `${origin}/auth/callback?next=/update-password`,
   });
   if (error || !data.user) return fail(error?.message ?? "Unable to invite this user.");

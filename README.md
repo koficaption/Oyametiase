@@ -78,32 +78,10 @@ Fill `.env.local` with your Supabase project values. Never commit real secrets.
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + server | Publishable / anon key |
 | `NEXT_PUBLIC_SITE_URL` | Server | Auth redirect origin |
-| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | Browser + server | Google reCAPTCHA v2 site key for the I'm not a robot checkbox |
-| `RECAPTCHA_SECRET_KEY` | Server only | Google reCAPTCHA secret. Used to verify tokens before an account is created |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Invites, password resets, signup tickets, and auth rate limits |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server only | Invites and password resets |
 | `SEED_DEV_DATA` | Development only | Must stay `false` in production |
 
-The service-role key and `RECAPTCHA_SECRET_KEY` must never be prefixed with `NEXT_PUBLIC_`. If either is missing, public registration stays closed.
-
-Create the reCAPTCHA v2 **checkbox** keys at [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin) for your live domain (and `localhost` for development). Add both values in Vercel → Project → Settings → Environment Variables for Production, Preview, and Development.
-
-## Blocking bots that skip the website
-
-The checkbox on the page is not enough. The server checks the token with Google **before** it creates an account. The database then refuses any Auth user that does not carry a one-time ticket minted after that check.
-
-After you apply the latest migration (`supabase db push`) you can prove a bot cannot sign up:
-
-```bash
-curl -sS "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/signup" \
-  -H "apikey: $NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
-  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"bot@example.com","password":"BotPassword12"}'
-```
-
-That request must fail with a CAPTCHA / privilege error. It must not create a row in Authentication → Users.
-
-Submitting `/register` without ticking I'm not a robot (or with a fake `captcha_token`) must also fail. Login and forgot-password allow a small burst, then return "Too many attempts from this network."
+The service-role key must never be prefixed with `NEXT_PUBLIC_`.
 
 ## Supabase setup
 
@@ -200,8 +178,6 @@ In [Vercel](https://vercel.com):
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable / anon key |
 | `NEXT_PUBLIC_SITE_URL` | `https://your-app.vercel.app` (or your custom domain) |
-| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | reCAPTCHA v2 checkbox site key |
-| `RECAPTCHA_SECRET_KEY` | reCAPTCHA secret (server only, never `NEXT_PUBLIC_`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | service-role / `sb_secret_...` key (server only) |
 | `SEED_DEV_DATA` | `false` |
 
@@ -247,8 +223,6 @@ Production checklist:
 - [ ] RLS enabled
 - [ ] Auth Site URL + `/auth/callback` configured
 - [ ] No development seed data
-- [ ] `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` and `RECAPTCHA_SECRET_KEY` set (secret is server-only)
-- [ ] Latest migration applied so direct Auth signup cannot skip CAPTCHA
 - [ ] Service-role key only on the server
 - [ ] First Presiding Elder can sign in and open Users & approvals
 

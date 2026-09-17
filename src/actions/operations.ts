@@ -17,6 +17,7 @@ import {
   welfareSchema,
 } from "@/lib/validations/operations";
 import {
+  encodeWeekMeta,
   mondayOfWeek,
   normalizeWeekLabel,
   normalizeWeekTime,
@@ -333,7 +334,7 @@ export async function saveWeeklyCollectionsAction(
 
   const { data: existing, error: existingError } = await supabase
     .from("financial_transactions")
-    .select("id, occurred_on, reference, archived_at")
+    .select("id, occurred_on, reference, archived_at, description")
     .eq("assembly_id", user.profile.assembly_id)
     .is("department_id", null)
     .in("reference", [WEEKLY_CHURCH_REF, WEEKLY_SUNDAY_SCHOOL_REF])
@@ -346,22 +347,29 @@ export async function saveWeeklyCollectionsAction(
     return matches.find((row) => !row.archived_at) ?? matches[0];
   };
 
+  const weekLabel = normalizeWeekLabel(parsed.data.week_label ?? "");
+  const weekDate = parsed.data.week_date || sunday;
+  const weekTime = parsed.data.week_time || "";
+  const weekMeta = { label: weekLabel, date: weekDate, time: weekTime };
+
   for (const day of parsed.data.days) {
     const isSunday = day.occurred_on === sunday;
+    const weekday = days.find((item) => item.iso === day.occurred_on)?.label ?? day.occurred_on;
     const entries = [
       {
         amount: day.church,
         reference: WEEKLY_CHURCH_REF,
         categoryId: isSunday ? (sundayOfferingId ?? churchFallback) : (midweekId ?? churchFallback),
-        description: isSunday
-          ? "Weekly church collection · Sunday"
-          : `Weekly church collection · ${days.find((item) => item.iso === day.occurred_on)?.label ?? day.occurred_on}`,
+        description: encodeWeekMeta(
+          isSunday ? "Weekly church collection · Sunday" : `Weekly church collection · ${weekday}`,
+          weekMeta,
+        ),
       },
       {
         amount: sundaySchoolForDay(isSunday, day.sunday_school),
         reference: WEEKLY_SUNDAY_SCHOOL_REF,
         categoryId: sundaySchoolId,
-        description: "Sunday school (children) · Sunday",
+        description: encodeWeekMeta("Sunday school (children) · Sunday", weekMeta),
       },
     ];
 
@@ -404,22 +412,22 @@ export async function saveWeeklyCollectionsAction(
     }
   }
 
-  const weekLabel = normalizeWeekLabel(parsed.data.week_label ?? "");
-  const weekDate = parsed.data.week_date || sunday;
-  const weekTime = parsed.data.week_time || null;
   const { error: weekError } = await supabase.from("weekly_collection_weeks").upsert(
     {
       assembly_id: user.profile.assembly_id,
       week_start: monday,
       label: weekLabel,
       event_date: weekDate,
-      event_time: weekTime,
+      event_time: weekTime || null,
       created_by: user.id,
     },
     { onConflict: "assembly_id,week_start" },
   );
   if (weekError) {
-    return fail("Week money saved, but the week name, date, or time could not be stored. Ask the Presiding Elder to apply the latest database update.");
+    const storedOnMoney = parsed.data.days.some((day) => day.church > 0 || day.sunday_school > 0);
+    if (!storedOnMoney) {
+      return fail("Week name, date, and time need at least one amount on the sheet, or the latest database update.");
+    }
   }
 
   revalidatePath("/app/finance");

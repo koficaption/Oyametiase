@@ -1,11 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  encodeWeekMeta,
+  firstWeekMeta,
   formatWeekMeta,
+  liveMonthTotals,
   mondayOfWeek,
+  monthBounds,
   normalizeWeekLabel,
   normalizeWeekTime,
   parseMoneyInput,
+  parseWeekMetaFromDescription,
   shiftWeek,
   sundayOfWeek,
   sundaySchoolForDay,
@@ -33,6 +38,17 @@ describe("weekly collection sheet", () => {
     expect(days[6].iso).toBe("2026-09-20");
     expect(days[6].isSunday).toBe(true);
     expect(shiftWeek("2026-09-14", 1)).toBe("2026-09-21");
+    const crossing = weekDays("2026-09-28");
+    expect(crossing.map((day) => day.iso)).toEqual([
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+    ]);
+    expect(monthBounds("2026-09")).toEqual({ start: "2026-09-01", end: "2026-09-30" });
   });
 
   it("adds Sunday school to the church amount for Sunday and the week totals", () => {
@@ -47,6 +63,34 @@ describe("weekly collection sheet", () => {
     expect(totals.church).toBe(430);
     expect(totals.sundaySchool).toBe(80);
     expect(totals.combined).toBe(510);
+  });
+
+  it("adds a week total and a month total when the week crosses the end of the month", () => {
+    const crossing = weekDays("2026-09-28").map((day, index) => ({
+      iso: day.iso,
+      church: index === 2 ? 30 : index === 3 ? 40 : 10,
+      sundaySchool: day.isSunday ? 5 : 0,
+      isSunday: day.isSunday,
+    }));
+    const week = weekTotals(crossing);
+    expect(week.church).toBe(30 + 40 + 50);
+    expect(week.sundaySchool).toBe(5);
+    const september = liveMonthTotals({
+      month: "2026-09",
+      savedMonth: { church: 100, sundaySchool: 0 },
+      originalDays: crossing.map((day) => ({ iso: day.iso, church: 0, sundaySchool: 0 })),
+      liveDays: crossing,
+    });
+    expect(september.church).toBe(100 + 10 + 10 + 30);
+    expect(september.sundaySchool).toBe(0);
+    const october = liveMonthTotals({
+      month: "2026-10",
+      savedMonth: { church: 0, sundaySchool: 0 },
+      originalDays: crossing.map((day) => ({ iso: day.iso, church: 0, sundaySchool: 0 })),
+      liveDays: crossing,
+    });
+    expect(october.church).toBe(40 + 10 + 10 + 10);
+    expect(october.sundaySchool).toBe(5);
   });
 
   it("keeps Sunday school off every day except Sunday", () => {
@@ -64,6 +108,17 @@ describe("weekly collection sheet", () => {
     expect(sundayOfWeek("2026-09-14")).toBe("2026-09-20");
     expect(formatWeekMeta({ label: "Youth week", date: "2026-09-20", time: "09:00" })).toContain("Youth week");
     expect(formatWeekMeta({ label: "Youth week", date: "2026-09-20", time: "09:00" })).toContain("2026");
+    expect(encodeWeekMeta("Weekly church collection · Sunday", { label: "Youth week", date: "2026-09-20", time: "09:00" })).toContain(
+      "Youth week",
+    );
+    expect(parseWeekMetaFromDescription("Weekly church collection · Sunday | Youth week | 2026-09-20 | 09:00")).toEqual({
+      label: "Youth week",
+      date: "2026-09-20",
+      time: "09:00",
+    });
+    expect(firstWeekMeta(["Weekly church collection · Monday", "Sunday school (children) · Sunday | Youth week | 2026-09-20 | 09:00"]).label).toBe(
+      "Youth week",
+    );
     const days = weekDays("2026-09-14").map((day) => ({
       occurred_on: day.iso,
       church: 0,
@@ -112,8 +167,8 @@ describe("weekly collection sheet", () => {
     expect(action).toContain("sundaySchoolForDay");
     expect(action).toContain("week_date");
     expect(action).toContain("week_time");
-    expect(action).toContain("event_date");
-    expect(action).toContain("event_time");
+    expect(action).toContain("encodeWeekMeta");
+    expect(action).not.toContain("Week money saved, but the week name, date, or time could not be stored");
   });
 
   it("lets the treasurer name a week and collect Sunday school only on Sunday", () => {
@@ -132,7 +187,9 @@ describe("weekly collection sheet", () => {
     const datetime = readFileSync("supabase/migrations/20260917194200_weekly_collection_week_date_time.sql", "utf8");
     expect(datetime).toContain("event_date");
     expect(datetime).toContain("event_time");
-    expect(sheet).toContain("day.isSunday");
+    expect(sheet).toContain("Date for");
+    expect(sheet).toContain("Month to total");
+    expect(sheet).toContain("liveMonthTotals");
     expect(sheet).not.toContain('placeholder={day.isSunday ? "Children" : "0"}');
   });
 });

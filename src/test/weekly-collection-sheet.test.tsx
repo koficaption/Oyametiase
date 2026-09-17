@@ -9,6 +9,10 @@ vi.mock("@/actions/operations", () => ({
   saveWeeklyCollectionsAction: async () => ({ ok: true, message: "saved" }),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
 vi.mock("next/link", () => ({
   default({ href, children, ...props }: { href: string; children: ReactNode; [key: string]: unknown }) {
     return (
@@ -37,6 +41,8 @@ describe("weekly collection sheet UI", () => {
         prevWeek="2026-09-07"
         nextWeek="2026-09-21"
         days={days}
+        month="2026-09"
+        savedMonth={{ church: 100, sundaySchool: 20 }}
         canWrite
         filterLinks={[{ href: "/app/finance/weekly", label: "Weekly" }]}
       />,
@@ -46,13 +52,17 @@ describe("weekly collection sheet UI", () => {
     expect(weekName).toHaveAttribute("placeholder", "Youth week");
     await user.type(weekName, "Youth week");
     expect(screen.getByText("Youth week")).toBeInTheDocument();
-    expect(screen.getByLabelText("Date")).toHaveAttribute("type", "date");
-    expect(screen.getByLabelText("Date")).toHaveValue("2026-09-20");
-    await user.clear(screen.getByLabelText("Date"));
-    await user.type(screen.getByLabelText("Date"), "2026-09-18");
+    expect(screen.getByLabelText("Service date")).toHaveAttribute("type", "date");
+    expect(screen.getByLabelText("Service date")).toHaveValue("2026-09-20");
+    expect(screen.getByLabelText("Date for Monday")).toHaveValue("2026-09-14");
+    expect(screen.getByLabelText("Date for Sunday")).toHaveValue("2026-09-20");
+    expect(screen.getByLabelText("Month to total")).toHaveValue("2026-09");
+    expect(screen.getByText("Month total · September 2026")).toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Service date"));
+    await user.type(screen.getByLabelText("Service date"), "2026-09-18");
     await user.clear(screen.getByLabelText("Time"));
     await user.type(screen.getByLabelText("Time"), "09:00");
-    expect(screen.getByLabelText("Date")).toHaveValue("2026-09-18");
+    expect(screen.getByLabelText("Service date")).toHaveValue("2026-09-18");
     expect(screen.getByLabelText("Time")).toHaveValue("09:00");
 
     expect(screen.getByLabelText("Sunday school money for Sunday")).toBeInTheDocument();

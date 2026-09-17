@@ -171,3 +171,110 @@ export function formatWeekRange(mondayIso: string) {
   });
   return `${firstLabel} – ${lastLabel}`;
 }
+
+export function monthKey(iso: string) {
+  return iso.slice(0, 7);
+}
+
+export function parseMonthKey(value: string) {
+  if (!/^\d{4}-\d{2}$/.test(value)) return null;
+  const start = parseIsoDate(`${value}-01`);
+  if (!start) return null;
+  if (monthKey(toIsoDate(start)) !== value) return null;
+  return value;
+}
+
+export function monthBounds(month: string) {
+  const key = parseMonthKey(month);
+  if (!key) return null;
+  const startDate = parseIsoDate(`${key}-01`);
+  if (!startDate) return null;
+  const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+  return { start: toIsoDate(startDate), end: toIsoDate(endDate) };
+}
+
+export function formatMonthName(month: string) {
+  const bounds = monthBounds(month);
+  if (!bounds) return "";
+  const date = parseIsoDate(bounds.start);
+  if (!date) return "";
+  return date.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+}
+
+export function inMonth(iso: string, month: string) {
+  return iso.startsWith(month);
+}
+
+export type WeekMeta = { label: string; date: string; time: string };
+
+export function emptyWeekMeta(): WeekMeta {
+  return { label: "", date: "", time: "" };
+}
+
+export function encodeWeekMeta(description: string, meta: WeekMeta) {
+  const label = normalizeWeekLabel(meta.label);
+  const date = parseIsoDate(meta.date) ? meta.date : "";
+  const time = normalizeWeekTime(meta.time) ?? "";
+  if (!label && !date && !time) return description;
+  return [description, label, date, time].filter(Boolean).join(" | ");
+}
+
+export function parseWeekMetaFromDescription(description: string | null | undefined): WeekMeta {
+  const meta = emptyWeekMeta();
+  if (!description) return meta;
+  const parts = description.split(" | ").map((part) => part.trim()).filter(Boolean);
+  for (const part of parts.slice(1)) {
+    if (parseIsoDate(part)) meta.date = part;
+    else if (normalizeWeekTime(part)) meta.time = normalizeWeekTime(part) ?? "";
+    else if (!meta.label) meta.label = normalizeWeekLabel(part);
+  }
+  return meta;
+}
+
+export function firstWeekMeta(descriptions: (string | null | undefined)[]) {
+  for (const description of descriptions) {
+    const meta = parseWeekMetaFromDescription(description);
+    if (meta.label || meta.date || meta.time) return meta;
+  }
+  return emptyWeekMeta();
+}
+
+export type MonthDayAmount = { iso: string; church: number; sundaySchool: number };
+
+export function monthTotalsFromEntries(entries: MonthDayAmount[], month: string) {
+  return weekTotals(
+    entries
+      .filter((entry) => inMonth(entry.iso, month))
+      .map((entry) => ({ church: entry.church, sundaySchool: entry.sundaySchool, isSunday: true })),
+  );
+}
+
+export function liveMonthTotals({
+  month,
+  savedMonth,
+  originalDays,
+  liveDays,
+}: {
+  month: string;
+  savedMonth: { church: number; sundaySchool: number };
+  originalDays: MonthDayAmount[];
+  liveDays: MonthDayAmount[];
+}) {
+  let church = savedMonth.church;
+  let sundaySchool = savedMonth.sundaySchool;
+  for (const day of originalDays) {
+    if (!inMonth(day.iso, month)) continue;
+    church -= day.church;
+    sundaySchool -= day.sundaySchool;
+  }
+  for (const day of liveDays) {
+    if (!inMonth(day.iso, month)) continue;
+    church += day.church;
+    sundaySchool += day.sundaySchool;
+  }
+  return {
+    church,
+    sundaySchool,
+    combined: church + sundaySchool,
+  };
+}

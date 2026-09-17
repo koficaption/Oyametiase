@@ -2,7 +2,7 @@ import { PortalHome, type PortalStats } from "@/components/dashboards/portal-hom
 import { requirePermission, userPortal } from "@/lib/auth/session";
 import { getActiveTheme } from "@/lib/data/themes";
 import { daysAgoIso } from "@/lib/dates";
-import { mondayOfWeek, todayIsoDate, WEEKLY_CHURCH_REF, WEEKLY_SUNDAY_SCHOOL_REF, weekDays } from "@/lib/weekly-collections";
+import { firstWeekMeta, mondayOfWeek, todayIsoDate, WEEKLY_CHURCH_REF, WEEKLY_SUNDAY_SCHOOL_REF, weekDays } from "@/lib/weekly-collections";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Dashboard" };
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
     supabase.from("announcements").select("id, title, published_at").eq("assembly_id", assemblyId).is("archived_at", null).order("published_at", { ascending: false }).limit(5),
     supabase.from("events").select("id, title, starts_at, venue, department_id").eq("assembly_id", assemblyId).gte("starts_at", new Date().toISOString()).order("starts_at").limit(5),
     supabase.from("attendance").select("attendance_date, status, department_id").eq("assembly_id", assemblyId).eq("status", "present").gte("attendance_date", monthStart),
-    supabase.from("financial_transactions").select("id, amount, type, occurred_on, department_id, reference, financial_categories(name, slug)").eq("assembly_id", assemblyId).is("archived_at", null).order("occurred_on", { ascending: false }).limit(200),
+    supabase.from("financial_transactions").select("id, amount, type, occurred_on, department_id, reference, description, financial_categories(name, slug)").eq("assembly_id", assemblyId).is("archived_at", null).order("occurred_on", { ascending: false }).limit(200),
     supabase.from("department_reports").select("id", { count: "exact", head: true }).eq("status", "submitted"),
     supabase.from("approvals").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("profiles").select("id", { count: "exact", head: true }).or("approval_status.eq.pending,account_status.eq.pending"),
@@ -93,6 +93,16 @@ export default async function DashboardPage() {
   const isMinistryLeader = user.profile.role_slug === "department_leader" || user.profile.role_slug === "ministry_finance";
   const txnRows = (transactions ?? []).filter((row) =>
     isMinistryLeader ? Boolean(row.department_id && scopedIds?.includes(row.department_id)) : row.department_id == null,
+  );
+  const metaFromMoney = firstWeekMeta(
+    txnRows
+      .filter(
+        (row) =>
+          (row.reference === WEEKLY_CHURCH_REF || row.reference === WEEKLY_SUNDAY_SCHOOL_REF) &&
+          row.occurred_on >= collectionWeekStart &&
+          row.occurred_on <= collectionWeekEnd,
+      )
+      .map((row) => row.description),
   );
   const ministryRows = (transactions ?? []).filter((row) => row.department_id != null);
   const sumWhere = (predicate: (row: (typeof txnRows)[number]) => boolean) =>
@@ -146,9 +156,9 @@ export default async function DashboardPage() {
           row.occurred_on === collectionWeekEnd,
       )
       .reduce((sum, row) => sum + Number(row.amount), 0),
-    weekLabel: weekRow?.label ?? "",
-    weekDate: weekRow?.event_date ?? "",
-    weekTime: weekRow?.event_time ?? "",
+    weekLabel: weekRow?.label || metaFromMoney.label,
+    weekDate: weekRow?.event_date || metaFromMoney.date,
+    weekTime: weekRow?.event_time || metaFromMoney.time,
   };
 
   const attendanceTrend = Object.values(

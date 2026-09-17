@@ -101,6 +101,7 @@ export default async function WeeklyCollectionsPage({
       nextWeek={shiftWeek(weekStart, 1) ?? weekStart}
       days={amounts}
       month={selectedMonth}
+      monthDays={[...monthEntries.values()]}
       savedMonth={savedMonth}
       canWrite={hasPermission(user.profile.role_slug, "finance.manage")}
       filterLinks={ASSEMBLY_FINANCE_FILTERS}

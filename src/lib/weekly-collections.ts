@@ -205,6 +205,49 @@ export function inMonth(iso: string, month: string) {
   return iso.startsWith(month);
 }
 
+export function shiftMonth(month: string, months: number) {
+  const bounds = monthBounds(month);
+  if (!bounds) return null;
+  const date = parseIsoDate(bounds.start);
+  if (!date) return null;
+  date.setMonth(date.getMonth() + months);
+  return monthKey(toIsoDate(date));
+}
+
+export type MonthGridDay = {
+  iso: string;
+  inMonth: boolean;
+  isSunday: boolean;
+  dayOfMonth: number;
+  label: WeekdayLabel;
+};
+
+/** Monday-start calendar weeks covering every day of `month`. */
+export function monthGrid(month: string): MonthGridDay[][] {
+  const bounds = monthBounds(month);
+  if (!bounds) return [];
+  const startMonday = mondayOfWeek(bounds.start);
+  const endMonday = mondayOfWeek(bounds.end);
+  if (!startMonday || !endMonday) return [];
+  const weeks: MonthGridDay[][] = [];
+  let monday = startMonday;
+  while (monday <= endMonday) {
+    weeks.push(
+      weekDays(monday).map((day) => ({
+        iso: day.iso,
+        inMonth: inMonth(day.iso, month),
+        isSunday: day.isSunday,
+        dayOfMonth: Number(day.iso.slice(8, 10)),
+        label: day.label,
+      })),
+    );
+    const next = shiftWeek(monday, 1);
+    if (!next || next <= monday) break;
+    monday = next;
+  }
+  return weeks;
+}
+
 export type WeekMeta = { label: string; date: string; time: string };
 
 export function emptyWeekMeta(): WeekMeta {
@@ -240,6 +283,28 @@ export function firstWeekMeta(descriptions: (string | null | undefined)[]) {
 }
 
 export type MonthDayAmount = { iso: string; church: number; sundaySchool: number };
+
+export function overlayMonthDayAmounts({
+  savedDays,
+  originalDays,
+  liveDays,
+}: {
+  savedDays: MonthDayAmount[];
+  originalDays: MonthDayAmount[];
+  liveDays: MonthDayAmount[];
+}): MonthDayAmount[] {
+  const map = new Map<string, MonthDayAmount>();
+  function apply(day: MonthDayAmount, factor: 1 | -1) {
+    const current = map.get(day.iso) ?? { iso: day.iso, church: 0, sundaySchool: 0 };
+    current.church += factor * day.church;
+    current.sundaySchool += factor * day.sundaySchool;
+    map.set(day.iso, current);
+  }
+  for (const day of savedDays) apply(day, 1);
+  for (const day of originalDays) apply(day, -1);
+  for (const day of liveDays) apply(day, 1);
+  return [...map.values()].filter((day) => day.church !== 0 || day.sundaySchool !== 0);
+}
 
 export function monthTotalsFromEntries(entries: MonthDayAmount[], month: string) {
   return weekTotals(

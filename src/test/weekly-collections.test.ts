@@ -7,6 +7,9 @@ import {
   liveMonthTotals,
   mondayOfWeek,
   monthBounds,
+  monthGrid,
+  overlayMonthDayAmounts,
+  shiftMonth,
   normalizeWeekLabel,
   normalizeWeekTime,
   parseMoneyInput,
@@ -49,6 +52,29 @@ describe("weekly collection sheet", () => {
       "2026-10-04",
     ]);
     expect(monthBounds("2026-09")).toEqual({ start: "2026-09-01", end: "2026-09-30" });
+    expect(shiftMonth("2026-09", 1)).toBe("2026-10");
+    expect(shiftMonth("2026-01", -1)).toBe("2025-12");
+    const september = monthGrid("2026-09");
+    expect(september[0].map((day) => day.iso)).toEqual([
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-06",
+    ]);
+    expect(september[0][0].inMonth).toBe(false);
+    expect(september[0][1].inMonth).toBe(true);
+    expect(september.at(-1)?.map((day) => day.iso)).toEqual([
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+    ]);
   });
 
   it("adds Sunday school to the church amount for Sunday and the week totals", () => {
@@ -91,6 +117,19 @@ describe("weekly collection sheet", () => {
     });
     expect(october.church).toBe(40 + 10 + 10 + 10);
     expect(october.sundaySchool).toBe(5);
+    expect(
+      overlayMonthDayAmounts({
+        savedDays: [
+          { iso: "2026-09-20", church: 400, sundaySchool: 80 },
+          { iso: "2026-09-06", church: 50, sundaySchool: 0 },
+        ],
+        originalDays: [{ iso: "2026-09-20", church: 400, sundaySchool: 80 }],
+        liveDays: [{ iso: "2026-09-20", church: 500, sundaySchool: 80 }],
+      }),
+    ).toEqual([
+      { iso: "2026-09-20", church: 500, sundaySchool: 80 },
+      { iso: "2026-09-06", church: 50, sundaySchool: 0 },
+    ]);
   });
 
   it("keeps Sunday school off every day except Sunday", () => {
@@ -173,6 +212,8 @@ describe("weekly collection sheet", () => {
     expect(sheet).not.toContain('id="week_time"');
     expect(sheet).toContain("Date for");
     expect(sheet).toContain("Month to total");
+    expect(sheet).toContain("Calendar for");
+    expect(sheet).not.toContain('type="month"');
     expect(sheet).toContain("liveMonthTotals");
     expect(sheet).not.toContain('placeholder={day.isSunday ? "Children" : "0"}');
   });

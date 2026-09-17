@@ -9,10 +9,6 @@ vi.mock("@/actions/operations", () => ({
   saveWeeklyCollectionsAction: async () => ({ ok: true, message: "saved" }),
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
-
 vi.mock("next/link", () => ({
   default({ href, children, ...props }: { href: string; children: ReactNode; [key: string]: unknown }) {
     return (
@@ -40,6 +36,10 @@ describe("weekly collection sheet UI", () => {
         nextWeek="2026-09-21"
         days={days}
         month="2026-09"
+        monthDays={[
+          { iso: "2026-09-06", church: 50, sundaySchool: 0 },
+          { iso: "2026-09-20", church: 400, sundaySchool: 80 },
+        ]}
         savedMonth={{ church: 100, sundaySchool: 20 }}
         canWrite
         filterLinks={[{ href: "/app/finance/weekly", label: "Weekly" }]}
@@ -54,7 +54,21 @@ describe("weekly collection sheet UI", () => {
     expect(screen.queryByLabelText("Time")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Date for Monday")).toHaveValue("2026-09-14");
     expect(screen.getByLabelText("Date for Sunday")).toHaveValue("2026-09-20");
-    expect(screen.getByLabelText("Month to total")).toHaveValue("2026-09");
+    expect(screen.queryByLabelText("Month to total")).not.toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Calendar for September 2026" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Monday, 14 Sept 2026, this week/ })).toHaveAttribute(
+      "href",
+      "/app/finance/weekly?week=2026-09-14&month=2026-09",
+    );
+    expect(screen.getByRole("link", { name: /Sunday, 20 Sept 2026, this week, GHS 480/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Sunday, 6 Sept 2026, GHS 50/ })).toHaveAttribute(
+      "href",
+      "/app/finance/weekly?week=2026-08-31&month=2026-09",
+    );
+    expect(screen.getByRole("link", { name: "Next month" })).toHaveAttribute(
+      "href",
+      "/app/finance/weekly?week=2026-09-14&month=2026-10",
+    );
     expect(screen.getByText("Month total · September 2026")).toBeInTheDocument();
 
     expect(screen.getByLabelText("Sunday school money for Sunday")).toBeInTheDocument();

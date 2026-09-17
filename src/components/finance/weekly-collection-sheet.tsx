@@ -2,7 +2,6 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { saveWeeklyCollectionsAction } from "@/actions/operations";
 import { FormStatus } from "@/components/shared/form-status";
 import { PageHeader } from "@/components/shared/page-header";
@@ -11,13 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  WEEKDAY_LABELS,
   formatMonthName,
+  formatWeekEventDate,
   formatWeekRange,
   liveMonthTotals,
   mondayOfWeek,
+  monthGrid,
+  overlayMonthDayAmounts,
+  shiftMonth,
   sundaySchoolForDay,
   weekDays,
   weekTotals,
+  type MonthDayAmount,
   type WeekDay,
 } from "@/lib/weekly-collections";
 import type { ActionResult } from "@/lib/validations/common";
@@ -48,6 +53,7 @@ export function WeeklyCollectionSheet({
   nextWeek,
   days,
   month,
+  monthDays,
   savedMonth,
   canWrite,
   filterLinks,
@@ -58,11 +64,11 @@ export function WeeklyCollectionSheet({
   nextWeek: string;
   days: WeeklyDayAmounts[];
   month: string;
+  monthDays: MonthDayAmount[];
   savedMonth: { church: number; sundaySchool: number };
   canWrite: boolean;
   filterLinks: { href: string; label: string }[];
 }) {
-  const router = useRouter();
   const [state, action, pending] = useActionState(saveWeeklyCollectionsAction, initial);
   const [activeMonday, setActiveMonday] = useState(weekStart);
   const displayDays = weekDays(activeMonday);
@@ -92,6 +98,17 @@ export function WeeklyCollectionSheet({
   });
   const heading = weekLabel.trim() || "Weekly collections";
   const monthName = formatMonthName(month);
+  const prevMonth = shiftMonth(month, -1) ?? month;
+  const nextMonth = shiftMonth(month, 1) ?? month;
+  const calendarWeeks = useMemo(() => monthGrid(month), [month]);
+  const calendarAmounts = useMemo(() => {
+    const overlay = overlayMonthDayAmounts({
+      savedDays: monthDays,
+      originalDays: days.map((day) => ({ iso: day.iso, church: day.church, sundaySchool: day.sundaySchool })),
+      liveDays: parsedDays,
+    });
+    return new Map(overlay.map((day) => [day.iso, day.church + day.sundaySchool]));
+  }, [days, monthDays, parsedDays]);
 
   function setDateForDay(picked: string) {
     const monday = mondayOfWeek(picked);
@@ -103,7 +120,7 @@ export function WeeklyCollectionSheet({
     <div className="space-y-6">
       <PageHeader
         title="Weekly collections"
-        description="Set the date under Monday, Tuesday, and the other days. If the week reaches the end of the month, the next days continue into the new month. Name the week if it has one — Youth week, Last supper week, or any name. Sunday school is only on Sunday."
+        description="Use the month calendar to pick a day. The yellow row is this week. If the week reaches the end of the month, the next days continue into the new month. Name the week if it has one — Youth week, Last supper week, or any name. Sunday school is only on Sunday."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
@@ -139,19 +156,64 @@ export function WeeklyCollectionSheet({
         <StatCard label="Week total" value={money(totals.combined)} />
       </div>
       <div className="space-y-3 rounded-xl border p-4">
-        <Label htmlFor="month" className="text-base font-semibold text-cop-navy">
-          Month to total
-        </Label>
-        <Input
-          id="month"
-          name="month"
-          type="month"
-          value={month}
-          onChange={(event) => router.push(sheetHref(activeMonday, event.target.value))}
-        />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-base font-semibold text-cop-navy">Month to total</p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link href={sheetHref(activeMonday, prevMonth)}>Previous month</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href={sheetHref(activeMonday, nextMonth)}>Next month</Link>
+            </Button>
+          </div>
+        </div>
+        <p className="text-lg font-semibold text-cop-navy">{monthName}</p>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[36rem] table-fixed border-collapse overflow-hidden rounded-lg border text-center text-sm" aria-label={`Calendar for ${monthName}`}>
+            <thead>
+              <tr className="bg-muted/60">
+                {WEEKDAY_LABELS.map((label) => (
+                  <th key={label} className={`border-b px-1 py-2 font-medium ${label === "Sunday" ? "text-cop-navy" : "text-muted-foreground"}`}>
+                    {label.slice(0, 3)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {calendarWeeks.map((week) => {
+                const isActiveWeek = week[0]?.iso === activeMonday;
+                return (
+                  <tr key={week[0]?.iso} className={isActiveWeek ? "bg-cop-gold/25" : ""}>
+                    {week.map((day) => {
+                      const total = calendarAmounts.get(day.iso) ?? 0;
+                      const monday = mondayOfWeek(day.iso) ?? day.iso;
+                      return (
+                        <td key={day.iso} className={`border p-0 align-top ${day.isSunday ? "bg-cop-gold/10" : ""}`}>
+                          <Link
+                            href={sheetHref(monday, day.inMonth ? month : day.iso.slice(0, 7))}
+                            aria-current={isActiveWeek && day.iso === activeMonday ? "date" : undefined}
+                            aria-label={`${formatWeekEventDate(day.iso)}${isActiveWeek ? ", this week" : ""}${total > 0 ? `, ${money(total)}` : ""}`}
+                            className={`flex min-h-[4.25rem] flex-col items-center px-1 py-1.5 hover:bg-cop-blue/10 ${
+                              day.inMonth ? "text-cop-navy" : "text-muted-foreground/60"
+                            } ${day.isSunday && day.inMonth ? "font-semibold" : ""}`}
+                          >
+                            <span className="text-sm font-medium">{day.dayOfMonth}</span>
+                            {total > 0 ? (
+                              <span className="mt-1 text-[0.7rem] leading-tight font-medium">{money(total)}</span>
+                            ) : null}
+                          </Link>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         <p className="text-sm leading-6 text-cop-navy/80">
-          Choose the month you are in, or another month, to add up church and Sunday school for that whole month.
-          A week that crosses the end of the month still has a week total; only the days in {monthName || "the chosen month"} go into the month total.
+          This month is a calendar. The yellow row is the week you are entering. Tap a day to open that week.
+          A week that crosses the end of the month still has a week total; only the days in {monthName || "this month"} go into the month total.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">

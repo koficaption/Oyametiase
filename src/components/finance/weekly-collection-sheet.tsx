@@ -12,14 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   formatMonthName,
-  formatWeekMeta,
   formatWeekRange,
   liveMonthTotals,
   mondayOfWeek,
-  sundayOfWeek,
   sundaySchoolForDay,
   weekDays,
-  weekTimeInputValue,
   weekTotals,
   type WeekDay,
 } from "@/lib/weekly-collections";
@@ -47,8 +44,6 @@ function sheetHref(week: string, month: string) {
 export function WeeklyCollectionSheet({
   weekStart,
   weekLabel: savedWeekLabel,
-  weekDate: savedWeekDate,
-  weekTime: savedWeekTime,
   prevWeek,
   nextWeek,
   days,
@@ -59,8 +54,6 @@ export function WeeklyCollectionSheet({
 }: {
   weekStart: string;
   weekLabel: string;
-  weekDate: string;
-  weekTime: string;
   prevWeek: string;
   nextWeek: string;
   days: WeeklyDayAmounts[];
@@ -73,10 +66,7 @@ export function WeeklyCollectionSheet({
   const [state, action, pending] = useActionState(saveWeeklyCollectionsAction, initial);
   const [activeMonday, setActiveMonday] = useState(weekStart);
   const displayDays = weekDays(activeMonday);
-  const sundayIso = sundayOfWeek(activeMonday);
   const [weekLabel, setWeekLabel] = useState(savedWeekLabel);
-  const [weekDate, setWeekDate] = useState(savedWeekDate || sundayIso);
-  const [weekTime, setWeekTime] = useState(weekTimeInputValue(savedWeekTime));
   const [church, setChurch] = useState(() => days.map((day) => displayAmount(day.church)));
   const [sundaySchool, setSundaySchool] = useState(() => {
     const sunday = days.find((day) => day.isSunday);
@@ -101,22 +91,19 @@ export function WeeklyCollectionSheet({
     liveDays: parsedDays,
   });
   const heading = weekLabel.trim() || "Weekly collections";
-  const when = formatWeekMeta({ date: weekDate, time: weekTime });
   const monthName = formatMonthName(month);
 
   function setDateForDay(picked: string) {
     const monday = mondayOfWeek(picked);
     if (!monday) return;
-    const nextSunday = sundayOfWeek(monday);
     setActiveMonday(monday);
-    setWeekDate((current) => (current === sundayIso || !current ? nextSunday : current));
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Weekly collections"
-        description="Set the date under Monday, Tuesday, and the other days. If the week reaches the end of the month, the next days continue into the new month. Name the week if it has one — Youth week, Last supper week, or any name — and add the service time. Sunday school is only on Sunday."
+        description="Set the date under Monday, Tuesday, and the other days. If the week reaches the end of the month, the next days continue into the new month. Name the week if it has one — Youth week, Last supper week, or any name. Sunday school is only on Sunday."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
@@ -144,7 +131,6 @@ export function WeeklyCollectionSheet({
       </div>
       <div>
         <p className="text-base font-medium text-cop-navy">{heading}</p>
-        {when ? <p className="text-sm text-cop-navy/80">{when}</p> : null}
         <p className="text-sm text-muted-foreground">Week of {formatWeekRange(activeMonday)}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
@@ -192,36 +178,8 @@ export function WeeklyCollectionSheet({
                 autoComplete="off"
               />
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="week_date" className="text-base font-semibold text-cop-navy">
-                  Service date
-                </Label>
-                <Input
-                  id="week_date"
-                  name="week_date"
-                  type="date"
-                  value={weekDate}
-                  onChange={(event) => setWeekDate(event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="week_time" className="text-base font-semibold text-cop-navy">
-                  Time
-                </Label>
-                <Input
-                  id="week_time"
-                  name="week_time"
-                  type="time"
-                  step={60}
-                  value={weekTime}
-                  onChange={(event) => setWeekTime(event.target.value)}
-                />
-              </div>
-            </div>
             <p className="text-sm leading-6 text-cop-navy/80">
-              Optional. Youth week, Last supper week, or any name. The service date and time are for that programme.
-              Each day column also has its own date, including when the month ends.
+              Optional. Youth week, Last supper week, or any name the assembly uses for this week.
             </p>
           </div>
           <div className="overflow-x-auto rounded-xl border">

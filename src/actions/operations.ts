@@ -20,8 +20,6 @@ import {
   encodeWeekMeta,
   mondayOfWeek,
   normalizeWeekLabel,
-  normalizeWeekTime,
-  parseIsoDate,
   parseMoneyInput,
   SUNDAY_SCHOOL_CATEGORY_SLUG,
   sundayOfWeek,
@@ -306,12 +304,9 @@ export async function saveWeeklyCollectionsAction(
   if (!monday) return fail("Choose a valid week.");
   const days = weekDays(monday);
   const sunday = sundayOfWeek(monday);
-  const requestedDate = str(formData, "week_date");
   const parsed = weeklyCollectionsSchema.safeParse({
     week_start: monday,
     week_label: normalizeWeekLabel(str(formData, "week_label")),
-    week_date: requestedDate ? (parseIsoDate(requestedDate) ? requestedDate : "invalid") : sunday,
-    week_time: normalizeWeekTime(str(formData, "week_time")) ?? "invalid",
     days: days.map((day) => ({
       occurred_on: day.iso,
       church: parseMoneyInput(str(formData, `church_${day.iso}`)) ?? -1,
@@ -348,9 +343,7 @@ export async function saveWeeklyCollectionsAction(
   };
 
   const weekLabel = normalizeWeekLabel(parsed.data.week_label ?? "");
-  const weekDate = parsed.data.week_date || sunday;
-  const weekTime = parsed.data.week_time || "";
-  const weekMeta = { label: weekLabel, date: weekDate, time: weekTime };
+  const weekMeta = { label: weekLabel, date: "", time: "" };
 
   for (const day of parsed.data.days) {
     const isSunday = day.occurred_on === sunday;
@@ -417,8 +410,8 @@ export async function saveWeeklyCollectionsAction(
       assembly_id: user.profile.assembly_id,
       week_start: monday,
       label: weekLabel,
-      event_date: weekDate,
-      event_time: weekTime || null,
+      event_date: sunday,
+      event_time: null,
       created_by: user.id,
     },
     { onConflict: "assembly_id,week_start" },

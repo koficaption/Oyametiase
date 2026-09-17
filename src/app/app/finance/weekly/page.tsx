@@ -97,8 +97,6 @@ export default async function WeeklyCollectionsPage({
       key={`${weekStart}:${selectedMonth}`}
       weekStart={weekStart}
       weekLabel={weekRow?.label || metaFromMoney.label}
-      weekDate={weekRow?.event_date || metaFromMoney.date}
-      weekTime={weekRow?.event_time || metaFromMoney.time}
       prevWeek={shiftWeek(weekStart, -1) ?? weekStart}
       nextWeek={shiftWeek(weekStart, 1) ?? weekStart}
       days={amounts}

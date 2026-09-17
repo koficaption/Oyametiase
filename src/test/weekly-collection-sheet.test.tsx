@@ -36,8 +36,6 @@ describe("weekly collection sheet UI", () => {
       <WeeklyCollectionSheet
         weekStart="2026-09-14"
         weekLabel=""
-        weekDate=""
-        weekTime=""
         prevWeek="2026-09-07"
         nextWeek="2026-09-21"
         days={days}
@@ -52,18 +50,12 @@ describe("weekly collection sheet UI", () => {
     expect(weekName).toHaveAttribute("placeholder", "Youth week");
     await user.type(weekName, "Youth week");
     expect(screen.getByText("Youth week")).toBeInTheDocument();
-    expect(screen.getByLabelText("Service date")).toHaveAttribute("type", "date");
-    expect(screen.getByLabelText("Service date")).toHaveValue("2026-09-20");
+    expect(screen.queryByLabelText("Service date")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Time")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Date for Monday")).toHaveValue("2026-09-14");
     expect(screen.getByLabelText("Date for Sunday")).toHaveValue("2026-09-20");
     expect(screen.getByLabelText("Month to total")).toHaveValue("2026-09");
     expect(screen.getByText("Month total · September 2026")).toBeInTheDocument();
-    await user.clear(screen.getByLabelText("Service date"));
-    await user.type(screen.getByLabelText("Service date"), "2026-09-18");
-    await user.clear(screen.getByLabelText("Time"));
-    await user.type(screen.getByLabelText("Time"), "09:00");
-    expect(screen.getByLabelText("Service date")).toHaveValue("2026-09-18");
-    expect(screen.getByLabelText("Time")).toHaveValue("09:00");
 
     expect(screen.getByLabelText("Sunday school money for Sunday")).toBeInTheDocument();
     expect(screen.queryByLabelText("Sunday school money for Monday")).not.toBeInTheDocument();

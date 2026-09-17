@@ -128,8 +128,6 @@ describe("weekly collection sheet", () => {
       weeklyCollectionsSchema.safeParse({
         week_start: "2026-09-14",
         week_label: "Youth week",
-        week_date: "2026-09-20",
-        week_time: "09:00",
         days,
       }).success,
     ).toBe(true);
@@ -137,14 +135,6 @@ describe("weekly collection sheet", () => {
       weeklyCollectionsSchema.safeParse({
         week_start: "2026-09-14",
         week_label: "x".repeat(121),
-        days,
-      }).success,
-    ).toBe(false);
-    expect(
-      weeklyCollectionsSchema.safeParse({
-        week_start: "2026-09-14",
-        week_label: "Youth week",
-        week_time: "25:00",
         days,
       }).success,
     ).toBe(false);
@@ -165,8 +155,7 @@ describe("weekly collection sheet", () => {
     expect(action).toContain("requirePermission(\"finance.manage\")");
     expect(action).toContain("WEEKLY_SUNDAY_SCHOOL_REF");
     expect(action).toContain("sundaySchoolForDay");
-    expect(action).toContain("week_date");
-    expect(action).toContain("week_time");
+    expect(action).toContain("week_label");
     expect(action).toContain("encodeWeekMeta");
     expect(action).not.toContain("Week money saved, but the week name, date, or time could not be stored");
   });
@@ -180,13 +169,8 @@ describe("weekly collection sheet", () => {
     const sheet = readFileSync("src/components/finance/weekly-collection-sheet.tsx", "utf8");
     expect(sheet).toContain("What week is this?");
     expect(sheet).toContain("Youth week");
-    expect(sheet).toContain('id="week_date"');
-    expect(sheet).toContain('id="week_time"');
-    expect(sheet).toContain('type="date"');
-    expect(sheet).toContain('type="time"');
-    const datetime = readFileSync("supabase/migrations/20260917194200_weekly_collection_week_date_time.sql", "utf8");
-    expect(datetime).toContain("event_date");
-    expect(datetime).toContain("event_time");
+    expect(sheet).not.toContain("Service date");
+    expect(sheet).not.toContain('id="week_time"');
     expect(sheet).toContain("Date for");
     expect(sheet).toContain("Month to total");
     expect(sheet).toContain("liveMonthTotals");

@@ -106,16 +106,6 @@ export const weeklyAmountSchema = z.coerce
 export const weeklyCollectionsSchema = z.object({
   week_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a week"),
   week_label: z.string().trim().max(120, "Week name is too long").optional().or(z.literal("")),
-  week_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a date")
-    .optional()
-    .or(z.literal("")),
-  week_time: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Choose a valid time")
-    .optional()
-    .or(z.literal("")),
   days: z
     .array(
       z.object({

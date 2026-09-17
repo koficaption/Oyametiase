@@ -51,8 +51,6 @@ export type PortalStats = {
   weekChurch?: number;
   weekSundaySchool?: number;
   weekLabel?: string;
-  weekDate?: string;
-  weekTime?: string;
 };
 
 type ChartPoint = { label: string; value: number };
@@ -84,7 +82,7 @@ export function PortalHome({
 }) {
   const chrome = PORTAL_CHROME[portal];
   const greeting = `Peace be with you, ${name}. ${ministryName ? `${ministryName}. ` : ""}${chrome.hint}`;
-  const weekMeta = formatWeekMeta({ label: stats.weekLabel, date: stats.weekDate, time: stats.weekTime });
+  const weekMeta = formatWeekMeta({ label: stats.weekLabel });
 
   if (portal === "member") {
     return (

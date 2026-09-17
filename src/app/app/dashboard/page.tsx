@@ -157,8 +157,6 @@ export default async function DashboardPage() {
       )
       .reduce((sum, row) => sum + Number(row.amount), 0),
     weekLabel: weekRow?.label || metaFromMoney.label,
-    weekDate: weekRow?.event_date || metaFromMoney.date,
-    weekTime: weekRow?.event_time || metaFromMoney.time,
   };
 
   const attendanceTrend = Object.values(

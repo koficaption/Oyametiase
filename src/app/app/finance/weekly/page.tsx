@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   mondayOfWeek,
   shiftWeek,
+  sundaySchoolForDay,
   todayIsoDate,
   WEEKLY_CHURCH_REF,
   WEEKLY_SUNDAY_SCHOOL_REF,
@@ -27,15 +28,23 @@ export default async function WeeklyCollectionsPage({
   const days = weekDays(weekStart);
   const sunday = days[6]?.iso ?? weekStart;
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("financial_transactions")
-    .select("occurred_on, amount, reference")
-    .eq("assembly_id", user.profile.assembly_id)
-    .is("department_id", null)
-    .is("archived_at", null)
-    .in("reference", [WEEKLY_CHURCH_REF, WEEKLY_SUNDAY_SCHOOL_REF])
-    .gte("occurred_on", weekStart)
-    .lte("occurred_on", sunday);
+  const [{ data }, { data: weekRow }] = await Promise.all([
+    supabase
+      .from("financial_transactions")
+      .select("occurred_on, amount, reference")
+      .eq("assembly_id", user.profile.assembly_id)
+      .is("department_id", null)
+      .is("archived_at", null)
+      .in("reference", [WEEKLY_CHURCH_REF, WEEKLY_SUNDAY_SCHOOL_REF])
+      .gte("occurred_on", weekStart)
+      .lte("occurred_on", sunday),
+    supabase
+      .from("weekly_collection_weeks")
+      .select("label")
+      .eq("assembly_id", user.profile.assembly_id)
+      .eq("week_start", weekStart)
+      .maybeSingle(),
+  ]);
 
   const amounts = days.map((day) => {
     const rows = (data ?? []).filter((row) => row.occurred_on === day.iso);
@@ -44,9 +53,12 @@ export default async function WeeklyCollectionsPage({
       church: rows
         .filter((row) => row.reference === WEEKLY_CHURCH_REF)
         .reduce((sum, row) => sum + Number(row.amount), 0),
-      sundaySchool: rows
-        .filter((row) => row.reference === WEEKLY_SUNDAY_SCHOOL_REF)
-        .reduce((sum, row) => sum + Number(row.amount), 0),
+      sundaySchool: sundaySchoolForDay(
+        day.isSunday,
+        rows
+          .filter((row) => row.reference === WEEKLY_SUNDAY_SCHOOL_REF)
+          .reduce((sum, row) => sum + Number(row.amount), 0),
+      ),
     };
   });
 
@@ -54,6 +66,7 @@ export default async function WeeklyCollectionsPage({
     <WeeklyCollectionSheet
       key={weekStart}
       weekStart={weekStart}
+      weekLabel={weekRow?.label ?? ""}
       prevWeek={shiftWeek(weekStart, -1) ?? weekStart}
       nextWeek={shiftWeek(weekStart, 1) ?? weekStart}
       days={amounts}

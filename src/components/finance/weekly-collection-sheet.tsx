@@ -8,7 +8,8 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatWeekRange, weekTotals, type WeekDay } from "@/lib/weekly-collections";
+import { Label } from "@/components/ui/label";
+import { formatWeekRange, sundaySchoolForDay, weekTotals, type WeekDay } from "@/lib/weekly-collections";
 import type { ActionResult } from "@/lib/validations/common";
 
 export type WeeklyDayAmounts = WeekDay & {
@@ -28,6 +29,7 @@ function displayAmount(value: number) {
 
 export function WeeklyCollectionSheet({
   weekStart,
+  weekLabel: savedWeekLabel,
   prevWeek,
   nextWeek,
   days,
@@ -35,6 +37,7 @@ export function WeeklyCollectionSheet({
   filterLinks,
 }: {
   weekStart: string;
+  weekLabel: string;
   prevWeek: string;
   nextWeek: string;
   days: WeeklyDayAmounts[];
@@ -42,26 +45,30 @@ export function WeeklyCollectionSheet({
   filterLinks: { href: string; label: string }[];
 }) {
   const [state, action, pending] = useActionState(saveWeeklyCollectionsAction, initial);
+  const [weekLabel, setWeekLabel] = useState(savedWeekLabel);
   const [church, setChurch] = useState(() => Object.fromEntries(days.map((day) => [day.iso, displayAmount(day.church)])));
-  const [sundaySchool, setSundaySchool] = useState(() =>
-    Object.fromEntries(days.map((day) => [day.iso, displayAmount(day.sundaySchool)])),
-  );
+  const [sundaySchool, setSundaySchool] = useState(() => {
+    const sunday = days.find((day) => day.isSunday);
+    return sunday ? displayAmount(sunday.sundaySchool) : "";
+  });
 
   const parsedDays = useMemo(
     () =>
       days.map((day) => ({
         church: Number(church[day.iso] || 0) || 0,
-        sundaySchool: Number(sundaySchool[day.iso] || 0) || 0,
+        sundaySchool: sundaySchoolForDay(day.isSunday, Number(sundaySchool || 0) || 0),
+        isSunday: day.isSunday,
       })),
     [church, days, sundaySchool],
   );
   const totals = weekTotals(parsedDays);
+  const heading = weekLabel.trim() || "Weekly collections";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Weekly collections"
-        description="Enter Monday to Saturday as they come in. On Sunday add the church offering and Sunday school (children) offering. The Sunday total and the week total add them together."
+        description="Enter Monday to Saturday church money as it comes in. Sunday school is only on Sunday — add the children's offering there, then the Sunday total adds church and Sunday school together. Name the week if it has one, for example Last supper week."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
@@ -87,7 +94,10 @@ export function WeeklyCollectionSheet({
           </a>
         ))}
       </div>
-      <p className="text-base font-medium text-cop-navy">Week of {formatWeekRange(weekStart)}</p>
+      <div>
+        <p className="text-base font-medium text-cop-navy">{heading}</p>
+        <p className="text-sm text-muted-foreground">Week of {formatWeekRange(weekStart)}</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Church this week" value={money(totals.church)} />
         <StatCard label="Sunday school this week" value={money(totals.sundaySchool)} />
@@ -97,6 +107,23 @@ export function WeeklyCollectionSheet({
         <form action={action} className="space-y-4">
           <input type="hidden" name="week_start" value={weekStart} />
           <FormStatus state={state} />
+          <div className="space-y-2 rounded-xl border p-4">
+            <Label htmlFor="week_label" className="text-base font-semibold text-cop-navy">
+              What week is this?
+            </Label>
+            <Input
+              id="week_label"
+              name="week_label"
+              value={weekLabel}
+              onChange={(event) => setWeekLabel(event.target.value)}
+              placeholder="Last supper week"
+              maxLength={120}
+              autoComplete="off"
+            />
+            <p className="text-sm leading-6 text-cop-navy/80">
+              Optional. Type any name the assembly uses for this week, such as Last supper week.
+            </p>
+          </div>
           <div className="overflow-x-auto rounded-xl border">
             <table className="w-full min-w-[52rem] text-sm">
               <thead className="bg-muted/50 text-left">
@@ -143,22 +170,26 @@ export function WeeklyCollectionSheet({
                   <th className="px-3 py-3 text-left font-medium">Sunday school</th>
                   {days.map((day) => (
                     <td key={day.iso} className={`px-2 py-2 ${day.isSunday ? "bg-cop-gold/10" : ""}`}>
-                      <label className="sr-only" htmlFor={`sunday_school_${day.iso}`}>
-                        Sunday school money for {day.label}
-                      </label>
-                      <Input
-                        id={`sunday_school_${day.iso}`}
-                        name={`sunday_school_${day.iso}`}
-                        type="number"
-                        inputMode="decimal"
-                        step="0.01"
-                        min="0"
-                        value={sundaySchool[day.iso]}
-                        onChange={(event) =>
-                          setSundaySchool((current) => ({ ...current, [day.iso]: event.target.value }))
-                        }
-                        placeholder={day.isSunday ? "Children" : "0"}
-                      />
+                      {day.isSunday ? (
+                        <>
+                          <label className="sr-only" htmlFor={`sunday_school_${day.iso}`}>
+                            Sunday school money for {day.label}
+                          </label>
+                          <Input
+                            id={`sunday_school_${day.iso}`}
+                            name={`sunday_school_${day.iso}`}
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            min="0"
+                            value={sundaySchool}
+                            onChange={(event) => setSundaySchool(event.target.value)}
+                            placeholder="Children"
+                          />
+                        </>
+                      ) : (
+                        <span className="px-1 text-muted-foreground">—</span>
+                      )}
                     </td>
                   ))}
                   <td className="px-3 py-3 font-medium">{money(totals.sundaySchool)}</td>
@@ -179,8 +210,8 @@ export function WeeklyCollectionSheet({
             </table>
           </div>
           <p className="text-sm leading-6 text-cop-navy/80">
-            Sunday school is the children&apos;s offering. On Sunday it is added to the church amount so the
-            Sunday total is church + Sunday school, the way the assembly used to combine them.
+            Sunday school is the children&apos;s offering and is only collected on Sunday. That Sunday total is
+            church + Sunday school, the way the assembly used to combine them.
           </p>
           <Button type="submit" disabled={pending}>
             {pending ? "Saving week..." : "Save this week"}
@@ -214,7 +245,7 @@ export function WeeklyCollectionSheet({
                 <th className="px-3 py-3 text-left font-medium">Sunday school</th>
                 {days.map((day) => (
                   <td key={day.iso} className="px-3 py-3">
-                    {money(day.sundaySchool)}
+                    {day.isSunday ? money(day.sundaySchool) : "—"}
                   </td>
                 ))}
                 <td className="px-3 py-3 font-medium">{money(totals.sundaySchool)}</td>
@@ -223,7 +254,7 @@ export function WeeklyCollectionSheet({
                 <th className="px-3 py-3 text-left font-medium">Day total</th>
                 {days.map((day) => (
                   <td key={day.iso} className={`px-3 py-3 font-medium ${day.isSunday ? "bg-cop-gold/20" : ""}`}>
-                    {money(day.church + day.sundaySchool)}
+                    {money(day.church + sundaySchoolForDay(day.isSunday, day.sundaySchool))}
                   </td>
                 ))}
                 <td className="px-3 py-3 text-base font-semibold">{money(totals.combined)}</td>

@@ -84,9 +84,21 @@ export function parseMoneyInput(value: string) {
   return Math.round(amount * 100) / 100;
 }
 
-export function weekTotals(days: { church: number; sundaySchool: number }[]) {
+/** Sunday school (children) is collected on Sunday only. */
+export function sundaySchoolForDay(isSunday: boolean, amount: number) {
+  return isSunday ? amount : 0;
+}
+
+export function normalizeWeekLabel(value: string) {
+  return value.trim().replace(/\s+/g, " ").slice(0, 120);
+}
+
+export function weekTotals(days: { church: number; sundaySchool: number; isSunday?: boolean }[]) {
   const church = days.reduce((sum, day) => sum + day.church, 0);
-  const sundaySchool = days.reduce((sum, day) => sum + day.sundaySchool, 0);
+  const sundaySchool = days.reduce(
+    (sum, day) => sum + sundaySchoolForDay(day.isSunday ?? true, day.sundaySchool),
+    0,
+  );
   return {
     church,
     sundaySchool,

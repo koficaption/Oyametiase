@@ -27,6 +27,12 @@ export default async function DashboardPage() {
   const collectionWeekStart = mondayOfWeek(todayIsoDate()) ?? todayIsoDate();
   const collectionWeekDays = weekDays(collectionWeekStart);
   const collectionWeekEnd = collectionWeekDays[6]?.iso ?? collectionWeekStart;
+  const weekLabelPromise = supabase
+    .from("weekly_collection_weeks")
+    .select("label")
+    .eq("assembly_id", assemblyId)
+    .eq("week_start", collectionWeekStart)
+    .maybeSingle();
 
   let memberQuery = supabase.from("members").select("id, membership_status, date_joined, gender").eq("assembly_id", assemblyId).is("archived_at", null);
   if (scopedIds) {
@@ -70,6 +76,7 @@ export default async function DashboardPage() {
     supabase.from("department_members").select("department_id, departments(name)").limit(400),
     getActiveTheme(supabase),
   ]);
+  const { data: weekRow } = await weekLabelPromise;
 
   const scopedEvents = scopedIds
     ? (events ?? []).filter((event) => !event.department_id || scopedIds.includes(event.department_id))
@@ -136,10 +143,10 @@ export default async function DashboardPage() {
       .filter(
         (row) =>
           row.reference === WEEKLY_SUNDAY_SCHOOL_REF &&
-          row.occurred_on >= collectionWeekStart &&
-          row.occurred_on <= collectionWeekEnd,
+          row.occurred_on === collectionWeekEnd,
       )
       .reduce((sum, row) => sum + Number(row.amount), 0),
+    weekLabel: weekRow?.label ?? "",
   };
 
   const attendanceTrend = Object.values(

@@ -18,8 +18,10 @@ import {
 } from "@/lib/validations/operations";
 import {
   mondayOfWeek,
+  normalizeWeekLabel,
   parseMoneyInput,
   SUNDAY_SCHOOL_CATEGORY_SLUG,
+  sundaySchoolForDay,
   weekDays,
   WEEKLY_CHURCH_REF,
   WEEKLY_SUNDAY_SCHOOL_REF,
@@ -301,10 +303,14 @@ export async function saveWeeklyCollectionsAction(
   const days = weekDays(monday);
   const parsed = weeklyCollectionsSchema.safeParse({
     week_start: monday,
+    week_label: normalizeWeekLabel(str(formData, "week_label")),
     days: days.map((day) => ({
       occurred_on: day.iso,
       church: parseMoneyInput(str(formData, `church_${day.iso}`)) ?? -1,
-      sunday_school: parseMoneyInput(str(formData, `sunday_school_${day.iso}`)) ?? -1,
+      sunday_school: sundaySchoolForDay(
+        day.isSunday,
+        parseMoneyInput(str(formData, `sunday_school_${day.iso}`)) ?? -1,
+      ),
     })),
   });
   if (!parsed.success) return zodError(parsed.error);
@@ -346,10 +352,10 @@ export async function saveWeeklyCollectionsAction(
           : `Weekly church collection · ${days.find((item) => item.iso === day.occurred_on)?.label ?? day.occurred_on}`,
       },
       {
-        amount: day.sunday_school,
+        amount: sundaySchoolForDay(isSunday, day.sunday_school),
         reference: WEEKLY_SUNDAY_SCHOOL_REF,
         categoryId: sundaySchoolId,
-        description: `Sunday school (children) · ${days.find((item) => item.iso === day.occurred_on)?.label ?? day.occurred_on}`,
+        description: "Sunday school (children) · Sunday",
       },
     ];
 
@@ -392,13 +398,27 @@ export async function saveWeeklyCollectionsAction(
     }
   }
 
+  const weekLabel = normalizeWeekLabel(parsed.data.week_label ?? "");
+  const { error: weekError } = await supabase.from("weekly_collection_weeks").upsert(
+    {
+      assembly_id: user.profile.assembly_id,
+      week_start: monday,
+      label: weekLabel,
+      created_by: user.id,
+    },
+    { onConflict: "assembly_id,week_start" },
+  );
+  if (weekError) {
+    return fail("Week money saved, but the week name could not be stored. Ask the Presiding Elder to apply the latest database update.");
+  }
+
   revalidatePath("/app/finance");
   revalidatePath("/app/finance/weekly");
   revalidatePath("/app/finance/offerings");
   revalidatePath("/app/finance/income");
   revalidatePath("/app/dashboard");
   revalidatePath("/app/reports");
-  return ok("Week saved. Sunday school is included in the Sunday total.");
+  return ok("Week saved. Sunday school is only on Sunday and is included in the Sunday total.");
 }
 
 export async function saveFollowupAction(formData: FormData): Promise<ActionResult> {

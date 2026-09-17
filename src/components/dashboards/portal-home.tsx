@@ -49,6 +49,7 @@ export type PortalStats = {
   recentTransactions?: { id: string; amount: number; type: string; occurred_on: string }[];
   weekChurch?: number;
   weekSundaySchool?: number;
+  weekLabel?: string;
 };
 
 type ChartPoint = { label: string; value: number };
@@ -113,6 +114,7 @@ export function PortalHome({
           <Link href="/app/finance/weekly" className="font-medium text-primary underline-offset-4 hover:underline">
             Open the Monday–Sunday collection sheet
           </Link>
+          {stats.weekLabel ? ` · ${stats.weekLabel}` : null}
         </p>
         <div className="grid gap-4 xl:grid-cols-2">
           <Trend title="Income" data={incomeTrend} />

@@ -103,6 +103,7 @@ BEGIN
     (aid, 'Tithes', 'tithes', 'income', true),
     (aid, 'Sunday offerings', 'sunday-offerings', 'income', true),
     (aid, 'Midweek offerings', 'midweek-offerings', 'income', true),
+    (aid, 'Sunday school offerings', 'sunday-school-offerings', 'income', true),
     (aid, 'Thanksgiving', 'thanksgiving', 'income', true),
     (aid, 'Donations', 'donations', 'income', true),
     (aid, 'Special contributions', 'special-contributions', 'income', true),

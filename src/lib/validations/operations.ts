@@ -98,6 +98,24 @@ export const transactionSchema = z.object({
   reference: z.string().trim().max(120).optional().or(z.literal("")),
 });
 
+export const weeklyAmountSchema = z.coerce
+  .number()
+  .min(0, "Amount cannot be negative")
+  .max(10_000_000, "Amount is too large");
+
+export const weeklyCollectionsSchema = z.object({
+  week_start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a week"),
+  days: z
+    .array(
+      z.object({
+        occurred_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        church: weeklyAmountSchema,
+        sunday_school: weeklyAmountSchema,
+      }),
+    )
+    .length(7, "Record Monday through Sunday"),
+});
+
 export const followupSchema = z.object({
   member_id: z.string().uuid("Select a member"),
   follow_up_type: z.enum(["new_member", "new_convert", "inactive", "pastoral", "other"]),

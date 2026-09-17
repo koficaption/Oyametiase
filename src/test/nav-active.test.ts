@@ -8,6 +8,13 @@ const childrenHrefs = navForPortal("children").map((item) => item.href);
 const youthHrefs = navForPortal("youth").map((item) => item.href);
 
 describe("isNavActive", () => {
+  it("selects only Weekly collections on the weekday sheet", () => {
+    const active = treasurerHrefs.filter((href) =>
+      isNavActive(href, "/app/finance/weekly", "", treasurerHrefs),
+    );
+    expect(active).toEqual(["/app/finance/weekly"]);
+  });
+
   it("selects only Tithes on the tithes book, not every finance item", () => {
     const active = treasurerHrefs.filter((href) =>
       isNavActive(href, "/app/finance/tithes", "", treasurerHrefs),

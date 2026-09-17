@@ -47,6 +47,8 @@ export type PortalStats = {
   announcements: { id: string; title: string; published_at: string | null }[];
   events: { id: string; title: string; starts_at: string; venue: string | null }[];
   recentTransactions?: { id: string; amount: number; type: string; occurred_on: string }[];
+  weekChurch?: number;
+  weekSundaySchool?: number;
 };
 
 type ChartPoint = { label: string; value: number };
@@ -95,6 +97,9 @@ export function PortalHome({
       <div className="space-y-6">
         <PageHeader title={chrome.desk} description={greeting} />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard label="This week's church" value={money(stats.weekChurch ?? 0)} />
+          <StatCard label="This week's Sunday school" value={money(stats.weekSundaySchool ?? 0)} />
+          <StatCard label="This week's total" value={money((stats.weekChurch ?? 0) + (stats.weekSundaySchool ?? 0))} />
           <StatCard label="Tithes" value={money(stats.tithes)} />
           <StatCard label="Offerings" value={money(stats.offerings)} />
           <StatCard label="Donations" value={money(stats.donations)} />
@@ -104,6 +109,11 @@ export function PortalHome({
           <StatCard label="Monthly income" value={money(stats.income)} />
           <StatCard label="Monthly expenses" value={money(stats.expense)} />
         </div>
+        <p className="text-sm">
+          <Link href="/app/finance/weekly" className="font-medium text-primary underline-offset-4 hover:underline">
+            Open the Monday–Sunday collection sheet
+          </Link>
+        </p>
         <div className="grid gap-4 xl:grid-cols-2">
           <Trend title="Income" data={incomeTrend} />
           <Trend title="Expenses" data={expenseTrend} />

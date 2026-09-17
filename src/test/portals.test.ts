@@ -29,6 +29,7 @@ describe("portal resolution", () => {
     expect(hrefs).toContain("/app/themes");
     expect(hrefs).toContain("/app/reports");
     expect(hrefs).toContain("/app/users");
+    expect(hrefs).toContain("/app/finance/weekly");
     expect(hrefs.indexOf("/app/users")).toBeLessThan(hrefs.indexOf("/app/members"));
     expect(navForPortal("presiding_elder").some((item) => item.label === "Assign officers")).toBe(true);
     expect(navForPortal("secretary").map((item) => item.href)).not.toContain("/app/themes");
@@ -56,6 +57,7 @@ describe("portal resolution", () => {
 
   it("gives the Treasurer a distinct path for each finance book", () => {
     const hrefs = navForPortal("treasurer").map((item) => item.href);
+    expect(hrefs).toContain("/app/finance/weekly");
     expect(hrefs).toContain("/app/finance/tithes");
     expect(hrefs).toContain("/app/finance/offerings");
     expect(hrefs).toContain("/app/finance/donations");

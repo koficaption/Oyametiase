@@ -30,6 +30,7 @@ const PE_NAV: NavItem[] = [
   { href: "/app/announcements", label: "Announcements", permission: "announcements.view", section: "life" },
   { href: "/app/prayer-requests", label: "Prayer Requests", permission: "prayer.submit", section: "life" },
   { href: "/app/welfare", label: "Welfare", permission: "welfare.view", section: "stewardship" },
+  { href: "/app/finance/weekly", label: "Weekly collections", permission: "finance.view", section: "stewardship" },
   { href: "/app/finance", label: "Finance Overview", permission: "finance.view", section: "stewardship" },
   { href: "/app/department-finance", label: "Department finance", permission: "finance.department", section: "stewardship" },
   { href: "/app/reports", label: "Reports", permission: "reports.admin", section: "admin" },
@@ -59,6 +60,7 @@ const SECRETARY_NAV: NavItem[] = [
 
 const TREASURER_NAV: NavItem[] = [
   { href: "/app/dashboard", label: "Dashboard", permission: "dashboard.view", section: "overview" },
+  { href: "/app/finance/weekly", label: "Weekly collections", permission: "finance.view", section: "stewardship" },
   { href: "/app/finance/tithes", label: "Tithes", permission: "finance.view", section: "stewardship" },
   { href: "/app/finance/offerings", label: "Offerings", permission: "finance.view", section: "stewardship" },
   { href: "/app/finance/donations", label: "Donations", permission: "finance.view", section: "stewardship" },

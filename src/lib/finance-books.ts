@@ -53,6 +53,7 @@ export function financeBookHref(kind: FinanceBookKind) {
 }
 
 export const ASSEMBLY_FINANCE_FILTERS = [
+  { href: "/app/finance/weekly", label: "Weekly" },
   { href: "/app/finance/tithes", label: "Tithes" },
   { href: "/app/finance/offerings", label: "Offerings" },
   { href: "/app/finance/donations", label: "Donations" },

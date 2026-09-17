@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const collectionWeekEnd = collectionWeekDays[6]?.iso ?? collectionWeekStart;
   const weekLabelPromise = supabase
     .from("weekly_collection_weeks")
-    .select("label")
+    .select("label, event_date, event_time")
     .eq("assembly_id", assemblyId)
     .eq("week_start", collectionWeekStart)
     .maybeSingle();
@@ -147,6 +147,8 @@ export default async function DashboardPage() {
       )
       .reduce((sum, row) => sum + Number(row.amount), 0),
     weekLabel: weekRow?.label ?? "",
+    weekDate: weekRow?.event_date ?? "",
+    weekTime: weekRow?.event_time ?? "",
   };
 
   const attendanceTrend = Object.values(

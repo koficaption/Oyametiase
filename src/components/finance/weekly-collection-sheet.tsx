@@ -9,7 +9,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatWeekRange, sundaySchoolForDay, weekTotals, type WeekDay } from "@/lib/weekly-collections";
+import { formatWeekMeta, formatWeekRange, sundaySchoolForDay, weekTimeInputValue, weekTotals, type WeekDay } from "@/lib/weekly-collections";
 import type { ActionResult } from "@/lib/validations/common";
 
 export type WeeklyDayAmounts = WeekDay & {
@@ -30,6 +30,8 @@ function displayAmount(value: number) {
 export function WeeklyCollectionSheet({
   weekStart,
   weekLabel: savedWeekLabel,
+  weekDate: savedWeekDate,
+  weekTime: savedWeekTime,
   prevWeek,
   nextWeek,
   days,
@@ -38,14 +40,19 @@ export function WeeklyCollectionSheet({
 }: {
   weekStart: string;
   weekLabel: string;
+  weekDate: string;
+  weekTime: string;
   prevWeek: string;
   nextWeek: string;
   days: WeeklyDayAmounts[];
   canWrite: boolean;
   filterLinks: { href: string; label: string }[];
 }) {
+  const sundayIso = days.find((day) => day.isSunday)?.iso ?? weekStart;
   const [state, action, pending] = useActionState(saveWeeklyCollectionsAction, initial);
   const [weekLabel, setWeekLabel] = useState(savedWeekLabel);
+  const [weekDate, setWeekDate] = useState(savedWeekDate || sundayIso);
+  const [weekTime, setWeekTime] = useState(weekTimeInputValue(savedWeekTime));
   const [church, setChurch] = useState(() => Object.fromEntries(days.map((day) => [day.iso, displayAmount(day.church)])));
   const [sundaySchool, setSundaySchool] = useState(() => {
     const sunday = days.find((day) => day.isSunday);
@@ -63,12 +70,13 @@ export function WeeklyCollectionSheet({
   );
   const totals = weekTotals(parsedDays);
   const heading = weekLabel.trim() || "Weekly collections";
+  const when = formatWeekMeta({ date: weekDate, time: weekTime });
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Weekly collections"
-        description="Enter Monday to Saturday church money as it comes in. Sunday school is only on Sunday — add the children's offering there, then the Sunday total adds church and Sunday school together. Name the week if it has one, for example Last supper week."
+        description="Enter Monday to Saturday church money as it comes in. Sunday school is only on Sunday. Name the week if it has one — Youth week, Last supper week, or any name — and add the date and time."
         actions={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
@@ -96,6 +104,7 @@ export function WeeklyCollectionSheet({
       </div>
       <div>
         <p className="text-base font-medium text-cop-navy">{heading}</p>
+        {when ? <p className="text-sm text-cop-navy/80">{when}</p> : null}
         <p className="text-sm text-muted-foreground">Week of {formatWeekRange(weekStart)}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
@@ -107,21 +116,51 @@ export function WeeklyCollectionSheet({
         <form action={action} className="space-y-4">
           <input type="hidden" name="week_start" value={weekStart} />
           <FormStatus state={state} />
-          <div className="space-y-2 rounded-xl border p-4">
-            <Label htmlFor="week_label" className="text-base font-semibold text-cop-navy">
-              What week is this?
-            </Label>
-            <Input
-              id="week_label"
-              name="week_label"
-              value={weekLabel}
-              onChange={(event) => setWeekLabel(event.target.value)}
-              placeholder="Last supper week"
-              maxLength={120}
-              autoComplete="off"
-            />
+          <div className="space-y-3 rounded-xl border p-4">
+            <div className="space-y-2">
+              <Label htmlFor="week_label" className="text-base font-semibold text-cop-navy">
+                What week is this?
+              </Label>
+              <Input
+                id="week_label"
+                name="week_label"
+                value={weekLabel}
+                onChange={(event) => setWeekLabel(event.target.value)}
+                placeholder="Youth week"
+                maxLength={120}
+                autoComplete="off"
+              />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="week_date" className="text-base font-semibold text-cop-navy">
+                  Date
+                </Label>
+                <Input
+                  id="week_date"
+                  name="week_date"
+                  type="date"
+                  value={weekDate}
+                  onChange={(event) => setWeekDate(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="week_time" className="text-base font-semibold text-cop-navy">
+                  Time
+                </Label>
+                <Input
+                  id="week_time"
+                  name="week_time"
+                  type="time"
+                  step={60}
+                  value={weekTime}
+                  onChange={(event) => setWeekTime(event.target.value)}
+                />
+              </div>
+            </div>
             <p className="text-sm leading-6 text-cop-navy/80">
-              Optional. Type any name the assembly uses for this week, such as Last supper week.
+              Optional. Youth week, Last supper week, or any name the assembly uses. Add the date and time of
+              that service or programme.
             </p>
           </div>
           <div className="overflow-x-auto rounded-xl border">

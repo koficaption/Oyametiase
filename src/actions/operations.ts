@@ -19,8 +19,11 @@ import {
 import {
   mondayOfWeek,
   normalizeWeekLabel,
+  normalizeWeekTime,
+  parseIsoDate,
   parseMoneyInput,
   SUNDAY_SCHOOL_CATEGORY_SLUG,
+  sundayOfWeek,
   sundaySchoolForDay,
   weekDays,
   WEEKLY_CHURCH_REF,
@@ -301,9 +304,13 @@ export async function saveWeeklyCollectionsAction(
   const monday = mondayOfWeek(str(formData, "week_start"));
   if (!monday) return fail("Choose a valid week.");
   const days = weekDays(monday);
+  const sunday = sundayOfWeek(monday);
+  const requestedDate = str(formData, "week_date");
   const parsed = weeklyCollectionsSchema.safeParse({
     week_start: monday,
     week_label: normalizeWeekLabel(str(formData, "week_label")),
+    week_date: requestedDate ? (parseIsoDate(requestedDate) ? requestedDate : "invalid") : sunday,
+    week_time: normalizeWeekTime(str(formData, "week_time")) ?? "invalid",
     days: days.map((day) => ({
       occurred_on: day.iso,
       church: parseMoneyInput(str(formData, `church_${day.iso}`)) ?? -1,
@@ -316,7 +323,6 @@ export async function saveWeeklyCollectionsAction(
   if (!parsed.success) return zodError(parsed.error);
 
   const supabase = await createClient();
-  const sunday = days[6]?.iso;
   const midweekId = await categoryIdBySlug(supabase, user.profile.assembly_id, "midweek-offerings");
   const sundayOfferingId = await categoryIdBySlug(supabase, user.profile.assembly_id, "sunday-offerings");
   const churchFallback = sundayOfferingId ?? midweekId;
@@ -399,17 +405,21 @@ export async function saveWeeklyCollectionsAction(
   }
 
   const weekLabel = normalizeWeekLabel(parsed.data.week_label ?? "");
+  const weekDate = parsed.data.week_date || sunday;
+  const weekTime = parsed.data.week_time || null;
   const { error: weekError } = await supabase.from("weekly_collection_weeks").upsert(
     {
       assembly_id: user.profile.assembly_id,
       week_start: monday,
       label: weekLabel,
+      event_date: weekDate,
+      event_time: weekTime,
       created_by: user.id,
     },
     { onConflict: "assembly_id,week_start" },
   );
   if (weekError) {
-    return fail("Week money saved, but the week name could not be stored. Ask the Presiding Elder to apply the latest database update.");
+    return fail("Week money saved, but the week name, date, or time could not be stored. Ask the Presiding Elder to apply the latest database update.");
   }
 
   revalidatePath("/app/finance");

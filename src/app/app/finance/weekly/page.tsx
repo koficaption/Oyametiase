@@ -40,7 +40,7 @@ export default async function WeeklyCollectionsPage({
       .lte("occurred_on", sunday),
     supabase
       .from("weekly_collection_weeks")
-      .select("label")
+      .select("label, event_date, event_time")
       .eq("assembly_id", user.profile.assembly_id)
       .eq("week_start", weekStart)
       .maybeSingle(),
@@ -67,6 +67,8 @@ export default async function WeeklyCollectionsPage({
       key={weekStart}
       weekStart={weekStart}
       weekLabel={weekRow?.label ?? ""}
+      weekDate={weekRow?.event_date ?? ""}
+      weekTime={weekRow?.event_time ?? ""}
       prevWeek={shiftWeek(weekStart, -1) ?? weekStart}
       nextWeek={shiftWeek(weekStart, 1) ?? weekStart}
       days={amounts}

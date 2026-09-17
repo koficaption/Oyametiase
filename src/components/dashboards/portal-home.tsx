@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ChurchThemeRecord } from "@/lib/reports/types";
+import { formatWeekMeta } from "@/lib/weekly-collections";
 import { PORTAL_CHROME, type PortalKind } from "@/types/portals";
 
 export type PortalStats = {
@@ -50,6 +51,8 @@ export type PortalStats = {
   weekChurch?: number;
   weekSundaySchool?: number;
   weekLabel?: string;
+  weekDate?: string;
+  weekTime?: string;
 };
 
 type ChartPoint = { label: string; value: number };
@@ -81,6 +84,7 @@ export function PortalHome({
 }) {
   const chrome = PORTAL_CHROME[portal];
   const greeting = `Peace be with you, ${name}. ${ministryName ? `${ministryName}. ` : ""}${chrome.hint}`;
+  const weekMeta = formatWeekMeta({ label: stats.weekLabel, date: stats.weekDate, time: stats.weekTime });
 
   if (portal === "member") {
     return (
@@ -114,7 +118,7 @@ export function PortalHome({
           <Link href="/app/finance/weekly" className="font-medium text-primary underline-offset-4 hover:underline">
             Open the Monday–Sunday collection sheet
           </Link>
-          {stats.weekLabel ? ` · ${stats.weekLabel}` : null}
+          {weekMeta ? ` · ${weekMeta}` : null}
         </p>
         <div className="grid gap-4 xl:grid-cols-2">
           <Trend title="Income" data={incomeTrend} />

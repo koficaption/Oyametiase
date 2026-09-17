@@ -93,6 +93,56 @@ export function normalizeWeekLabel(value: string) {
   return value.trim().replace(/\s+/g, " ").slice(0, 120);
 }
 
+const CLOCK_TIME = /^([01]?\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/;
+
+/** Empty string if blank; HH:MM if valid; null if invalid. */
+export function normalizeWeekTime(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  const match = CLOCK_TIME.exec(trimmed);
+  if (!match) return null;
+  return `${match[1].padStart(2, "0")}:${match[2]}`;
+}
+
+export function weekTimeInputValue(value: string | null | undefined) {
+  if (!value) return "";
+  return normalizeWeekTime(value) ?? "";
+}
+
+export function sundayOfWeek(mondayIso: string) {
+  return weekDays(mondayIso)[6]?.iso ?? mondayIso;
+}
+
+export function formatClockTime(value: string) {
+  const time = normalizeWeekTime(value);
+  if (!time) return "";
+  const [hour, minute] = time.split(":").map(Number);
+  const date = new Date(2000, 0, 1, hour, minute);
+  return date.toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true });
+}
+
+export function formatWeekEventDate(iso: string) {
+  const date = parseIsoDate(iso);
+  if (!date) return "";
+  return date.toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function formatWeekMeta(meta: { label?: string; date?: string; time?: string }) {
+  const parts: string[] = [];
+  const label = normalizeWeekLabel(meta.label ?? "");
+  if (label) parts.push(label);
+  const dateLabel = meta.date ? formatWeekEventDate(meta.date) : "";
+  if (dateLabel) parts.push(dateLabel);
+  const timeLabel = meta.time ? formatClockTime(meta.time) : "";
+  if (timeLabel) parts.push(timeLabel);
+  return parts.join(" · ");
+}
+
 export function weekTotals(days: { church: number; sundaySchool: number; isSunday?: boolean }[]) {
   const church = days.reduce((sum, day) => sum + day.church, 0);
   const sundaySchool = days.reduce(

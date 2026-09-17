@@ -1,10 +1,13 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  formatWeekMeta,
   mondayOfWeek,
   normalizeWeekLabel,
+  normalizeWeekTime,
   parseMoneyInput,
   shiftWeek,
+  sundayOfWeek,
   sundaySchoolForDay,
   weekDays,
   weekTotals,
@@ -51,9 +54,16 @@ describe("weekly collection sheet", () => {
     expect(sundaySchoolForDay(true, 40)).toBe(40);
   });
 
-  it("stores a free-text week name such as Last supper week", () => {
-    expect(normalizeWeekLabel("  Last   supper week ")).toBe("Last supper week");
-    expect(normalizeWeekLabel("x".repeat(200)).length).toBe(120);
+  it("stores a free-text week name, date, and time such as Youth week", () => {
+    expect(normalizeWeekLabel("  Youth   week ")).toBe("Youth week");
+    expect(normalizeWeekLabel("Last supper week")).toBe("Last supper week");
+    expect(normalizeWeekTime("")).toBe("");
+    expect(normalizeWeekTime("9:00")).toBe("09:00");
+    expect(normalizeWeekTime("09:00:00")).toBe("09:00");
+    expect(normalizeWeekTime("25:00")).toBeNull();
+    expect(sundayOfWeek("2026-09-14")).toBe("2026-09-20");
+    expect(formatWeekMeta({ label: "Youth week", date: "2026-09-20", time: "09:00" })).toContain("Youth week");
+    expect(formatWeekMeta({ label: "Youth week", date: "2026-09-20", time: "09:00" })).toContain("2026");
     const days = weekDays("2026-09-14").map((day) => ({
       occurred_on: day.iso,
       church: 0,
@@ -62,7 +72,9 @@ describe("weekly collection sheet", () => {
     expect(
       weeklyCollectionsSchema.safeParse({
         week_start: "2026-09-14",
-        week_label: "Last supper week",
+        week_label: "Youth week",
+        week_date: "2026-09-20",
+        week_time: "09:00",
         days,
       }).success,
     ).toBe(true);
@@ -70,6 +82,14 @@ describe("weekly collection sheet", () => {
       weeklyCollectionsSchema.safeParse({
         week_start: "2026-09-14",
         week_label: "x".repeat(121),
+        days,
+      }).success,
+    ).toBe(false);
+    expect(
+      weeklyCollectionsSchema.safeParse({
+        week_start: "2026-09-14",
+        week_label: "Youth week",
+        week_time: "25:00",
         days,
       }).success,
     ).toBe(false);
@@ -90,8 +110,10 @@ describe("weekly collection sheet", () => {
     expect(action).toContain("requirePermission(\"finance.manage\")");
     expect(action).toContain("WEEKLY_SUNDAY_SCHOOL_REF");
     expect(action).toContain("sundaySchoolForDay");
-    expect(action).toContain("week_label");
-    expect(action).toContain("weekly_collection_weeks");
+    expect(action).toContain("week_date");
+    expect(action).toContain("week_time");
+    expect(action).toContain("event_date");
+    expect(action).toContain("event_time");
   });
 
   it("lets the treasurer name a week and collect Sunday school only on Sunday", () => {
@@ -102,7 +124,14 @@ describe("weekly collection sheet", () => {
     expect(weeks).toContain("Last supper week");
     const sheet = readFileSync("src/components/finance/weekly-collection-sheet.tsx", "utf8");
     expect(sheet).toContain("What week is this?");
-    expect(sheet).toContain("Last supper week");
+    expect(sheet).toContain("Youth week");
+    expect(sheet).toContain('id="week_date"');
+    expect(sheet).toContain('id="week_time"');
+    expect(sheet).toContain('type="date"');
+    expect(sheet).toContain('type="time"');
+    const datetime = readFileSync("supabase/migrations/20260917194200_weekly_collection_week_date_time.sql", "utf8");
+    expect(datetime).toContain("event_date");
+    expect(datetime).toContain("event_time");
     expect(sheet).toContain("day.isSunday");
     expect(sheet).not.toContain('placeholder={day.isSunday ? "Children" : "0"}');
   });
